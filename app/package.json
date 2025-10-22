@@ -1,0 +1,44 @@
+{
+  "name": "free-fps",
+  "private": true,
+  "license": "MIT",
+  "description": "A utility built as an easy-to-use wrapper around ffmpeg for direct video frame rate (FPS) modification.",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.8.0",
+    "@tauri-apps/plugin-dialog": "^2.4.0",
+    "@tauri-apps/plugin-fs": "^2.4.2",
+    "@tauri-apps/plugin-opener": "^2.5.0",
+    "@tauri-apps/plugin-os": "^2.3.1",
+    "@tauri-apps/plugin-shell": "^2.3.1",
+    "@tauri-apps/plugin-store": "^2.4.0",
+    "dompurify": "^3.3.0",
+    "markdown-it": "14.0.0",
+    "pinia": "^3.0.3",
+    "vue": "^3.5.22",
+    "vue-i18n": "^11.1.12",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.4",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^24.6.2",
+    "@vicons/ionicons5": "^0.13.0",
+    "@vicons/tabler": "^0.13.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "naive-ui": "^2.43.1",
+    "typescript": "^5.9.3",
+    "unplugin-auto-import": "^20.2.0",
+    "unplugin-vue-components": "^29.1.0",
+    "vfonts": "^0.0.3",
+    "vite": "^7.1.8",
+    "vue-tsc": "^3.1.0"
+  }
+}
