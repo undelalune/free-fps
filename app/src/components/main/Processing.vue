@@ -86,7 +86,7 @@ const toggleSelectAll = (checked: boolean) => {
         class="action-btn"
         type="primary"
         :disabled="store.processing ? false : !canConvert"
-        @click="$emit(store.processing ? 'stop' : 'convert')"
+        @click="store.processing ? $emit('stop') : $emit('convert')"
     >
       {{ t(store.processing ? 'mainView.processing.stop' : 'mainView.processing.convert') }}
     </n-button>
