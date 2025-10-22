@@ -1,0 +1,1 @@
+powershell c:\ffmpeg\convert_fps.ps1 -Dir d:\vid-src\to-fps-50 -Fps 50
