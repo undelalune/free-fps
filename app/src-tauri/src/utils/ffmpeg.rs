@@ -297,6 +297,8 @@ where
             opts.video_quality.to_string(),
             "-preset".into(),
             "slow".into(),
+            "-pix_fmt".into(),
+            "yuv420p".into(),
         ]);
     } else {
         // Ensure input metadata is available and file is not empty
@@ -332,6 +334,8 @@ where
             "libx264".into(),
             "-preset".into(),
             "slow".into(),
+            "-pix_fmt".into(),
+            "yuv420p".into(),
         ]);
     }
 
