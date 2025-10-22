@@ -1033,6 +1033,7 @@ dependencies = [
  "filetime",
  "futures",
  "num_cpus",
+ "open",
  "regex",
  "serde",
  "serde_json",

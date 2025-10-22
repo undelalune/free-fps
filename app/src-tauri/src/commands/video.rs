@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use filetime::{set_file_times, FileTime};
 use serde::{Deserialize, Serialize};
 use std::fs;
+use open;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Emitter, State};
 use tokio::sync::Mutex;
@@ -346,7 +347,7 @@ pub async fn convert_videos(
                 ffmpeg_bin: &ffmpeg_bin,
                 ffprobe_bin: ffprobe_bin.as_deref(),
                 input: &video_file.path,
-                output: output_path.to_str().unwrap(),
+                output: &output_path.to_string_lossy(),
                 target_fps: params.target_fps,
                 keep_audio: params.keep_audio,
                 audio_bitrate: params.audio_bitrate,
@@ -430,6 +431,12 @@ pub async fn convert_videos(
             }
         }
     }
+    //now just open output folder for the user in a separate window
+    if let Err(e) = open::that(&output_dir) {
+        eprintln!("Failed to open file manager: {}", e);
+    }
+
+
     Ok(format!("Successfully converted {} videos", total_files))
 }
 
