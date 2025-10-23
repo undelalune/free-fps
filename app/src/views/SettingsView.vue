@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LogoHeader from "@/components/LogoHeader.vue";
 import HomeButton from "@/components/buttons/HomeButton.vue";
-import {CircleX, File, InfoCircle, Moon, Sun} from "@vicons/tabler";
+import {CircleX, File, Help, Moon, Sun} from "@vicons/tabler";
 import {useI18n} from "vue-i18n";
 import {useStore} from "@/stores";
 import {languages} from "@/i18n";
@@ -114,7 +114,7 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
                       @mouseenter="store.heartIsBeating = true" @mouseleave="store.heartIsBeating = false">
               <template #icon>
                 <n-icon>
-                  <InfoCircle/>
+                  <Help/>
                 </n-icon>
               </template>
             </n-button>
@@ -132,7 +132,7 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
   display: flex;
   flex-direction: column;
   width: 90%;
-  margin-top: 36px;
+  margin-top: 20px;
 }
 
 .settings-form-item {

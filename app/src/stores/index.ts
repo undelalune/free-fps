@@ -37,6 +37,7 @@ export const useStore = defineStore('index', () => {
     const videoFiles = ref<VideoFile[]>([]);
     const folderScanning = ref(false);
     const processing = ref(false);
+    const processingPos = ref(0);
     const statusMessage = ref('');
     const showHelp = ref(false);
     const heartIsBeating = ref(false);
@@ -87,6 +88,7 @@ export const useStore = defineStore('index', () => {
         videoFiles,
         folderScanning,
         processing,
+        processingPos,
         statusMessage,
         showHelp,
         heartIsBeating,

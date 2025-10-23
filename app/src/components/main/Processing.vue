@@ -5,6 +5,7 @@ import {useI18n} from "vue-i18n";
 import RescanFolderButton from "@/components/main/RescanFolderButton.vue";
 import {useThemeVars} from "naive-ui";
 import {ConversionStatus} from "@/types";
+import {ScrollbarInst} from "naive-ui/lib/scrollbar/src/Scrollbar";
 
 defineEmits<{
   back: []
@@ -17,7 +18,7 @@ const store = useStore();
 const {t} = useI18n();
 const themeVars = useThemeVars();
 const selectAll = ref(false);
-
+const scrollBar = ref<ScrollbarInst | null>(null);
 const selectedFiles = computed(() => store.videoFiles.filter(v => v.convert));
 const allSelected = computed(() => store.videoFiles.length > 0 && store.videoFiles.every(v => v.convert));
 
@@ -40,11 +41,31 @@ const canConvert = computed(() =>
     !store.folderScanning && selectedFiles.value.some(v => v.status !== ConversionStatus.Success)
 );
 
+watch(() => store.processingPos, (newVal) => {
+  if (newVal) {
+    scrollToProcessing(newVal);
+  }
+});
+
+
+const scrollToProcessing = (pos: number) => {
+  if (pos < 0) return;
+
+  const sb = scrollBar.value;
+  if (!sb) return;
+
+  const container = document.querySelector('.video-scroll-container') as HTMLElement | null;
+  const el = container?.querySelector('#vi_' + pos) as HTMLElement | null;
+  if (!el) return;
+
+  const top = el.offsetTop;
+  sb.scrollTo({top, behavior: 'smooth'});
+};
+
 const toggleSelectAll = (checked: boolean) => {
   selectAll.value = checked ? !allSelected.value : false;
   store.videoFiles.forEach(v => v.convert = selectAll.value);
 };
-
 </script>
 
 <template>
@@ -64,8 +85,9 @@ const toggleSelectAll = (checked: boolean) => {
           <n-text>{{ selectedInfo }}</n-text>
         </div>
 
-        <n-scrollbar class="video-scroll-container">
-          <VideoItem v-for="v in store.videoFiles" :key="v.name" :videoItem="v" :processing="store.processing"/>
+        <n-scrollbar ref="scrollBar" class="video-scroll-container">
+          <VideoItem v-for="v in store.videoFiles" :key="v.name" :id="'vi_' + v.position" :videoItem="v"
+                     :processing="store.processing"/>
         </n-scrollbar>
 
         <div class="under-video-list">

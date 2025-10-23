@@ -5,6 +5,7 @@ export interface VideoFile {
     // duration?: number;
     convert: boolean;
     progress?: number;
+    position?: number;
     status?: ConversionStatus;
 }
 

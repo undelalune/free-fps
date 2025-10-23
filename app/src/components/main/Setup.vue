@@ -48,6 +48,13 @@ const selectFolderPath = async (isInputFolder: boolean = true) => {
   }
 };
 
+const outputPlaceholder = computed(()=> {
+  const fps = store.useCustomFps ? store.customFps : store.targetFps;
+  const folder = `converted_videos_${fps}fps`;
+  if (!store.inputFolder) return folder;
+  return `${store.inputFolder}\\${folder}`;
+})
+
 const selectFps = (value: number) => {
   store.useCustomFps = value === 0;
   store.customFps = 30;
@@ -64,7 +71,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
 <template>
   <n-form :model="store" label-placement="top" size="medium">
     <!-- Input Folder -->
-    <n-form-item :feedback="inputFeedback" feedback-style="text-align: right;">
+    <n-form-item :feedback="inputFeedback" feedback-style="text-align: right;" required>
       <template #label>
         <span class="label-with-help">
           {{ t('mainView.setup.inputFolder') }}
@@ -97,7 +104,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
           </n-tooltip>
         </span>
       </template>
-      <n-input v-model:value="store.outputFolder" @click="selectFolderPath(false)" readonly clearable placeholder="">
+      <n-input v-model:value="store.outputFolder" @click="selectFolderPath(false)" readonly clearable :placeholder="outputPlaceholder">
         <template #clear-icon>
           <n-icon :component="CircleX" @click.stop="store.outputFolder=''"/>
         </template>

@@ -42,7 +42,7 @@ export function useVideoConversion() {
             const files = await videoAPI.getVideoFiles(folderPath);
 
             if (scanId === currentScanId.value) {
-                store.videoFiles = files.map(f => ({ ...f, convert: true, progress: 0 }));
+                store.videoFiles = files.map((f, index) => ({ ...f, convert: true, progress: 0, position: index }));
             }
         } catch (error) {
             console.error('Scan failed:', error);
@@ -97,12 +97,14 @@ export function useVideoConversion() {
             showMsg('warning', `errors.${errorCode}`, 10000);
         } finally {
             store.processing = false;
+            store.processingPos = 0;
         }
     };
 
     const cancelConversion = async () => {
         await videoAPI.cancelConversion().catch(console.warn);
         store.processing = false;
+        store.processingPos = 0;
     };
 
     const setupProgressListener = async () => {
@@ -113,6 +115,7 @@ export function useVideoConversion() {
             if (video) {
                 video.progress = Math.floor(data.percentage) || 0;
                 video.status = data.status;
+                store.processingPos = video.position ?? 0;
             }
         });
     };
