@@ -9,7 +9,11 @@
     "dev": "vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:dev:mac": "PATH=$HOME/.cargo/bin:$PATH tauri dev --config src-tauri/tauri.macos.conf.json",
+    "tauri:build": "tauri build",
+    "tauri:build:mac": "PATH=$HOME/.cargo/bin:$PATH tauri build --config src-tauri/tauri.macos.conf.json"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",
