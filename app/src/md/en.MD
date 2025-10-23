@@ -1,4 +1,4 @@
-<img src="logo.png" style="border-radius: 8px; float: right; margin-right:24px; margin-top:12px; height: 89px; " alt="Free FPS Logo" />
+<img src="logo.png" style="border-radius: 8px; float: right; margin-right:16px; margin-top:12px; height: 89px;" alt="Free FPS Logo" />
 
 - [About this tool](#about-this-tool) 
 - [How to start?](#how-to-start)
@@ -22,7 +22,7 @@ This program is distributed for free ("As Is") under the MIT License.
 If you want to support the author, you can do it here:
 
 <a href="https://buymeacoffee.com/undelalune" target="_blank" rel="noopener" title="Go to buymeacoffee.com">
-<img src="bmc-logo.svg" style="float: right; margin-right:24px; height: 36px; alt="bmc Logo" />
+<img src="bmc-logo.svg" style="float: right; margin-right:24px; height: 36px;" alt="bmc Logo" />
 </a>
 
 <a href="https://suppi.pl/undelalune" target="_blank" rel="noopener" title="Go to suppi.pl">

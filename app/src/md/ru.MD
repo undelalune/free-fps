@@ -1,4 +1,6 @@
-- [О программе](#about-this-tool) <img src="logo.png" style="border-radius: 8px; float: right; margin-right:24px; margin-top:12px; height: 89px; " alt="Free FPS Logo" />
+<img src="logo.png" style="border-radius: 8px; float: right; margin-right:16px; margin-top:12px; height: 89px;" alt="Free FPS Logo" />
+
+- [О программе](#about-this-tool)
 - [С чего начать?](#how-to-start) 
 - [Экран настроек](#settings-page)    
 - [Стартовый экран](#main-page)
