@@ -20,11 +20,11 @@
 Если вы хотите поблагодарить автора, можете сделать это здесь:
 
 <a href="https://buymeacoffee.com/undelalune" target="_blank" rel="noopener" title="Перейти на buymeacoffee.com">
-<img src="bmc-logo.svg" style="float: right; margin-right:24px; height: 36px; background-color: #eee;" alt="bmc Logo" />
+<img src="bmc-logo.svg" style="float: right; margin-right:24px; height: 36px; " alt="bmc Logo" />
 </a>
 
 <a href="https://suppi.pl/undelalune" target="_blank" rel="noopener" title="Перейти на suppi.pl">
-<img src="suppi-logo.svg" style="margin-left:44px; height: 36px; background-color: #eee;" alt="suppi Logo" />
+<img src="suppi-logo.svg" style="margin-left:44px; height: 36px; " alt="suppi Logo" />
 </a>
 
 <br>

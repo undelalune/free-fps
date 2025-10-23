@@ -20,11 +20,11 @@ Ce programme est distribué gratuitement (\"As Is\") sous licence MIT.
 Si vous souhaitez soutenir l'auteur, vous pouvez le faire ici :
 
 <a href="https://buymeacoffee.com/undelalune" target="_blank" rel="noopener" title="Go to buymeacoffee.com">
-<img src="bmc-logo.svg" style="float: right; margin-right:24px; height: 36px; background-color: #eee;" alt="bmc Logo" />
+<img src="bmc-logo.svg" style="float: right; margin-right:24px; height: 36px; " alt="bmc Logo" />
 </a>
 
 <a href="https://suppi.pl/undelalune" target="_blank" rel="noopener" title="Go to suppi.pl">
-<img src="suppi-logo.svg" style="margin-left:44px; height: 36px; background-color: #eee;" alt="suppi Logo" />
+<img src="suppi-logo.svg" style="margin-left:44px; height: 36px; " alt="suppi Logo" />
 </a>
 
 <br>
