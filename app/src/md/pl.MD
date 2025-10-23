@@ -1,4 +1,4 @@
-- [O narzędziu](#about-this-tool) <img src="logo.png" style="float: right; margin-right:24px; margin-top:12px; height: 89px; " alt="Free FPS Logo" />
+- [O narzędziu](#about-this-tool) <img src="logo.png" style="border-radius: 8px; float: right; margin-right:24px; margin-top:12px; height: 89px; " alt="Free FPS Logo" />
 - [Jak zacząć?](#how-to-start)
 - [Ustawienia](#settings-page)
 - [Strona główna](#main-page)

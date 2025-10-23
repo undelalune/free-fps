@@ -14,6 +14,7 @@ const getVersion = ('v'+import.meta.env.VITE_APP_VERSION) || 'v0.0.0'
         src="logo.png"
         width="36"
         height="36"
+        style="border-radius: 4px;"
         :preview-disabled="true"
         :title="getVersion"
         alt="logo"
