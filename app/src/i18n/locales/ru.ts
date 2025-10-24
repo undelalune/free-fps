@@ -96,6 +96,7 @@ export default {
         helpText: "Если что-то непонятно - прочтите инструкцию.",
         openHelp: "Открыть инструкцию",
         executables: "Инструменты FFmpeg",
+        wrongExecutable: "Выбран неверный исполняемый файл {tool}."
     },
     fFFoundDialog: {
         foundFfToolsTitle: "Найдены ffmpeg / ffprobe",

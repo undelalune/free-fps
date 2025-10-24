@@ -2,8 +2,8 @@ mod commands;
 mod errors;
 mod utils;
 
-use commands::fftools::check_ff_tools;
-use commands::video::{cancel_conversion, convert_videos, get_video_files, get_video_files_with_thumbnails, get_video_thumbnail, ConversionController};
+use commands::fftools::{check_ff_tools, check_ff_tool_selected};
+use commands::video::{cancel_conversion, convert_videos, get_video_files, get_video_thumbnail, ConversionController};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -23,11 +23,11 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             get_video_files,
-            get_video_files_with_thumbnails,
             get_video_thumbnail,
             convert_videos,
             cancel_conversion,
-            check_ff_tools
+            check_ff_tools,
+            check_ff_tool_selected
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

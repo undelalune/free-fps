@@ -7,10 +7,6 @@ export const videoAPI = {
         return await invoke<VideoFile[]>('get_video_files', { folderPath });
     },
 
-    async getVideoFilesWithThumbnails(folderPath: string): Promise<VideoFile[]> {
-        return await invoke<VideoFile[]>('get_video_files_with_thumbnails', { folderPath });
-    },
-
     async getVideoThumbnail(path: string): Promise<string> {
         return await invoke<string>('get_video_thumbnail', { path });
     },

@@ -96,6 +96,7 @@ export default {
         helpText: "Wenn etwas unklar ist, bitte Anleitung lesen.",
         openHelp: "Hilfe öffnen",
         executables: "FFmpeg-Werkzeuge",
+        wrongExecutable: "Ungültige {tool}-Datei ausgewählt."
     },
     fFFoundDialog: {
         foundFfToolsTitle: "ffmpeg / ffprobe gefunden",

@@ -1,7 +1,6 @@
 import {ref, watch} from 'vue';
 import {useStore} from '@/stores';
-import type {FfToolsStatus} from '@/types';
-import {invoke} from "@tauri-apps/api/core";
+import {toolsAPI} from "@/api/toolsAPI.ts";
 
 export function useFFToolsDialog() {
     const store = useStore();
@@ -9,7 +8,7 @@ export function useFFToolsDialog() {
 
     async function checkFFInstalled() {
         try {
-            const res = await invoke<FfToolsStatus>('check_ff_tools');
+            const res = await toolsAPI.checkToolsInstalled()
             const {showDialog} = store.applyToolsStatus(res);
             if (showDialog) showFFPopup.value = true;
         } catch (e) {

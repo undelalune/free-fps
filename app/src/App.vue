@@ -48,7 +48,6 @@ const addCloseHandler = async () => {
         okLabel: t('common.yes'),
         cancelLabel: t('common.no'),
       });
-      console.log(confirmed);
       if (!confirmed) {
         event.preventDefault();
         return;

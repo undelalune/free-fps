@@ -215,23 +215,23 @@ pub async fn get_video_thumbnail(
 }
 
 // Note: this will be slower on big folders. Consider limiting concurrency if needed.
-#[tauri::command]
-pub async fn get_video_files_with_thumbnails(
-    folder_path: String,
-    state: State<'_, ConversionController>,
-) -> AppResult<Vec<VideoFile>> {
-    let cancel = state.new_token().await;
-    let mut files = list_video_files(folder_path, cancel.clone()).await?;
-
-    for f in files.iter_mut() {
-        if cancel.is_cancelled() {
-            break;
-        }
-        let thumb = extract_thumbnail_data_url("ffmpeg", Path::new(&f.path), &cancel).await?;
-        f.thumbnail = thumb; // small data URL or `None` if failed/cancelled
-    }
-    Ok(files)
-}
+// #[tauri::command]
+// pub async fn get_video_files_with_thumbnails(
+//     folder_path: String,
+//     state: State<'_, ConversionController>,
+// ) -> AppResult<Vec<VideoFile>> {
+//     let cancel = state.new_token().await;
+//     let mut files = list_video_files(folder_path, cancel.clone()).await?;
+//
+//     for f in files.iter_mut() {
+//         if cancel.is_cancelled() {
+//             break;
+//         }
+//         let thumb = extract_thumbnail_data_url("ffmpeg", Path::new(&f.path), &cancel).await?;
+//         f.thumbnail = thumb; // small data URL or `None` if failed/cancelled
+//     }
+//     Ok(files)
+// }
 
 async fn list_video_files(
     folder_path: String,

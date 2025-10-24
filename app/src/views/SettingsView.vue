@@ -8,14 +8,19 @@ import {languages} from "@/i18n";
 import {platform} from "@tauri-apps/plugin-os";
 import {open} from '@tauri-apps/plugin-dialog';
 import ResetSettingsButton from "@/components/buttons/ResetSettingsButton.vue";
+import {FFTool} from "@/types";
+import {toolsAPI} from "@/api/toolsAPI.ts";
+import {useMessage} from "naive-ui";
 
+const message = useMessage();
 const {t} = useI18n();
 const store = useStore();
+
 const selectFilePath = async (isFfmpeg: boolean = true) => {
   try {
     const currentPlatform = platform();
 
-    const selected = await open({
+    const path = await open({
       directory: false,
       multiple: false,
       filters: [
@@ -23,9 +28,17 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
       ],
     });
 
-    if (selected) {
-      if (isFfmpeg) store.ffmpegPath = selected;
-      else store.ffprobePath = selected;
+    if (path) {
+      const isValid = await toolsAPI.checkToolSelected({
+        tool: isFfmpeg ? FFTool.FFMPEG : FFTool.FFPROBE,
+        path: path as string
+      });
+      if (!isValid) {
+        message.warning( t('settingsView.wrongExecutable', {tool: isFfmpeg ? 'ffmpeg' : 'ffprobe'}) ,{ duration: 5000, closable: true });
+        return;
+      }
+      if (isFfmpeg) store.ffmpegPath = path;
+      else store.ffprobePath = path;
     }
   } catch (e) {
     console.error('File selection was cancelled or failed:', e);

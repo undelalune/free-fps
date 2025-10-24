@@ -10,23 +10,11 @@ export interface VideoFile {
     thumbnail?: string; //base64 data url
 }
 
-/**
- *         inputFolder: '',
- *         outputFolder: '',
- *         targetFps: 30,
- *         target_fps: 30,
- *         keepAudio: false,
- *         audioBitrate: 192,
- *         useCustomVideoQuality: false,
- *         videoQuality: 16,
- *         cpuLimit: 75,
- *         files: arrays of paths
- *
- ffmpegPath: '',
- *         ffprobePath: '',
- *         ffmpegUseInstalled: false,
- *         ffprobeUseInstalled: false,
- */
+export interface ToolCheckParams {
+    tool: FFTool;
+    path: string;
+}
+
 export interface VideoConversionParams {
     ffmpeg_path: string; //path to ffmpeg binary (if empty, use installed)
     ffprobe_path: string; //path to ffprobe binary (if empty, use installed if ffprobe_use_installed = true, if empty and ffprobe_use_installed = false, ffprobe will not be used)
@@ -39,19 +27,6 @@ export interface VideoConversionParams {
     keep_audio: boolean; // if true keep audio in video
     audio_bitrate: number; // output audio bitrate in video (if keep_audio = true)
     use_custom_video_quality: boolean; // if true use custom video quality - video_quality (crf, 0-51, lower is better quality). If false:
-    /**
-     * script computes a target bitrate using the formula:
-     *
-     * original file size (bytes) = S
-     * original duration (seconds) = D
-     * source FPS = src_fps
-     * target FPS = tfps
-     * new_duration = D * (src_fps / tfps)
-     *
-     * target_kbps = round((S * 8) / new_duration / 1000)
-     *
-     * The resulting target is used as -b:v <target_kbps>k -c:v libx264 -preset slow. If detection fails, the script warns and uses CRF mode instead.
-     */
     video_quality: number; // output video quality (crf, 0-51, lower is better quality) (if use_custom_video_quality = true)
     files: string[]; //array of file paths to convert
 }
@@ -91,6 +66,11 @@ export interface ConversionProgress {
     total_files: number;
     percentage: number;
     status: ConversionStatus; //pub enum ConversionStatus {Conversion,Success,Error,None,}
+}
+
+export enum FFTool {
+    FFMPEG = "ffmpeg",
+    FFPROBE = "ffprobe",
 }
 
 export type FfToolsStatus = {
