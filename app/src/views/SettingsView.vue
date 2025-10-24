@@ -9,7 +9,7 @@ import {platform} from "@tauri-apps/plugin-os";
 import {open} from '@tauri-apps/plugin-dialog';
 import ResetSettingsButton from "@/components/buttons/ResetSettingsButton.vue";
 import {FFTool} from "@/types";
-import {toolsAPI} from "@/api/toolsAPI.ts";
+import {toolsAPI} from "@/api/tauri.ts";
 import {useMessage} from "naive-ui";
 
 const message = useMessage();

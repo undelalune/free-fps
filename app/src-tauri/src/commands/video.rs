@@ -22,6 +22,15 @@ pub struct VideoFile {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct ThumbnailParams {
+    pub path: String,
+    pub ffmpeg_path: String,
+    pub ffprobe_path: String,
+    pub ffmpeg_use_installed: bool,
+    pub ffprobe_use_installed: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct VideoConversionParams {
     pub ffmpeg_path: String,
     pub ffprobe_path: String,
@@ -78,17 +87,17 @@ impl ConversionController {
     }
 }
 
-fn resolve_ffmpeg(params: &VideoConversionParams) -> AppResult<String> {
-    if params.ffmpeg_use_installed {
+fn resolve_ffmpeg_common(ffmpeg_use_installed: bool, ffmpeg_path: &str) -> AppResult<String> {
+    if ffmpeg_use_installed {
         Ok("ffmpeg".to_string())
-    } else if !params.ffmpeg_path.trim().is_empty() {
-        let p = Path::new(&params.ffmpeg_path);
+    } else if !ffmpeg_path.trim().is_empty() {
+        let p = Path::new(ffmpeg_path);
         if p.exists() {
             Ok(p.to_string_lossy().to_string())
         } else {
             Err(AppError::new(
                 AppErrorCode::FfmpegNotFound,
-                format!("ffmpeg not found at {}", params.ffmpeg_path),
+                format!("ffmpeg not found at {}", ffmpeg_path),
             ))
         }
     } else {
@@ -97,6 +106,14 @@ fn resolve_ffmpeg(params: &VideoConversionParams) -> AppResult<String> {
             "ffmpeg path not provided and ffmpeg_use_installed = false",
         ))
     }
+}
+
+fn resolve_ffmpeg_from_convert(params: &VideoConversionParams) -> AppResult<String> {
+    resolve_ffmpeg_common(params.ffmpeg_use_installed, &params.ffmpeg_path)
+}
+
+fn resolve_ffmpeg_from_thumb(params: &ThumbnailParams) -> AppResult<String> {
+    resolve_ffmpeg_common(params.ffmpeg_use_installed, &params.ffmpeg_path)
 }
 
 fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
@@ -198,40 +215,19 @@ async fn extract_thumbnail_data_url(
 
 #[tauri::command]
 pub async fn get_video_thumbnail(
-    path: String,
+    params: ThumbnailParams,
     state: State<'_, ConversionController>,
 ) -> AppResult<Option<String>> {
     let cancel = state.new_token().await;
 
-    // Use installed ffmpeg on PATH for simplicity.
-    // If you need custom paths, pass them in as params like in `convert_videos`.
-    let ffmpeg_bin = "ffmpeg";
+    let ffmpeg_bin = resolve_ffmpeg_from_thumb(&params)?;
 
-    let p = PathBuf::from(&path);
+    let p = PathBuf::from(&params.path);
     if !p.exists() || !p.is_file() {
         return Ok(None);
     }
-    extract_thumbnail_data_url(ffmpeg_bin, &p, &cancel).await
+    extract_thumbnail_data_url(&ffmpeg_bin, &p, &cancel).await
 }
-
-// Note: this will be slower on big folders. Consider limiting concurrency if needed.
-// #[tauri::command]
-// pub async fn get_video_files_with_thumbnails(
-//     folder_path: String,
-//     state: State<'_, ConversionController>,
-// ) -> AppResult<Vec<VideoFile>> {
-//     let cancel = state.new_token().await;
-//     let mut files = list_video_files(folder_path, cancel.clone()).await?;
-//
-//     for f in files.iter_mut() {
-//         if cancel.is_cancelled() {
-//             break;
-//         }
-//         let thumb = extract_thumbnail_data_url("ffmpeg", Path::new(&f.path), &cancel).await?;
-//         f.thumbnail = thumb; // small data URL or `None` if failed/cancelled
-//     }
-//     Ok(files)
-// }
 
 async fn list_video_files(
     folder_path: String,
@@ -379,7 +375,7 @@ pub async fn convert_videos(
 ) -> AppResult<String> {
     let cancel = state.new_token().await;
 
-    let ffmpeg_bin = resolve_ffmpeg(&params)?;
+    let ffmpeg_bin = resolve_ffmpeg_from_convert(&params)?;
     let ffprobe_bin = resolve_ffprobe(&params);
 
     let inputs: Vec<VideoFile> = if !params.files.is_empty() {

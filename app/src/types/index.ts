@@ -15,11 +15,14 @@ export interface ToolCheckParams {
     path: string;
 }
 
-export interface VideoConversionParams {
+export interface FFParams {
     ffmpeg_path: string; //path to ffmpeg binary (if empty, use installed)
     ffprobe_path: string; //path to ffprobe binary (if empty, use installed if ffprobe_use_installed = true, if empty and ffprobe_use_installed = false, ffprobe will not be used)
     ffmpeg_use_installed: boolean; //use installed ffmpeg
     ffprobe_use_installed: boolean; //use installed ffprobe
+}
+
+export interface VideoConversionParams extends FFParams {
     input_folder: string; //input folder path
     output_folder: string; //output folder path (if empty, use input folder to create output folder inside with the name "converted_videos_${target_fps}fps")
     target_fps: number; //target fps
@@ -29,6 +32,10 @@ export interface VideoConversionParams {
     use_custom_video_quality: boolean; // if true use custom video quality - video_quality (crf, 0-51, lower is better quality). If false:
     video_quality: number; // output video quality (crf, 0-51, lower is better quality) (if use_custom_video_quality = true)
     files: string[]; //array of file paths to convert
+}
+
+export interface ThumbnailParams extends FFParams {
+    path: string;
 }
 
 export enum ErrorCode {

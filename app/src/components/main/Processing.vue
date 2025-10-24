@@ -90,6 +90,7 @@ const toggleSelectAll = (checked: boolean) => {
                      :key="v.name"
                      :id="'vi_' + v.position"
                      :videoItem="v"
+                     :ff-params="store.ffparams"
                      :processing="store.processing"/>
         </n-scrollbar>
 

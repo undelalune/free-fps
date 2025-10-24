@@ -48,12 +48,13 @@ const selectFolderPath = async (isInputFolder: boolean = true) => {
   }
 };
 
-const outputPlaceholder = computed(()=> {
+const outputPlaceholder = computed(() => {
   const fps = store.useCustomFps ? store.customFps : store.targetFps;
   const folder = `converted_videos_${fps}fps`;
-  if (!store.inputFolder) return folder;
-  return `${store.inputFolder}\\${folder}`;
-})
+  const separator = store.inputFolder?.includes('\\') ? '\\' : '/';
+  return store.inputFolder ? `${store.inputFolder}${separator}${folder}` : folder;
+});
+
 
 const selectFps = (value: number) => {
   store.useCustomFps = value === 0;

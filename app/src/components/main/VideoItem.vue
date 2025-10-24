@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ConversionStatus, VideoFile} from "@/types";
+import {ConversionStatus, FFParams, VideoFile} from "@/types";
 import {AlertCircle, CircleCheck, Eye} from '@vicons/tabler';
 import {useThemeVars} from 'naive-ui'
 import {useI18n} from "vue-i18n";
@@ -9,7 +9,7 @@ import PreviewNotAvailable from "@/components/main/PreviewNotAvailable.vue";
 
 const themeVars = useThemeVars();
 const {t} = useI18n();
-const props = defineProps<{ videoItem: VideoFile; processing: boolean }>();
+const props = defineProps<{ videoItem: VideoFile; processing: boolean, ffParams: FFParams }>();
 
 const formatSize = (bytes: number = 0): string => {
   const sizes = ['b', 'kb', 'mb', 'gb'];
@@ -37,7 +37,10 @@ const showPreview = ref(false);
 const getThumbnail = () => {
   showPreview.value = true;
   if (thumbnail.value) return;
-  videoAPI.getVideoThumbnail(props.videoItem.path).then((thumbPath) => {
+  videoAPI.getVideoThumbnail({
+    path: props.videoItem.path,
+    ... props.ffParams
+  }).then((thumbPath) => {
     thumbnail.value = thumbPath;
     thumbnailError.value = thumbPath === null;
   }).catch((e) => {

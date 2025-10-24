@@ -1,6 +1,6 @@
 import {ref, watch} from 'vue';
 import {useStore} from '@/stores';
-import {toolsAPI} from "@/api/toolsAPI.ts";
+import {toolsAPI} from "@/api/tauri.ts";
 
 export function useFFToolsDialog() {
     const store = useStore();
