@@ -145,7 +145,7 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
   display: flex;
   flex-direction: column;
   width: 90%;
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .settings-form-item {

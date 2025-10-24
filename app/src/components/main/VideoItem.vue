@@ -68,7 +68,7 @@ const getThumbnail = () => {
          class="video-preview"
          @mouseleave="showPreview = false">
       <PreviewNotAvailable v-if="thumbnailError"/>
-      <n-image v-else-if="thumbnail" :src="thumbnail" width="200" style="border-radius: 8px;" />
+      <n-image v-else-if="thumbnail" :src="thumbnail" width="200"  style="border-radius: 8px; height: 100%;" />
       <n-spin v-else size="tiny" class="preview-spinner" />
     </div>
 
