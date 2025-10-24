@@ -86,7 +86,10 @@ const toggleSelectAll = (checked: boolean) => {
         </div>
 
         <n-scrollbar ref="scrollBar" class="video-scroll-container">
-          <VideoItem v-for="v in store.videoFiles" :key="v.name" :id="'vi_' + v.position" :videoItem="v"
+          <VideoItem v-for="v in store.videoFiles"
+                     :key="v.name"
+                     :id="'vi_' + v.position"
+                     :videoItem="v"
                      :processing="store.processing"/>
         </n-scrollbar>
 

@@ -79,6 +79,7 @@ export default {
             gb: "{size} ГБ",
             conversionCompleted: "Канвертацыя завершана.",
             operationCompletedWithErrors: "Завершана з памылкамі.",
+            previewNotAvailable: "Выява недаступная. Файл пашкоджаны або не падтрымліваецца.",
         }
     },
     settingsView: {

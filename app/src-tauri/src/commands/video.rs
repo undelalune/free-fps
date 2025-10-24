@@ -9,12 +9,16 @@ use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Emitter, State};
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
+use base64::{engine::general_purpose, Engine as _};
+use tokio::process::Command;
+use tokio::io::AsyncReadExt;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VideoFile {
     pub path: String,
     pub name: String,
     pub size: u64,
+    pub thumbnail: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -110,6 +114,101 @@ fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
     }
 }
 
+async fn extract_thumbnail_data_url(
+    ffmpeg_bin: &str,
+    input: &Path,
+    cancel: &CancellationToken,
+) -> AppResult<Option<String>> {
+    if cancel.is_cancelled() {
+        return Ok(None);
+    }
+
+    let mut cmd = Command::new(ffmpeg_bin);
+    cmd.arg("-hide_banner")
+        .arg("-loglevel").arg("error")
+        .arg("-nostdin")
+        .arg("-y")
+        .arg("-ss").arg("1")
+        .arg("-i").arg(input)
+        .arg("-frames:v").arg("1")
+        .arg("-vf").arg("scale=320:-2")
+        .arg("-q:v").arg("5")
+        .arg("-f").arg("mjpeg")
+        .arg("-"); // stdout
+    cmd.stdout(std::process::Stdio::piped());
+    cmd.stderr(std::process::Stdio::null());
+
+    let mut child = cmd
+        .spawn()
+        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+
+    // Take stdout pipe and read it in a separate task (so we don't block the child).
+    let Some(mut stdout) = child.stdout.take() else {
+        return Ok(None);
+    };
+    let read_task = tokio::spawn(async move {
+        let mut buf = Vec::new();
+        // If reading fails, return empty buffer (treated as no thumbnail).
+        let _ = stdout.read_to_end(&mut buf).await;
+        buf
+    });
+
+    let cancel_for_wait = cancel.clone();
+    tokio::select! {
+        _ = cancel_for_wait.cancelled() => {
+            let _ = child.kill().await;   // no move-after-move anymore
+            let _ = child.wait().await;   // reap process
+            return Ok(None);
+        }
+        status = child.wait() => {
+            let status = status.map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+            let out = read_task.await
+                .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+            if !status.success() || out.is_empty() {
+                return Ok(None);
+            }
+            let b64 = general_purpose::STANDARD.encode(out);
+            let data_url = format!("data:image/jpeg;base64,{}", b64);
+            Ok(Some(data_url))
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn get_video_thumbnail(
+    path: String,
+    state: State<'_, ConversionController>,
+) -> AppResult<Option<String>> {
+    let cancel = state.new_token().await;
+
+    // Use installed ffmpeg on PATH for simplicity.
+    // If you need custom paths, pass them in as params like in `convert_videos`.
+    let ffmpeg_bin = "ffmpeg";
+
+    let p = PathBuf::from(&path);
+    if !p.exists() || !p.is_file() {
+        return Ok(None);
+    }
+    extract_thumbnail_data_url(ffmpeg_bin, &p, &cancel).await
+}
+
+// Note: this will be slower on big folders. Consider limiting concurrency if needed.
+#[tauri::command]
+pub async fn get_video_files_with_thumbnails(
+    folder_path: String,
+    state: State<'_, ConversionController>,
+) -> AppResult<Vec<VideoFile>> {
+    let cancel = state.new_token().await;
+    let mut files = list_video_files(folder_path, cancel.clone()).await?;
+
+    for f in files.iter_mut() {
+        if cancel.is_cancelled() { break; }
+        let thumb = extract_thumbnail_data_url("ffmpeg", Path::new(&f.path), &cancel).await?;
+        f.thumbnail = thumb; // small data URL or `None` if failed/cancelled
+    }
+    Ok(files)
+}
+
 async fn list_video_files(
     folder_path: String,
     cancel: CancellationToken,
@@ -149,6 +248,7 @@ async fn list_video_files(
                         .to_string_lossy()
                         .to_string(),
                     size: metadata.len(),
+                    thumbnail: None,
                 });
             }
         }
@@ -274,6 +374,7 @@ pub async fn convert_videos(
                     path: pb.to_string_lossy().to_string(),
                     name,
                     size,
+                    thumbnail: None,
                 }
             })
             .collect()

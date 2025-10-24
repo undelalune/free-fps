@@ -7,6 +7,7 @@ export interface VideoFile {
     progress?: number;
     position?: number;
     status?: ConversionStatus;
+    thumbnail?: string; //base64 data url
 }
 
 /**

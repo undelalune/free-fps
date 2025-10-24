@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {ConversionStatus, VideoFile} from "@/types";
-import {AlertCircle, CircleCheck} from '@vicons/tabler';
+import {AlertCircle, CircleCheck, Eye, AlertTriangle} from '@vicons/tabler';
 import {useThemeVars} from 'naive-ui'
 import {useI18n} from "vue-i18n";
+import {videoAPI} from "@/api/tauri.ts";
+import PreviewNotAvailable from "@/components/main/PreviewNotAvailable.vue";
 
 
 const themeVars = useThemeVars();
@@ -29,22 +31,54 @@ const showSuccess = computed(() => {
   return props.videoItem?.status === ConversionStatus.Success;
 })
 
+const thumbnail = ref('');
+const thumbnailError = ref(false);
+const showPreview = ref(false);
+const getThumbnail = () => {
+  showPreview.value = true;
+  if (thumbnail.value) return;
+  videoAPI.getVideoThumbnail(props.videoItem.path).then((thumbPath) => {
+    thumbnail.value = thumbPath;
+    thumbnailError.value = thumbPath === null;
+  }).catch((e) => {
+    thumbnailError.value = true;
+    console.error('Failed to get thumbnail for video:', props.videoItem.path, e);
+  });
+};
 
 </script>
 
 <template>
   <div class="video-item"
-       :class="{ 'video-item-deselected': !videoItem.convert, 'video-item-disabled': processing, 'video-item-deselected-disabled': !videoItem.convert && processing }"
+       :class="{
+          'video-item-deselected': !videoItem.convert,
+          'video-item-disabled': processing,
+          'video-item-deselected-disabled': !videoItem.convert && processing,
+          'video-item--preview': showPreview
+        }"
        @click="videoItem.convert=!videoItem.convert">
     <div class="col-checkbox">
       <n-checkbox :checked="videoItem.convert" :disabled="processing"/>
     </div>
 
+    <div v-if="showPreview"
+         class="video-preview"
+         @mouseleave="showPreview = false">
+      <PreviewNotAvailable v-if="thumbnailError"/>
+      <n-image v-else-if="thumbnail" :src="thumbnail" width="200" style="border-radius: 8px;" />
+      <n-spin v-else size="tiny" content-class="preview-spinner" />
+    </div>
+
     <div class="video-info">
-      <div class="video-title" :title="videoItem.name">
+      <div class="video-title" :class="{'video-title--preview': showPreview}" :title="videoItem.name">
         {{ videoItem.name }}
       </div>
-      <div class="video-details">
+      <div v-if="!showPreview" class="video-details">
+        <n-button size="tiny" ghost quaternary  @click.stop="getThumbnail">
+          <template #icon>
+            <n-icon size="16"><Eye /></n-icon>
+          </template>
+        </n-button>
         <span class="video-size">{{ formatSize(videoItem.size) }}</span>
       </div>
     </div>
@@ -82,12 +116,16 @@ const showSuccess = computed(() => {
   border-radius: 6px;
   margin: 0 0 2px 0;
   cursor: pointer;
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.video-item--preview {
+  height: 120px;
 }
 
 .video-item:hover {
   background-color: v-bind('themeVars.tableHeaderColor');
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .video-item-deselected {
@@ -110,6 +148,22 @@ const showSuccess = computed(() => {
   justify-content: center;
 }
 
+.video-preview {
+  position: relative;
+  flex: 0 0 200px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.preview-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 .video-info {
   flex: 1 1 auto;
   min-width: 0; /* critical for WebView2/Chromium */
@@ -128,8 +182,27 @@ const showSuccess = computed(() => {
   font-weight: bold;
 }
 
+.video-title--preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  word-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  animation: preview-appear 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
+}
+
+@keyframes preview-appear {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .video-details {
   font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .col-progress {

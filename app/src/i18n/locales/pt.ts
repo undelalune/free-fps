@@ -79,6 +79,7 @@ export default {
             gb: "{size} GB",
             conversionCompleted: "Conversão concluída com sucesso.",
             operationCompletedWithErrors: "Conversão concluída com erros.",
+            previewNotAvailable: "Imagem indisponível. Arquivo corrompido ou não suportado.",
         }
     },
     settingsView: {
