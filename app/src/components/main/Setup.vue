@@ -141,6 +141,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
                           v-model:value="store.customFps"
                           :min="1"
                           :max="200"
+                          precision="3"
                           :step="1"
                           placeholder=""
           />
@@ -255,7 +256,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
 }
 
 .custom-fps-input {
-  width: 90px;
+  width: 112px;
 }
 
 .cpu-slider {

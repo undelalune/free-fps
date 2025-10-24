@@ -49,6 +49,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SettingsButton: typeof import('./src/components/buttons/SettingsButton.vue')['default']
     Setup: typeof import('./src/components/main/Setup.vue')['default']
+    TitledHeader: typeof import('./src/components/TitledHeader.vue')['default']
     VideoItem: typeof import('./src/components/main/VideoItem.vue')['default']
   }
 }

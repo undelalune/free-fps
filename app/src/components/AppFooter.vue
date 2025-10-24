@@ -6,6 +6,8 @@ import { useI18n } from 'vue-i18n';
 import { useStore } from '@/stores';
 import { useThemeVars } from 'naive-ui';
 
+const getVersion = ('v'+import.meta.env.VITE_APP_VERSION) || 'v0.0.0'
+
 const REDIRECT_URL = 'https://www.buymeacoffee.com/undelalune';
 const CLICK_RESET_MS = 2000;
 const BUBBLE_LIFETIME_MS = 1050;
@@ -124,6 +126,9 @@ onBeforeUnmount(() => {
 
       <span> © 2025 <a href="https://github.com/undelalune/free-fps" target="_blank">undelalune</a></span>
     </div>
+    <div class="version-info">
+      {{getVersion}}
+    </div>
   </footer>
 </template>
 
@@ -198,5 +203,17 @@ onBeforeUnmount(() => {
   width: 0;
   height: 0;
   pointer-events: none;
+}
+
+.version-info {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.app-footer:hover .version-info {
+  opacity: 1;
 }
 </style>

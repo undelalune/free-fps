@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import LogoHeader from "@/components/LogoHeader.vue";
 import HomeButton from "@/components/buttons/HomeButton.vue";
-import {CircleX, File, Help, Moon, Sun} from "@vicons/tabler";
+import {CircleX, File, Help, Moon} from "@vicons/tabler";
+import {SettingsSharp} from "@vicons/ionicons5";
 import {useI18n} from "vue-i18n";
 import {useStore} from "@/stores";
 import {languages} from "@/i18n";
@@ -11,6 +11,7 @@ import ResetSettingsButton from "@/components/buttons/ResetSettingsButton.vue";
 import {FFTool} from "@/types";
 import {toolsAPI} from "@/api/tauri.ts";
 import {useMessage} from "naive-ui";
+import TitledHeader from "@/components/TitledHeader.vue";
 
 const message = useMessage();
 const {t} = useI18n();
@@ -49,7 +50,9 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
 
 <template>
   <n-flex align="center" vertical>
-    <LogoHeader/>
+    <TitledHeader :title="t('common.settings')">
+      <SettingsSharp/>
+    </TitledHeader>
     <HomeButton/>
 
     <div class="settings-wrapper">

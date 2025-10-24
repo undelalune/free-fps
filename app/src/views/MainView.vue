@@ -10,12 +10,17 @@ import HelpButton from '@/components/buttons/HelpButton.vue';
 import LogoHeader from '@/components/LogoHeader.vue';
 import Setup from '@/components/main/Setup.vue';
 import Processing from '@/components/main/Processing.vue';
+import {RotateClockwise2} from "@vicons/tabler";
+import TitledHeader from "@/components/TitledHeader.vue";
 
 const store = useStore();
 const {t} = useI18n();
 const message = useMessage();
 const setupState = ref(true);
 
+const getTitle = () => {
+  return `${store.useCustomFps ? store.customFps : store.targetFps} FPS`;
+};
 const {
   isFfmpegConfigured,
   scanFolder,
@@ -43,7 +48,10 @@ onUnmounted(cleanup);
 
 <template>
   <div class="main-view">
-    <LogoHeader/>
+    <LogoHeader v-if="setupState"/>
+    <TitledHeader v-else :title="getTitle()">
+      <RotateClockwise2/>
+    </TitledHeader>
     <HelpButton/>
     <SettingsButton/>
 
