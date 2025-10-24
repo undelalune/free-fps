@@ -74,7 +74,7 @@ const getThumbnail = () => {
         {{ videoItem.name }}
       </div>
       <div v-if="!showPreview" class="video-details">
-        <n-button size="tiny" ghost quaternary  @click.stop="getThumbnail">
+        <n-button size="tiny" ghost :bordered="false"  @click.stop="getThumbnail">
           <template #icon>
             <n-icon size="16"><Eye /></n-icon>
           </template>
