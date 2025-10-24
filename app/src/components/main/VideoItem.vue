@@ -66,7 +66,7 @@ const getThumbnail = () => {
          @mouseleave="showPreview = false">
       <PreviewNotAvailable v-if="thumbnailError"/>
       <n-image v-else-if="thumbnail" :src="thumbnail" width="200" style="border-radius: 8px;" />
-      <n-spin v-else size="tiny" content-class="preview-spinner" />
+      <n-spin v-else size="tiny" class="preview-spinner" />
     </div>
 
     <div class="video-info">
@@ -185,6 +185,7 @@ const getThumbnail = () => {
 .video-title--preview {
   display: -webkit-box;
   -webkit-line-clamp: 5;
+  line-clamp: 5;
   -webkit-box-orient: vertical;
   word-wrap: anywhere;
   overflow: hidden;
