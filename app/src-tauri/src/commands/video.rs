@@ -1,17 +1,17 @@
 use crate::errors::{AppError, AppErrorCode, AppResult};
 use crate::utils::ffmpeg::{convert_video_with_progress, ConvertOptions};
+use base64::{engine::general_purpose, Engine as _};
 use chrono::{DateTime, Utc};
 use filetime::{set_file_times, FileTime};
+use open;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use open;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Emitter, State};
+use tokio::io::AsyncReadExt;
+use tokio::process::Command;
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
-use base64::{engine::general_purpose, Engine as _};
-use tokio::process::Command;
-use tokio::io::AsyncReadExt;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VideoFile {
@@ -114,6 +114,7 @@ fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
     }
 }
 
+// rust
 async fn extract_thumbnail_data_url(
     ffmpeg_bin: &str,
     input: &Path,
@@ -124,17 +125,38 @@ async fn extract_thumbnail_data_url(
     }
 
     let mut cmd = Command::new(ffmpeg_bin);
+
+    // Kill the child if the handle is dropped.
+    cmd.kill_on_drop(true);
+
+    // Windows: hide console window.
+    #[cfg(target_os = "windows")]
+    {
+        use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+
     cmd.arg("-hide_banner")
-        .arg("-loglevel").arg("error")
+        .arg("-loglevel")
+        .arg("error")
         .arg("-nostdin")
         .arg("-y")
-        .arg("-ss").arg("1")
-        .arg("-i").arg(input)
-        .arg("-frames:v").arg("1")
-        .arg("-vf").arg("scale=320:-2")
-        .arg("-q:v").arg("5")
-        .arg("-f").arg("mjpeg")
-        .arg("-"); // stdout
+        .arg("-ss")
+        .arg("1")
+        .arg("-i")
+        .arg(input)
+        .arg("-frames:v")
+        .arg("1")
+        .arg("-vf")
+        .arg("scale=320:-2")
+        .arg("-q:v")
+        .arg("5")
+        .arg("-f")
+        .arg("mjpeg")
+        .arg("-");
+
+    // Ensure no stdin; pipe stdout; silence stderr.
+    cmd.stdin(std::process::Stdio::null());
     cmd.stdout(std::process::Stdio::piped());
     cmd.stderr(std::process::Stdio::null());
 
@@ -142,13 +164,12 @@ async fn extract_thumbnail_data_url(
         .spawn()
         .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
 
-    // Take stdout pipe and read it in a separate task (so we don't block the child).
+    // Read stdout concurrently to avoid blocking the child.
     let Some(mut stdout) = child.stdout.take() else {
         return Ok(None);
     };
     let read_task = tokio::spawn(async move {
         let mut buf = Vec::new();
-        // If reading fails, return empty buffer (treated as no thumbnail).
         let _ = stdout.read_to_end(&mut buf).await;
         buf
     });
@@ -156,9 +177,10 @@ async fn extract_thumbnail_data_url(
     let cancel_for_wait = cancel.clone();
     tokio::select! {
         _ = cancel_for_wait.cancelled() => {
-            let _ = child.kill().await;   // no move-after-move anymore
+            let _ = child.kill().await;
             let _ = child.wait().await;   // reap process
-            return Ok(None);
+            let _ = read_task.await;      // join reader task
+            Ok(None)
         }
         status = child.wait() => {
             let status = status.map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
@@ -202,7 +224,9 @@ pub async fn get_video_files_with_thumbnails(
     let mut files = list_video_files(folder_path, cancel.clone()).await?;
 
     for f in files.iter_mut() {
-        if cancel.is_cancelled() { break; }
+        if cancel.is_cancelled() {
+            break;
+        }
         let thumb = extract_thumbnail_data_url("ffmpeg", Path::new(&f.path), &cancel).await?;
         f.thumbnail = thumb; // small data URL or `None` if failed/cancelled
     }
@@ -536,7 +560,6 @@ pub async fn convert_videos(
     if let Err(e) = open::that(&output_dir) {
         eprintln!("Failed to open file manager: {}", e);
     }
-
 
     Ok(format!("Successfully converted {} videos", total_files))
 }

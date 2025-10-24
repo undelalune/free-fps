@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ConversionStatus, VideoFile} from "@/types";
-import {AlertCircle, CircleCheck, Eye, AlertTriangle} from '@vicons/tabler';
+import {AlertCircle, CircleCheck, Eye} from '@vicons/tabler';
 import {useThemeVars} from 'naive-ui'
 import {useI18n} from "vue-i18n";
 import {videoAPI} from "@/api/tauri.ts";
