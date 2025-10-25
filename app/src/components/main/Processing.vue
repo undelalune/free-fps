@@ -163,14 +163,14 @@ const toggleSelectAll = (checked: boolean) => {
 
 .prev-btn {
   position: absolute;
-  bottom: 40px;
+  bottom: 30px;
   left: 30px;
   padding: 16px;
 }
 
 .action-btn {
   position: absolute;
-  bottom: 40px;
+  bottom: 30px;
   right: 30px;
   padding: 16px;
 }

@@ -12,7 +12,7 @@ const {t} = useI18n();
       <n-button
           class="reset-settings"
           size="small"
-          quaternary
+          bordered
           @click="store.resetSettings()"
       >{{ t('settingsView.resetSettings') }}
       </n-button>
@@ -24,7 +24,6 @@ const {t} = useI18n();
 <style scoped>
 
 .reset-settings {
-  padding: 6px;
   opacity: 0.5;
 }
 

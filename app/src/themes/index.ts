@@ -18,7 +18,6 @@ const darkThemeOverrides: GlobalThemeOverrides = {
         errorColor: '#ff472f',
         invertedColor: '#2fb2ff',
         // actionColor: '#4379F2',
-
     },
     Button: {
         // ...darkTheme.Button,

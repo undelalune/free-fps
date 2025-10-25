@@ -7,6 +7,7 @@ export default {
         open: "Öffnen",
         close: "Schließen",
         settings: "Einstellungen",
+        conversion: "Konvertierung",
         home: "Startseite",
         next: "Weiter",
         back: "Zurück",

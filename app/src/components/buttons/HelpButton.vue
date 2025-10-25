@@ -17,14 +17,15 @@ const toggleShowHelp = () => {
     <template #trigger>
       <n-button
           class="help-menu-btn"
-          size="small"
-          quaternary
+          size="tiny"
+          ghost
+          :bordered="false"
           @click="toggleShowHelp"
           @mouseenter="store.heartIsBeating = true"
           @mouseleave="store.heartIsBeating = false"
           :disabled="store.processing"
       >
-        <n-icon size="20">
+        <n-icon size="18">
           <Help/>
         </n-icon>
       </n-button>
@@ -36,11 +37,8 @@ const toggleShowHelp = () => {
 <style scoped>
 .help-menu-btn {
   position: absolute;
-  width: 32px;
-  height: 32px;
-  top: 8px;
-  right: 48px;
-  padding: 6px;
+  top: 16px;
+  right: 52px;
   color: #888;
 }
 </style>

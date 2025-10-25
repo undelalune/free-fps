@@ -1,32 +1,35 @@
 <script setup lang="ts">
+import { useThemeVars } from 'naive-ui';
 defineProps<{ title: string }>();
+
+const themeVars = useThemeVars();
 </script>
 
 <template>
-  <n-flex
-      class="logo-header"
-      justify="center"
-      align="center"
-      :size="12"
-  >
-    <n-text class="logo-header__title">{{ title }}</n-text>
-    <n-icon :size="24">
-      <slot/>
-    </n-icon>
-  </n-flex>
+  <div class="logo-header">
+    <div class="logo-header__wrapper">
+      <n-text class="logo-header__title">{{ title }}</n-text>
+    </div>
+
+  </div>
 </template>
 
 <style scoped>
 .logo-header {
-  position: relative;
   width: 100%;
-  margin-top: 12px;
-  opacity: 0.9;
+}
+
+.logo-header__wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  padding-left: 22px;
 }
 
 .logo-header__title {
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 36px;
+  font-size: 18px;
+  line-height: 22px;
+  z-index: 2;
 }
 </style>

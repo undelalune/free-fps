@@ -7,6 +7,7 @@ export default {
         open: "Адкрыць",
         close: "Закрыць",
         settings: "Налады",
+        conversion: "Канвертацыя",
         home: "Галоўны экран",
         next: "Далей",
         back: "Назад",

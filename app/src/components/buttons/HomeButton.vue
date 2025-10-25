@@ -17,11 +17,12 @@ const goHome = () => {
     <template #trigger>
       <n-button
           class="home-menu-btn"
-          size="small"
-          tertiary
+          size="tiny"
+          ghost
+          :bordered="false"
           @click="goHome"
       >
-        <n-icon size="20">
+        <n-icon size="18">
           <Home/>
         </n-icon>
       </n-button>
@@ -33,8 +34,7 @@ const goHome = () => {
 <style scoped>
 .home-menu-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 6px;
+  top: 16px;
+  right: 28px;
 }
 </style>

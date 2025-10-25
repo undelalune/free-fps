@@ -21,12 +21,13 @@ const toggleShowSettings = () => {
     <template #trigger>
       <n-button
           class="settings-menu-btn"
-          size="small"
-          tertiary
+          size="tiny"
+          ghost
+          :bordered="false"
           @click="toggleShowSettings"
           :disabled="store.processing"
       >
-        <n-icon size="20">
+        <n-icon size="18">
           <SettingsSharp/>
         </n-icon>
       </n-button>
@@ -38,10 +39,7 @@ const toggleShowSettings = () => {
 <style scoped>
 .settings-menu-btn {
   position: absolute;
-  width: 32px;
-  height: 32px;
-  top: 8px;
-  right: 8px;
-  padding: 6px;
+  top: 16px;
+  right: 28px;
 }
 </style>

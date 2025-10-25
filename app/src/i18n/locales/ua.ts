@@ -7,6 +7,7 @@ export default {
         open: "Відкрити",
         close: "Закрити",
         settings: "Налаштування",
+        conversion: "Конвертація",
         home: "Головний екран",
         next: "Далі",
         back: "Назад",

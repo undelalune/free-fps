@@ -19,7 +19,7 @@ const message = useMessage();
 const setupState = ref(true);
 
 const getTitle = () => {
-  return `${store.useCustomFps ? store.customFps : store.targetFps} FPS`;
+  return `${t('common.conversion')} • ${store.useCustomFps ? store.customFps : store.targetFps} fps`;
 };
 const {
   isFfmpegConfigured,
@@ -80,6 +80,6 @@ onUnmounted(cleanup);
   display: flex;
   flex-direction: column;
   width: 90%;
-  margin-top: 26px;
+  margin-top: 46px;
 }
 </style>

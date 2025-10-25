@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HomeButton from "@/components/buttons/HomeButton.vue";
-import {CircleX, File, Help, Moon} from "@vicons/tabler";
+import {CircleX, File, Help, Moon, Sun} from "@vicons/tabler";
 import {SettingsSharp} from "@vicons/ionicons5";
 import {useI18n} from "vue-i18n";
 import {useStore} from "@/stores";
@@ -121,9 +121,6 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
       </n-flex>
 
       <div class="help-block">
-        <n-text>
-          {{ t('settingsView.helpText') }}
-        </n-text>
         <n-tooltip placement="top">
           <template #trigger>
             <n-button quaternary circle type="primary" @click="store.showHelp = true" size="small"
@@ -137,6 +134,9 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
           </template>
           <span>{{ t('settingsView.openHelp') }}</span>
         </n-tooltip>
+        <n-text>
+          {{ t('settingsView.helpText') }}
+        </n-text>
       </div>
     </div>
   </n-flex>
@@ -148,7 +148,7 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
   display: flex;
   flex-direction: column;
   width: 90%;
-  margin-top: 18px;
+  margin-top: 36px;
 }
 
 .settings-form-item {
@@ -163,6 +163,7 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
   width: 100%;
   display: flex;
   align-items: center;
+  margin-top: 16px;
   gap: 4px;
 }
 </style>
