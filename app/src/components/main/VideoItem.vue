@@ -77,9 +77,9 @@ const getThumbnail = () => {
         {{ videoItem.name }}
       </div>
       <div v-if="!showPreview" class="video-details">
-        <n-button size="tiny" ghost style="padding: 0;" :bordered="false"  @click.stop="getThumbnail">
+        <n-button size="tiny" ghost style="padding: 0;" :bordered="false"  @click.stop="getThumbnail" :disabled="processing">
           <template #icon>
-            <n-icon size="16"><Eye /></n-icon>
+            <n-icon size="16" ><Eye/></n-icon>
           </template>
         </n-button>
         <span style="margin-left: 4px;">{{ formatSize(videoItem.size) }}</span>

@@ -11,8 +11,6 @@ const {t} = useI18n();
     <template #trigger>
       <n-button
           class="reset-settings"
-          size="small"
-          bordered
           @click="store.resetSettings()"
       >{{ t('settingsView.resetSettings') }}
       </n-button>
@@ -24,7 +22,7 @@ const {t} = useI18n();
 <style scoped>
 
 .reset-settings {
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .reset-settings:hover {

@@ -70,19 +70,19 @@ const darkThemeOverrides: GlobalThemeOverrides = {
 const lightThemeOverrides: GlobalThemeOverrides = {
     common: {
         ...lightTheme.common,
-        bodyColor: '#f3f3f3',
-        primaryColor: '#3674B5',
-        textColor2: '#222222',
+        bodyColor: '#f8f8f8',
+        primaryColor: '#1976D2',
+        textColor2: '#111111',
         // textColor2: '#eeeeee',
         // inputColor: '#662549'
-        primaryColorHover: '#3674B5',
-        primaryColorPressed: '#3674B5',
-        primaryColorSuppl: '#3674B5',
-        tableColor: '#e8e8e8',
-        tableHeaderColor: '#d8d8d8',
-        tableColorHover: '#c2c2c2',
+        primaryColorHover: '#1E88E5',
+        primaryColorPressed: '#42A5F5',
+        primaryColorSuppl: '#1E88E5',
+        tableColor: '#ececec', //vi bg
+        tableHeaderColor: '#dadada', //vi hover
+        tableColorHover: '#c8c8c8', //horizontal border
         tableColorStriped: '#000000',
-        invertedColor: '#2585b9',
+        invertedColor: '#1976D2',
         // bodyColor: '#ffffff',
         // textColorBase: '#222222',
         // primaryColor: '#409eff'
@@ -118,11 +118,11 @@ const lightThemeOverrides: GlobalThemeOverrides = {
         // optionTextColor: '#eeee00',
         // optionTextColorPressed: '#eeee00',
         // optionTextColorDisabled: '#555555',
-        optionTextColorActive: '#3674B5',
+        optionTextColorActive: '#1976D2',
     },
     Switch: {
         // ...darkTheme.Select,
-        railColorActive: '#3674B5',
+        railColorActive: '#1976D2',
     },
     Card: {
         borderRadius: '6px',
@@ -134,7 +134,7 @@ const lightThemeOverrides: GlobalThemeOverrides = {
     Message: {
         maxWidth: '400px',
         colorWarning: '#eeeeee',
-        iconColorWarning: '#3674B5',
+        iconColorWarning: '#1976D2',
         textColor: '#222222',
     }
 }
