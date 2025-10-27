@@ -30,7 +30,7 @@ const isDisabled = computed(() => {
             @click="$emit('rescan')">
     {{ t('mainView.processing.rescanFolder') }}
   </n-button>
-  <n-tooltip v-else placement="bottom" trigger="hover">
+  <n-tooltip v-else placement="bottom" trigger="hover" delay="500">
     <template #trigger>
       <n-button class="rescan-folder-btn" size="small" tertiary :disabled="isDisabled"
                 @click="$emit('rescan')">

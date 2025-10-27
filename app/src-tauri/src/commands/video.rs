@@ -1,6 +1,5 @@
 use crate::errors::{AppError, AppErrorCode, AppResult};
 use crate::utils::ffmpeg::{convert_video_with_progress, ConvertOptions};
-use base64::{engine::general_purpose, Engine as _};
 use chrono::{DateTime, Utc};
 use filetime::{set_file_times, FileTime};
 use open;
@@ -8,10 +7,11 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Emitter, State};
-use tokio::io::AsyncReadExt;
-use tokio::process::Command;
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
+
+// import the new thumbnail module
+use crate::commands::thumbnail::{get_video_thumbnail_data_url, ThumbnailParams};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VideoFile {
@@ -19,15 +19,6 @@ pub struct VideoFile {
     pub name: String,
     pub size: u64,
     pub thumbnail: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ThumbnailParams {
-    pub path: String,
-    pub ffmpeg_path: String,
-    pub ffprobe_path: String,
-    pub ffmpeg_use_installed: bool,
-    pub ffprobe_use_installed: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -102,7 +93,10 @@ fn resolve_installed_bin(tool: &str) -> String {
     tool.to_string()
 }
 
-fn resolve_ffmpeg_common(ffmpeg_use_installed: bool, ffmpeg_path: &str) -> AppResult<String> {
+pub(crate) fn resolve_ffmpeg_common(
+    ffmpeg_use_installed: bool,
+    ffmpeg_path: &str,
+) -> AppResult<String> {
     if ffmpeg_use_installed {
         Ok(resolve_installed_bin("ffmpeg"))
     } else if !ffmpeg_path.trim().is_empty() {
@@ -127,10 +121,6 @@ fn resolve_ffmpeg_from_convert(params: &VideoConversionParams) -> AppResult<Stri
     resolve_ffmpeg_common(params.ffmpeg_use_installed, &params.ffmpeg_path)
 }
 
-fn resolve_ffmpeg_from_thumb(params: &ThumbnailParams) -> AppResult<String> {
-    resolve_ffmpeg_common(params.ffmpeg_use_installed, &params.ffmpeg_path)
-}
-
 fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
     if params.ffprobe_use_installed {
         Some(resolve_installed_bin("ffprobe"))
@@ -146,101 +136,14 @@ fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
     }
 }
 
-async fn extract_thumbnail_data_url(
-    ffmpeg_bin: &str,
-    input: &Path,
-    cancel: &CancellationToken,
-) -> AppResult<Option<String>> {
-    if cancel.is_cancelled() {
-        return Ok(None);
-    }
-
-    let mut cmd = Command::new(ffmpeg_bin);
-
-    // Kill the child if the handle is dropped.
-    cmd.kill_on_drop(true);
-
-    // Windows: hide console window.
-    #[cfg(target_os = "windows")]
-    {
-        use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
-
-    cmd.arg("-hide_banner")
-        .arg("-loglevel")
-        .arg("error")
-        .arg("-nostdin")
-        .arg("-y")
-        .arg("-ss")
-        .arg("1")
-        .arg("-i")
-        .arg(input)
-        .arg("-frames:v")
-        .arg("1")
-        .arg("-vf")
-        .arg("scale=320:-2")
-        .arg("-q:v")
-        .arg("5")
-        .arg("-f")
-        .arg("mjpeg")
-        .arg("-");
-
-    // Ensure no stdin; pipe stdout; silence stderr.
-    cmd.stdin(std::process::Stdio::null());
-    cmd.stdout(std::process::Stdio::piped());
-    cmd.stderr(std::process::Stdio::null());
-
-    let mut child = cmd
-        .spawn()
-        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
-
-    // Read stdout concurrently to avoid blocking the child.
-    let Some(mut stdout) = child.stdout.take() else {
-        return Ok(None);
-    };
-    let read_task = tokio::spawn(async move {
-        let mut buf = Vec::new();
-        let _ = stdout.read_to_end(&mut buf).await;
-        buf
-    });
-
-    let cancel_for_wait = cancel.clone();
-    tokio::select! {
-        _ = cancel_for_wait.cancelled() => {
-            let _ = child.kill().await;
-            let _ = child.wait().await;   // reap process
-            let _ = read_task.await;      // join reader task
-            Ok(None)
-        }
-        status = child.wait() => {
-            let status = status.map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
-            let out = read_task.await
-                .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
-            if !status.success() || out.is_empty() {
-                return Ok(None);
-            }
-            let b64 = general_purpose::STANDARD.encode(out);
-            let data_url = format!("data:image/jpeg;base64,{}", b64);
-            Ok(Some(data_url))
-        }
-    }
-}
-
+// Command now delegates to the thumbnail module.
 #[tauri::command]
 pub async fn get_video_thumbnail(
     params: ThumbnailParams,
-    state: State<'_, ConversionController>,
+    state: tauri::State<'_, ConversionController>,
 ) -> AppResult<Option<String>> {
     let cancel = state.new_token().await;
-
-    let ffmpeg_bin = resolve_ffmpeg_from_thumb(&params)?;
-
-    let p = PathBuf::from(&params.path);
-    if !p.exists() || !p.is_file() {
-        return Ok(None);
-    }
-    extract_thumbnail_data_url(&ffmpeg_bin, &p, &cancel).await
+    get_video_thumbnail_data_url(params, &cancel).await
 }
 
 async fn list_video_files(
@@ -307,7 +210,6 @@ fn parse_creation_time(ct: &str) -> Option<std::time::SystemTime> {
     None
 }
 
-// rust
 #[cfg(target_os = "windows")]
 fn set_creation_time_windows(path: &Path, t: std::time::SystemTime) -> Result<(), String> {
     use std::ffi::OsStr;
@@ -350,10 +252,10 @@ fn set_creation_time_windows(path: &Path, t: std::time::SystemTime) -> Result<()
             to_utf16(path.as_os_str()).as_ptr(),
             FILE_WRITE_ATTRIBUTES,
             0,
-            std::ptr::null_mut(), // LPSECURITY_ATTRIBUTES
+            std::ptr::null_mut(),
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
-            std::ptr::null_mut() as HANDLE, // hTemplateFile
+            std::ptr::null_mut() as HANDLE,
         )
     };
     if h == INVALID_HANDLE_VALUE {
@@ -363,7 +265,6 @@ fn set_creation_time_windows(path: &Path, t: std::time::SystemTime) -> Result<()
     let ft = system_time_to_filetime(t);
     let ok = unsafe { SetFileTime(h, &ft, std::ptr::null(), std::ptr::null()) };
 
-    // Always close the handle
     unsafe { CloseHandle(h) };
 
     if ok == 0 {
@@ -508,7 +409,7 @@ pub async fn convert_videos(
             },
             cancel.clone(),
         )
-        .await;
+            .await;
 
         match convert_res {
             Ok(creation_time_str) => {
@@ -539,7 +440,6 @@ pub async fn convert_videos(
                 let _ = app.emit("conversion-progress", &done);
             }
             Err(e) => {
-                // Map cancellation to a thrown error; all other per-file errors are only signaled via events.
                 if e == "Cancelled" {
                     let _ = app.emit(
                         "conversion-progress",
@@ -566,7 +466,7 @@ pub async fn convert_videos(
             }
         }
     }
-    //now just open output folder for the user in a separate window
+
     if let Err(e) = open::that(&output_dir) {
         eprintln!("Failed to open file manager: {}", e);
     }
@@ -590,6 +490,6 @@ pub async fn cancel_conversion(
             status: ConversionStatus::Cancelled,
         },
     )
-    .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
     Ok(())
 }

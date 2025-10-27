@@ -7,7 +7,7 @@ const {t} = useI18n();
 </script>
 
 <template>
-  <n-tooltip placement="top">
+  <n-tooltip placement="top" delay="500">
     <template #trigger>
       <n-button
           class="reset-settings"

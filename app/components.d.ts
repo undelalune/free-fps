@@ -9,7 +9,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
-    BackButton: typeof import('./src/components/buttons/BackButton.vue')['default']
     CloseButton: typeof import('./src/components/buttons/CloseButton.vue')['default']
     FFFoundDialog: typeof import('./src/components/dialogs/FFFoundDialog.vue')['default']
     FFFoundDialogProvider: typeof import('./src/components/dialogs/FFFoundDialogProvider.vue')['default']

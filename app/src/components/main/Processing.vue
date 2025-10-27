@@ -43,7 +43,9 @@ const canConvert = computed(() =>
 
 watch(() => store.processingPos, (newVal) => {
   if (newVal) {
-    scrollToProcessing(newVal);
+    setTimeout(()=> {
+      scrollToProcessing(newVal);
+    }, 1000);
   }
 });
 
