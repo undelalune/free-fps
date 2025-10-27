@@ -87,11 +87,26 @@ impl ConversionController {
     }
 }
 
+#[cfg(target_os = "macos")]
+fn resolve_installed_bin(tool: &str) -> String {
+    for dir in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"] {
+        let p = std::path::Path::new(dir).join(tool);
+        if p.exists() {
+            return p.to_string_lossy().into_owned();
+        }
+    }
+    tool.to_string()
+}
+#[cfg(not(target_os = "macos"))]
+fn resolve_installed_bin(tool: &str) -> String {
+    tool.to_string()
+}
+
 fn resolve_ffmpeg_common(ffmpeg_use_installed: bool, ffmpeg_path: &str) -> AppResult<String> {
     if ffmpeg_use_installed {
-        Ok("ffmpeg".to_string())
+        Ok(resolve_installed_bin("ffmpeg"))
     } else if !ffmpeg_path.trim().is_empty() {
-        let p = Path::new(ffmpeg_path);
+        let p = std::path::Path::new(ffmpeg_path);
         if p.exists() {
             Ok(p.to_string_lossy().to_string())
         } else {
@@ -118,9 +133,9 @@ fn resolve_ffmpeg_from_thumb(params: &ThumbnailParams) -> AppResult<String> {
 
 fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
     if params.ffprobe_use_installed {
-        Some("ffprobe".into())
+        Some(resolve_installed_bin("ffprobe"))
     } else if !params.ffprobe_path.trim().is_empty() {
-        let p = Path::new(&params.ffprobe_path);
+        let p = std::path::Path::new(&params.ffprobe_path);
         if p.exists() {
             Some(p.to_string_lossy().to_string())
         } else {
@@ -131,7 +146,6 @@ fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
     }
 }
 
-// rust
 async fn extract_thumbnail_data_url(
     ffmpeg_bin: &str,
     input: &Path,

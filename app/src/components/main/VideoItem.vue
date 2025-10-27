@@ -11,6 +11,12 @@ const themeVars = useThemeVars();
 const {t} = useI18n();
 const props = defineProps<{ videoItem: VideoFile; processing: boolean, ffParams: FFParams }>();
 
+watch(() => props.processing, (newVal) => {
+  if (newVal) {
+    showPreview.value = false;
+  }
+});
+
 const formatSize = (bytes: number = 0): string => {
   const sizes = ['b', 'kb', 'mb', 'gb'];
   if (bytes === 0) return t('mainView.processing.b', {size: 0});
@@ -65,10 +71,10 @@ const getThumbnail = () => {
     </div>
 
     <div v-if="showPreview"
-         class="video-preview"
-         @mouseleave="showPreview = false">
-      <PreviewNotAvailable v-if="thumbnailError"/>
-      <n-image v-else-if="thumbnail" :src="thumbnail" width="200"  style="border-radius: 8px; height: 100%;" />
+         class="video-preview">
+      <PreviewNotAvailable v-if="thumbnailError" @click.stop="showPreview = false"/>
+      <n-image v-else-if="thumbnail" :src="thumbnail" width="200" style="border-radius: 8px; height: 100%;" preview-disabled
+               @click.stop="showPreview = false"/>
       <n-spin v-else size="tiny" class="preview-spinner" />
     </div>
 

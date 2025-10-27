@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { useThemeVars } from 'naive-ui';
 defineProps<{ title: string }>();
-
-const themeVars = useThemeVars();
 </script>
 
 <template>
