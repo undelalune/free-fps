@@ -25,7 +25,7 @@ Open‑source desktop app and scripts to change a video file frame rate \(FPS\) 
 
 - FFmpeg and FFprobe are required.
     - Uses versions found in system `PATH`, or set explicit paths in app settings.
-    - Get FFmpeg: https://ffmpeg.org/download.html (or see per‑platform guides above).
+    - Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides above).
 
 ## What it does
 
