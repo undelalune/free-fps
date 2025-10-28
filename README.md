@@ -1,5 +1,4 @@
 # Free‑FPS
-by Yury Paulouski
 
 <p align="center">
   <img src="app/src/md/logo.png" alt="Free‑FPS logo" width="120" style="border-radius: 24px;">
@@ -17,9 +16,9 @@ Open‑source desktop app and scripts to change a video file frame rate \(FPS\) 
 - Scripts user guide: [Windows](scripts/win/README.md), [MacOS](scripts/unix/README.md) - you can also run the scripts directly with PowerShell or bash/sh if you don't want to use the desktop app.
 
 - Downloads
-    - Latest release: https://github.com/undelalune/free-fps/releases/latest
+    - Latest release: https://github.com/undelalune/free-fps/releases/latest/
     - All releases: https://github.com/undelalune/free-fps/releases
-    - Windows: Installer and Portable \(Portable recommended\)
+    - Windows: Installer and Portable \(Portable recommended - free-fps.exe file \)
     - macOS: Universal build
 
 ## Requirements
