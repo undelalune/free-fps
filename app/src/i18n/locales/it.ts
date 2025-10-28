@@ -61,7 +61,7 @@ export default {
             setVideoQualityInfo: "Valore inferiore = qualità superiore (e file più grande). 0 = senza perdita, 51 = qualità minima.",
             customVideoQualityInfo: "Se disabilitato, la qualità video sarà impostata automaticamente in base alla qualità di input. Le regolazioni manuali possono portare a file più grandi.",
             cpuLimit: "Limite CPU:",
-            cpuLimitInfo: "Limita i core CPU usati per mantenere reattività.",
+            cpuLimitInfo: "Limita i core CPU per mantenere il sistema reattivo.",
             ffmpegNotSet: "Imposta prima un percorso valido per ffmpeg."
         },
         processing: {
