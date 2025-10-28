@@ -198,7 +198,8 @@ async fn extract_thumbnail_system(
     Ok(Some(format!("data:{};base64,{}", content_type, b64)))
 }
 
-// System thumbnail extraction (macOS)
+// rust
+// `src-tauri/src/commands/thumbnail.rs` (macOS)
 #[cfg(target_os = "macos")]
 async fn extract_thumbnail_system(
     input: &std::path::Path,
@@ -209,8 +210,9 @@ async fn extract_thumbnail_system(
     use base64::{engine::general_purpose, Engine as _};
     use std::fs;
     use std::path::PathBuf;
+    use std::process::{Command as StdCommand, Stdio};
+    use std::time::{Duration, Instant};
     use tokio::io::AsyncReadExt;
-    use tokio::process::Command;
 
     if cancel.is_cancelled() {
         return Ok(None);
@@ -228,37 +230,61 @@ async fn extract_thumbnail_system(
     );
     out_png.set_extension("png");
 
-    let mut cmd = Command::new("/usr/bin/qlmanage");
-    cmd.kill_on_drop(true);
-    #[cfg(target_os = "windows")]
-    {
-        use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
-
+    let mut cmd = StdCommand::new("/usr/bin/qlmanage");
     cmd.arg("-t")
         .arg("-s")
         .arg(size.to_string())
         .arg("-o")
         .arg(&tmp_dir)
         .arg(input)
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null());
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+
+    // Make a new process group so we can kill children too.
+    #[cfg(unix)]
+    unsafe {
+        use std::os::unix::process::CommandExt;
+        cmd.pre_exec(|| {
+            libc::setpgid(0, 0);
+            Ok(())
+        });
+    }
 
     let mut child = cmd
         .spawn()
         .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
 
-    tokio::select! {
-        _ = cancel.cancelled() => {
-            let _ = child.kill().await;
-            let _ = child.wait().await;
-            return Ok(None);
+    let pid = child.id();
+    let cancel2 = cancel.clone();
+
+    // Hard wall‑clock timeout: 1s
+    let finished_ok = tokio::task::spawn_blocking(move || {
+        let start = Instant::now();
+        loop {
+            if cancel2.is_cancelled() || start.elapsed() > Duration::from_secs(1) {
+                #[cfg(unix)]
+                unsafe {
+                    // Kill the whole process group: -pid
+                    libc::kill(-(pid as i32), libc::SIGKILL);
+                }
+                let _ = child.wait();
+                return false;
+            }
+            match child.try_wait() {
+                Ok(Some(status)) => return status.success(),
+                Ok(None) => {
+                    std::thread::sleep(Duration::from_millis(25));
+                }
+                Err(_) => return false,
+            }
         }
-        status = child.wait() => {
-            let _ = status.map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
-        }
+    })
+        .await
+        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+
+    if !finished_ok {
+        return Ok(None);
     }
 
     if !out_png.exists() {
@@ -287,6 +313,7 @@ async fn extract_thumbnail_system(
     let mut f = tokio::fs::File::open(&out_png)
         .await
         .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+
     let mut buf = Vec::new();
     f.read_to_end(&mut buf)
         .await
@@ -325,8 +352,8 @@ pub async fn get_video_thumbnail_data_url(
         let sys_res = tauri::async_runtime::spawn_blocking(move || {
             tauri::async_runtime::block_on(extract_thumbnail_system(&path_cloned, 320, &cancel2))
         })
-            .await
-            .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+        .await
+        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
 
         if let Ok(Some(sys_thumb)) = sys_res {
             return Ok(Some(sys_thumb));
