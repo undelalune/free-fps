@@ -25,9 +25,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Node deps (app)
+        working-directory: app
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Build and release with Tauri
         uses: tauri-apps/tauri-action@v0
