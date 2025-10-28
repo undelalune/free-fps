@@ -1,4 +1,5 @@
 # Free‑FPS
+by Yury Paulouski
 
 <p align="center">
   <img src="app/src/md/logo.png" alt="Free‑FPS logo" width="120" style="border-radius: 24px;">
