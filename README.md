@@ -9,8 +9,8 @@ Open‑source desktop app and scripts to change a video file frame rate \(FPS\) 
 ## Quick links
 
 - App user guide: 
-  [Беларуская](app/src/md/by.MD), [Deutsch](app/src/md/de.MD), [English](app/src/md/en.MD), [Español](app/src/md/es.MD)
-  [Français](app/src/md/fr.MD), [Italiano](app/src/md/it.MD), [Polski](app/src/md/pl.MD), [Português](app/src/md/pt.MD)
+  [Беларуская](app/src/md/by.MD), [Deutsch](app/src/md/de.MD), [English](app/src/md/en.MD), [Español](app/src/md/es.MD),
+  [Français](app/src/md/fr.MD), [Italiano](app/src/md/it.MD), [Polski](app/src/md/pl.MD), [Português](app/src/md/pt.MD),
   [Русский](app/src/md/ru.MD), [Українська](app/src/md/ua.MD)
 
 - Scripts user guide: [Windows](scripts/win/README.md), [MacOS](scripts/unix/README.md) - you can also run the scripts directly with PowerShell or bash/sh if you don't want to use the desktop app.
@@ -73,4 +73,4 @@ Open‑source desktop app and scripts to change a video file frame rate \(FPS\) 
 - Commands:
     - Install: `npm i`
     - Dev: `npm run tauri:dev`
-    - Build: `npm run tauri:build` or `tauri:dev:mac` on macOS
+    - Build: `npm run tauri:build`

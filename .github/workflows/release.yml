@@ -53,12 +53,26 @@ jobs:
           releaseDraft: false
           prerelease: false
 
+      - name: Rename portable exe (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $pkg = Get-Content 'app/package.json' -Raw | ConvertFrom-Json
+          $version = $pkg.version
+          $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'arm64' } else { 'x64' }
+          $src = 'app\src-tauri\target\release\free-fps.exe'
+          if (-not (Test-Path $src)) { throw "Portable exe not found: $src" }
+          $dstName = "Free.FPS_${version}_${arch}_portable.exe"
+          $dst = Join-Path 'app\src-tauri\target\release' $dstName
+          Move-Item -Path $src -Destination $dst -Force
+          echo "PORTABLE_PATH=$dst" >> $env:GITHUB_ENV
+
       - name: Attach portable exe (Windows)
         if: matrix.os == 'windows-latest'
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: app/src-tauri/target/release/*.exe
+          files: ${{ env.PORTABLE_PATH }}
           tag_name: ${{ github.ref_name }}
           fail_on_unmatched_files: true
