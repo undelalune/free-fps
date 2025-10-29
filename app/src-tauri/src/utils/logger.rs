@@ -1,4 +1,3 @@
-// rust
 use chrono::Utc;
 use std::{
     path::PathBuf,

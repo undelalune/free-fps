@@ -7,6 +7,8 @@ use std::process::Stdio;
 use tokio::{fs, io::AsyncBufReadExt, process::Command};
 use tokio_util::sync::CancellationToken;
 
+// ===== ffprobe parsing =====
+
 #[derive(Debug, Deserialize)]
 struct FfprobeJson {
     streams: Option<Vec<ProbeStream>>,
@@ -37,6 +39,8 @@ pub struct VideoProbe {
     pub creation_time: Option<String>,
 }
 
+// ===== Utilities =====
+
 fn parse_rational(r: &str) -> Option<f64> {
     if let Some((n, d)) = r.split_once('/') {
         let n: f64 = n.trim().parse().ok()?;
@@ -48,13 +52,34 @@ fn parse_rational(r: &str) -> Option<f64> {
     r.trim().parse::<f64>().ok()
 }
 
+fn system_time_to_rfc3339_z(t: std::time::SystemTime) -> String {
+    let dt: DateTime<Utc> = t.into();
+    dt.to_rfc3339()
+}
+
+// Used only for the logged command preview
+fn quote_if_needed(s: &str) -> String {
+    if s.contains(' ') || s.contains('"') {
+        format!(r#""{}""#, s.replace('"', "\\\""))
+    } else {
+        s.to_string()
+    }
+}
+
+#[cfg(windows)]
+fn apply_no_window(cmd: &mut Command) {
+    use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
+    cmd.creation_flags(CREATE_NO_WINDOW);
+}
+#[cfg(not(windows))]
+fn apply_no_window(_: &mut Command) {}
+
+// ===== Probe via ffprobe/ffmpeg =====
+
 async fn probe_with_ffprobe(ffprobe_bin: &str, input: &str) -> Result<VideoProbe, String> {
     let mut cmd = Command::new(ffprobe_bin);
-    #[cfg(windows)]
-    {
-        use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
+    apply_no_window(&mut cmd);
+
     let output = cmd
         .args(&[
             "-v",
@@ -108,11 +133,8 @@ async fn probe_with_ffprobe(ffprobe_bin: &str, input: &str) -> Result<VideoProbe
 
 async fn probe_with_ffmpeg(ffmpeg_bin: &str, input: &str) -> Result<VideoProbe, String> {
     let mut cmd = Command::new(ffmpeg_bin);
-    #[cfg(windows)]
-    {
-        use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
+    apply_no_window(&mut cmd);
+
     let output = cmd
         .args(&["-i", input, "-hide_banner"])
         .stderr(Stdio::piped())
@@ -160,15 +182,17 @@ pub async fn probe_video(
     probe_with_ffmpeg(ffmpeg_bin, input).await
 }
 
+// ===== Conversion helpers =====
+
 fn threads_from_cpu_limit(cpu_limit: Option<u8>) -> usize {
-    cpu_limit
-        .map(|p| {
-            (num_cpus::get() as f32 * (p as f32 / 100.0))
-                .ceil()
-                .max(1.0) as usize
-        })
-        .filter(|t| *t > 0)
-        .unwrap_or_else(|| num_cpus::get())
+    match cpu_limit {
+        Some(pct) => {
+            let pct = pct.clamp(1, 100) as f32 / 100.0;
+            let n = ((num_cpus::get() as f32) * pct).floor() as usize;
+            n.max(1)
+        }
+        None => num_cpus::get(),
+    }
 }
 
 fn build_atempo_chain(atempo: f64) -> String {
@@ -208,18 +232,271 @@ fn parse_progress_time(key: &str, val: &str) -> Option<f64> {
     None
 }
 
-fn system_time_to_rfc3339_z(t: std::time::SystemTime) -> String {
-    let dt: DateTime<Utc> = t.into();
-    dt.to_rfc3339()
+struct Timings {
+    setpts: f64,
+    atempo: f64,
+    new_duration: f64,
+    progress_total_secs: f64,
+    total_frames_est: u64,
 }
 
-fn quote_if_needed(s: &str) -> String {
-    if s.contains(' ') || s.contains('"') {
-        format!(r#""{}""#, s.replace('"', "\\\""))
-    } else {
-        s.to_string()
+async fn compute_timings(probe: &VideoProbe, target_fps: f32) -> Result<Timings, AppError> {
+    let src_fps = probe.fps;
+    let tfps = target_fps as f64;
+
+    if tfps <= 0.0 || src_fps <= 0.0 {
+        let _ = log_error("InvalidFps", &format!("src_fps={} tfps={}", src_fps, tfps)).await;
+        return Err(AppError::code_only(AppErrorCode::InvalidFps));
+    }
+
+    let setpts = (src_fps / tfps).max(0.00001);
+    let atempo = (tfps / src_fps).max(0.00001);
+
+    let progress_total_secs = probe.duration_sec.max(0.000001);
+    let total_frames_est = (probe.duration_sec * src_fps).round().max(1.0) as u64;
+    let new_duration = probe.duration_sec * (src_fps / tfps);
+
+    Ok(Timings {
+        setpts,
+        atempo,
+        new_duration,
+        progress_total_secs,
+        total_frames_est,
+    })
+}
+
+async fn build_video_args(
+    input: &str,
+    use_custom_quality: bool,
+    crf: u8,
+    new_duration: f64,
+) -> Result<Vec<String>, AppError> {
+    if use_custom_quality {
+        if crf > 51 {
+            let _ = log_error("VideoQualityOutOfRange", &format!("crf={}", crf)).await;
+            return Err(AppError::code_only(AppErrorCode::VideoQualityOutOfRange));
+        }
+        return Ok(vec![
+            "-c:v".into(),
+            "libx264".into(),
+            "-crf".into(),
+            crf.to_string(),
+            "-preset".into(),
+            "slow".into(),
+            "-pix_fmt".into(),
+            "yuv420p".into(),
+        ]);
+    }
+
+    // Derive approximate target bitrate to preserve size
+    let meta = fs::metadata(input)
+        .await
+        .map_err(|e| AppError::new(AppErrorCode::ReadMetadataFailed, e.to_string()))?;
+    let size_bytes = meta.len() as f64;
+    if size_bytes <= 0.0 {
+        let _ = log_error(
+            "EmptyInputFile",
+            &format!("input={} size={}", input, size_bytes),
+        )
+        .await;
+        return Err(AppError::code_only(AppErrorCode::EmptyInputFile));
+    }
+    if new_duration <= 0.0 {
+        let _ = log_error(
+            "InvalidNewDuration",
+            &format!("input={} new_duration={}", input, new_duration),
+        )
+        .await;
+        return Err(AppError::code_only(AppErrorCode::InvalidNewDuration));
+    }
+
+    let target_kbps = ((size_bytes * 8.0) / new_duration / 1000.0)
+        .round()
+        .max(1.0) as u64;
+
+    Ok(vec![
+        "-b:v".into(),
+        format!("{}k", target_kbps),
+        "-c:v".into(),
+        "libx264".into(),
+        "-preset".into(),
+        "slow".into(),
+        "-pix_fmt".into(),
+        "yuv420p".into(),
+    ])
+}
+
+async fn build_audio_args(
+    keep_audio: bool,
+    audio_bitrate: u32,
+    atempo: f64,
+) -> Result<Vec<String>, AppError> {
+    if !keep_audio {
+        return Ok(vec!["-an".into()]);
+    }
+    if audio_bitrate == 0 {
+        let _ = log_error("AudioBitrateInvalid", "keep_audio=true with bitrate=0").await;
+        return Err(AppError::code_only(AppErrorCode::AudioBitrateInvalid));
+    }
+    let chain = build_atempo_chain(atempo);
+    Ok(vec![
+        "-c:a".into(),
+        "aac".into(),
+        "-b:a".into(),
+        format!("{}k", audio_bitrate),
+        "-af".into(),
+        chain,
+    ])
+}
+
+async fn creation_time_for_input(probe: &VideoProbe, input: &str) -> Option<String> {
+    if let Some(ct) = &probe.creation_time {
+        return Some(ct.clone());
+    }
+    fs::metadata(input)
+        .await
+        .ok()
+        .and_then(|m| m.modified().ok())
+        .map(system_time_to_rfc3339_z)
+}
+
+fn build_command_preview(
+    ffmpeg_bin: &str,
+    input: &str,
+    output: &str,
+    target_fps: f32,
+    setpts: f64,
+    threads: usize,
+    video_args: &[String],
+    audio_args: &[String],
+    meta_creation_time: Option<&String>,
+) -> String {
+    let mut parts: Vec<String> = Vec::new();
+    parts.push(ffmpeg_bin.to_string());
+    parts.push("-y".to_string());
+    parts.push("-i".to_string());
+    parts.push(quote_if_needed(input));
+    parts.push("-vf".to_string());
+    parts.push(format!("setpts={:.5}*PTS", setpts));
+    parts.push("-r".to_string());
+    parts.push(target_fps.to_string());
+    parts.extend(video_args.iter().cloned());
+    parts.extend(audio_args.iter().cloned());
+    parts.push("-threads".to_string());
+    parts.push(threads.to_string());
+    if let Some(ct) = meta_creation_time {
+        parts.push("-metadata".to_string());
+        parts.push(format!(r#"creation_time={}"#, ct));
+    }
+    parts.push("-progress".to_string());
+    parts.push("pipe:1".to_string());
+    parts.push("-nostats".to_string());
+    parts.push(quote_if_needed(output));
+    parts.join(" ")
+}
+
+fn build_ffmpeg_command(
+    ffmpeg_bin: &str,
+    input: &str,
+    output: &str,
+    target_fps: f32,
+    setpts: f64,
+    threads: usize,
+    video_args: Vec<String>,
+    audio_args: Vec<String>,
+    meta_creation_time: Option<String>,
+) -> Command {
+    let mut cmd = Command::new(ffmpeg_bin);
+    apply_no_window(&mut cmd);
+
+    cmd.arg("-y")
+        .arg("-i")
+        .arg(input)
+        .arg("-vf")
+        .arg(format!("setpts={:.5}*PTS", setpts))
+        .arg("-r")
+        .arg(format!("{}", target_fps))
+        .args(video_args)
+        .args(audio_args)
+        .arg("-threads")
+        .arg(threads.to_string());
+
+    if let Some(ct) = meta_creation_time {
+        cmd.arg("-metadata").arg(format!(r#"creation_time={}"#, ct));
+    }
+
+    cmd.arg("-progress")
+        .arg("pipe:1")
+        .arg("-nostats")
+        .arg(output)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null());
+
+    cmd
+}
+
+struct ProgressTracker {
+    last_pct: f32,
+    last_frame: Option<u64>,
+    last_secs: Option<f64>,
+    total_frames_est: u64,
+    total_secs: f64,
+}
+
+impl ProgressTracker {
+    fn new(total_frames_est: u64, total_secs: f64) -> Self {
+        Self {
+            last_pct: 0.0,
+            last_frame: None,
+            last_secs: None,
+            total_frames_est,
+            total_secs,
+        }
+    }
+
+    fn update_kv(&mut self, key: &str, val: &str) -> Option<f32> {
+        match key {
+            "frame" => {
+                if let Ok(f) = val.parse::<u64>() {
+                    self.last_frame = Some(f);
+                }
+            }
+            "out_time_ms" | "out_time_us" | "out_time" => {
+                if let Some(s) = parse_progress_time(key, val) {
+                    self.last_secs = Some(s);
+                }
+            }
+            _ => {}
+        }
+        self.emit()
+    }
+
+    fn emit(&mut self) -> Option<f32> {
+        let mut candidates: Vec<f64> = Vec::new();
+        if let Some(fr) = self.last_frame {
+            let pf = (fr as f64 / self.total_frames_est as f64).clamp(0.0, 0.999);
+            candidates.push(pf);
+        }
+        if let Some(s) = self.last_secs {
+            let pt = (s / self.total_secs).clamp(0.0, 0.999);
+            candidates.push(pt);
+        }
+        if candidates.is_empty() {
+            return None;
+        }
+        let p01 = candidates.into_iter().fold(1.0, f64::min) as f32;
+        let pct = (p01 * 100.0).max(self.last_pct);
+        if pct > self.last_pct {
+            self.last_pct = pct;
+            Some(pct)
+        } else {
+            None
+        }
     }
 }
+
+// ===== Public API =====
 
 pub struct ConvertOptions<'a> {
     pub ffmpeg_bin: &'a str,
@@ -243,17 +520,16 @@ async fn convert_video_with_progress_impl<F>(
 where
     F: FnMut(f32) + Send + 'static,
 {
-    // ensure log rotation is checked
     rotate_log_if_needed().await;
 
-    // Probe (map to ffprobe/ffmpeg related codes).
+    // Probe
     let probe = match probe_video(opts.ffprobe_bin, opts.ffmpeg_bin, opts.input).await {
         Ok(p) => p,
         Err(e) => {
             let code = if opts.ffprobe_bin.is_some() {
                 AppErrorCode::FfprobeFailed
             } else {
-                AppErrorCode::FfmpegFailed
+                AppErrorCode::FfprobeFailed
             };
             let ctx = format!("probe failed for input {}: {}", opts.input, e);
             let _ = log_error("ProbeFailed", &ctx).await;
@@ -261,175 +537,51 @@ where
         }
     };
 
-    // Compute timings
-    let src_fps = probe.fps;
-    let tfps = opts.target_fps as f64;
-    if tfps <= 0.0 || src_fps <= 0.0 {
-        let _ = log_error("InvalidFps", &format!("src_fps={} tfps={}", src_fps, tfps)).await;
-        return Err(AppError::code_only(AppErrorCode::InvalidFps));
-    }
-    let setpts = (src_fps / tfps).max(0.00001);
-    let atempo = (tfps / src_fps).max(0.00001);
+    // Timings
+    let timings = compute_timings(&probe, opts.target_fps).await?;
 
-    // Use original duration for time-based progress
-    let progress_total_secs = probe.duration_sec.max(0.000001);
+    // Args
+    let video_args = build_video_args(
+        opts.input,
+        opts.use_custom_video_quality,
+        opts.video_quality,
+        timings.new_duration,
+    )
+    .await?;
 
-    // Estimate total frames (works well even with setpts + -r)
-    let total_frames_est = (probe.duration_sec * src_fps).round().max(1.0) as u64;
+    let audio_args = build_audio_args(opts.keep_audio, opts.audio_bitrate, timings.atempo).await?;
 
-    // Video args
-    let new_duration = probe.duration_sec * (src_fps / tfps);
-    let mut video_args: Vec<String> = Vec::new();
-    if opts.use_custom_video_quality {
-        // Validate CRF range 0..=51
-        if opts.video_quality > 51 {
-            let _ = log_error(
-                "VideoQualityOutOfRange",
-                &format!("quality={}", opts.video_quality),
-            )
-            .await;
-            return Err(AppError::code_only(AppErrorCode::VideoQualityOutOfRange));
-        }
-        video_args.extend([
-            "-c:v".into(),
-            "libx264".into(),
-            "-crf".into(),
-            opts.video_quality.to_string(),
-            "-preset".into(),
-            "slow".into(),
-            "-pix_fmt".into(),
-            "yuv420p".into(),
-        ]);
-    } else {
-        // Ensure input metadata is available and file is not empty
-        let meta = fs::metadata(opts.input)
-            .await
-            .map_err(|e| AppError::new(AppErrorCode::ReadMetadataFailed, e.to_string()))?;
-        let size_bytes = meta.len() as f64;
-        if size_bytes <= 0.0 {
-            let _ = log_error(
-                "EmptyInputFile",
-                &format!("input={} size={}", opts.input, size_bytes),
-            )
-            .await;
-            return Err(AppError::code_only(AppErrorCode::EmptyInputFile));
-        }
+    let threads = threads_from_cpu_limit(opts.cpu_limit);
+    let meta_creation_time = creation_time_for_input(&probe, opts.input).await;
 
-        if new_duration <= 0.0 {
-            let _ = log_error(
-                "InvalidNewDuration",
-                &format!("input={} new_duration={}", opts.input, new_duration),
-            )
-            .await;
-            return Err(AppError::code_only(AppErrorCode::InvalidNewDuration));
-        }
+    // Preview + log
+    let preview = build_command_preview(
+        opts.ffmpeg_bin,
+        opts.input,
+        opts.output,
+        opts.target_fps,
+        timings.setpts,
+        threads,
+        &video_args,
+        &audio_args,
+        meta_creation_time.as_ref(),
+    );
+    let _ = log_ffmpeg_command(&preview).await;
 
-        let target_kbps = ((size_bytes * 8.0) / new_duration / 1000.0)
-            .round()
-            .max(1.0) as u64;
-        video_args.extend([
-            "-b:v".into(),
-            format!("{}k", target_kbps),
-            "-c:v".into(),
-            "libx264".into(),
-            "-preset".into(),
-            "slow".into(),
-            "-pix_fmt".into(),
-            "yuv420p".into(),
-        ]);
-    }
+    // Command
+    let mut cmd = build_ffmpeg_command(
+        opts.ffmpeg_bin,
+        opts.input,
+        opts.output,
+        opts.target_fps,
+        timings.setpts,
+        threads,
+        video_args,
+        audio_args,
+        meta_creation_time.clone(),
+    );
 
-    // Validate audio bitrate when audio is kept
-    if opts.keep_audio && opts.audio_bitrate == 0 {
-        let _ = log_error("AudioBitrateInvalid", &format!("input={}", opts.input)).await;
-        return Err(AppError::code_only(AppErrorCode::AudioBitrateInvalid));
-    }
-    // Audio args
-    let mut audio_args: Vec<String> = Vec::new();
-    if opts.keep_audio {
-        let chain = build_atempo_chain(atempo);
-        audio_args.extend([
-            "-c:a".into(),
-            "aac".into(),
-            "-b:a".into(),
-            format!("{}k", opts.audio_bitrate),
-            "-af".into(),
-            chain,
-        ]);
-    } else {
-        audio_args.push("-an".into());
-    }
-
-    // Threads
-    let threads_arg = threads_from_cpu_limit(opts.cpu_limit);
-
-    // Creation time for metadata
-    let meta_creation_time = if let Some(ct) = &probe.creation_time {
-        Some(ct.clone())
-    } else {
-        fs::metadata(opts.input)
-            .await
-            .ok()
-            .and_then(|m| m.modified().ok())
-            .map(system_time_to_rfc3339_z)
-    };
-
-    // Build command preview for logging (conservative).
-    let mut parts: Vec<String> = Vec::new();
-    parts.push(opts.ffmpeg_bin.to_string());
-    parts.push("-y".to_string());
-    parts.push("-i".to_string());
-    parts.push(quote_if_needed(opts.input));
-    parts.push("-vf".to_string());
-    parts.push(format!("setpts={:.5}*PTS", setpts));
-    parts.push("-r".to_string());
-    parts.push(opts.target_fps.to_string());
-    parts.extend(video_args.clone());
-    parts.extend(audio_args.clone());
-    parts.push("-threads".to_string());
-    parts.push(threads_arg.to_string());
-    if let Some(ct) = &meta_creation_time {
-        parts.push("-metadata".to_string());
-        parts.push(format!(r#"creation_time={}"#, ct));
-    }
-    parts.push("-progress".to_string());
-    parts.push("pipe:1".to_string());
-    parts.push("-nostats".to_string());
-    parts.push(quote_if_needed(opts.output));
-    let cmd_preview = parts.join(" ");
-    // Log ffmpeg command
-    let _ = log_ffmpeg_command(&cmd_preview).await;
-
-    // Build actual Command
-    let mut cmd = Command::new(opts.ffmpeg_bin);
-    #[cfg(windows)]
-    {
-        use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
-    cmd.arg("-y")
-        .arg("-i")
-        .arg(opts.input)
-        .arg("-vf")
-        .arg(format!("setpts={:.5}*PTS", setpts))
-        .arg("-r")
-        .arg(format!("{}", opts.target_fps))
-        .args(video_args)
-        .args(audio_args)
-        .arg("-threads")
-        .arg(threads_arg.to_string());
-
-    if let Some(ct) = &meta_creation_time {
-        cmd.arg("-metadata").arg(format!(r#"creation_time={}"#, ct));
-    }
-
-    cmd.arg("-progress")
-        .arg("pipe:1")
-        .arg("-nostats")
-        .arg(opts.output)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null());
-
+    // Spawn
     let mut child = match cmd.spawn() {
         Ok(c) => c,
         Err(e) => {
@@ -443,77 +595,36 @@ where
     };
 
     let mut stdout = tokio::io::BufReader::new(child.stdout.take().unwrap()).lines();
-
     on_progress(0.0);
 
-    // Trackers
-    let mut last_pct = 0.0_f32;
-    let mut last_frame: Option<u64> = None;
-    let mut last_secs: Option<f64> = None;
-
-    // Helper to compute conservative progress from available signals
-    let emit_progress =
-        |on_progress: &mut F, last_pct: &mut f32, frame: Option<u64>, secs: Option<f64>| {
-            let mut candidates: Vec<f64> = Vec::new();
-            if let Some(fr) = frame {
-                let pf = (fr as f64 / total_frames_est as f64).clamp(0.0, 0.999);
-                candidates.push(pf);
-            }
-            if let Some(s) = secs {
-                let pt = (s / progress_total_secs).clamp(0.0, 0.999);
-                candidates.push(pt);
-            }
-
-            if candidates.is_empty() {
-                return;
-            }
-
-            // Be conservative: take the minimum to prevent early 100%
-            let p01 = candidates.into_iter().fold(1.0, f64::min) as f32;
-            let pct = (p01 * 100.0).max(*last_pct); // monotonic
-
-            // Emit only on increase to reduce noise
-            if pct > *last_pct {
-                *last_pct = pct;
-                on_progress(pct);
-            }
-        };
+    // Progress tracking
+    let mut tracker = ProgressTracker::new(timings.total_frames_est, timings.progress_total_secs);
 
     loop {
         tokio::select! {
             _ = cancel.cancelled() => {
                 let _ = child.kill().await;
+                let _ = child.wait().await;
+                let _ = log_error("Cancelled", "conversion cancelled by user").await;
                 return Err(AppError::code_only(AppErrorCode::Cancelled));
             }
             line = stdout.next_line() => {
                 match line {
                     Ok(Some(l)) => {
                         if let Some((k,v)) = l.split_once('=') {
-                            match k {
-                                "frame" => {
-                                    if let Ok(fr) = v.trim().parse::<u64>() {
-                                        last_frame = Some(fr);
-                                        emit_progress(&mut on_progress, &mut last_pct, last_frame, last_secs);
-                                    }
-                                }
-                                "out_time_ms" | "out_time_us" | "out_time" => {
-                                    if let Some(secs) = parse_progress_time(k, v) {
-                                        last_secs = Some(secs);
-                                        emit_progress(&mut on_progress, &mut last_pct, last_frame, last_secs);
-                                    }
-                                }
-                                "progress" if v == "end" => {
-                                    on_progress(100.0);
-                                }
-                                _ => {}
+                            if let Some(pct) = tracker.update_kv(k.trim(), v.trim()) {
+                                on_progress(pct);
+                            }
+                            // ffmpeg emits "progress=end"
+                            if k.trim() == "progress" && v.trim() == "end" {
+                                break;
                             }
                         }
                     }
                     Ok(None) => break,
                     Err(e) => {
-                        let _ = child.kill().await;
-                        let _ = log_error("FfmpegReadFailed", &format!("ffmpeg read failed: {e}")).await;
-                        return Err(AppError::new(AppErrorCode::Io, format!("ffmpeg read failed: {e}")));
+                        let _ = log_error("ProgressReadFailed", &e.to_string()).await;
+                        break;
                     }
                 }
             }
@@ -531,7 +642,7 @@ where
         let emsg = format!(
             "ffmpeg failed with code {:?} (cmd: {})",
             status.code(),
-            cmd_preview
+            preview
         );
         let _ = log_error("FfmpegFailed", &emsg).await;
         Err(AppError::new(

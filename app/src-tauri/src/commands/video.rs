@@ -10,8 +10,9 @@ use tauri::{AppHandle, Emitter, State};
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 
-// import the new thumbnail module
 use crate::commands::thumbnail::{get_video_thumbnail_data_url, ThumbnailParams};
+
+use crate::utils::bins::resolve_bin;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VideoFile {
@@ -77,20 +78,8 @@ impl ConversionController {
         }
     }
 }
-
-#[cfg(target_os = "macos")]
 fn resolve_installed_bin(tool: &str) -> String {
-    for dir in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"] {
-        let p = std::path::Path::new(dir).join(tool);
-        if p.exists() {
-            return p.to_string_lossy().into_owned();
-        }
-    }
-    tool.to_string()
-}
-#[cfg(not(target_os = "macos"))]
-fn resolve_installed_bin(tool: &str) -> String {
-    tool.to_string()
+    resolve_bin(None, tool)
 }
 
 pub(crate) fn resolve_ffmpeg_common(
@@ -136,7 +125,6 @@ fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
     }
 }
 
-// Command now delegates to the thumbnail module.
 #[tauri::command]
 pub async fn get_video_thumbnail(
     params: ThumbnailParams,
@@ -409,7 +397,7 @@ pub async fn convert_videos(
             },
             cancel.clone(),
         )
-            .await;
+        .await;
 
         match convert_res {
             Ok(creation_time_str) => {
@@ -490,6 +478,6 @@ pub async fn cancel_conversion(
             status: ConversionStatus::Cancelled,
         },
     )
-        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+    .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
     Ok(())
 }

@@ -1,4 +1,3 @@
-// src-tauri/src/commands/thumbnail.rs
 use crate::errors::{AppError, AppErrorCode, AppResult};
 use base64::{engine::general_purpose, Engine as _};
 use serde::{Deserialize, Serialize};
@@ -6,6 +5,8 @@ use std::path::{Path, PathBuf};
 use tokio::io::AsyncReadExt;
 use tokio::process::Command;
 use tokio_util::sync::CancellationToken;
+
+use crate::utils::proc::apply_no_window_tokio;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ThumbnailParams {
@@ -17,11 +18,9 @@ pub struct ThumbnailParams {
 }
 
 fn resolve_ffmpeg_from_thumb(params: &ThumbnailParams) -> AppResult<String> {
-    // Reuse the shared resolver from `video.rs`.
     crate::commands::video::resolve_ffmpeg_common(params.ffmpeg_use_installed, &params.ffmpeg_path)
 }
 
-// FFMPEG extraction (fallback)
 async fn extract_thumbnail_data_url(
     ffmpeg_bin: &str,
     input: &Path,
@@ -33,12 +32,7 @@ async fn extract_thumbnail_data_url(
 
     let mut cmd = Command::new(ffmpeg_bin);
     cmd.kill_on_drop(true);
-
-    #[cfg(target_os = "windows")]
-    {
-        use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
+    apply_no_window_tokio(&mut cmd);
 
     cmd.arg("-hide_banner")
         .arg("-loglevel")
@@ -198,8 +192,6 @@ async fn extract_thumbnail_system(
     Ok(Some(format!("data:{};base64,{}", content_type, b64)))
 }
 
-// rust
-// `src-tauri/src/commands/thumbnail.rs` (macOS)
 #[cfg(target_os = "macos")]
 async fn extract_thumbnail_system(
     input: &std::path::Path,
@@ -334,7 +326,7 @@ async fn extract_thumbnail_system(
     Ok(None)
 }
 
-// Public facade used by the command in `video.rs`.
+
 pub async fn get_video_thumbnail_data_url(
     params: ThumbnailParams,
     cancel: &CancellationToken,

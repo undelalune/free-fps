@@ -6,28 +6,9 @@ Open‑source desktop app and scripts to change a video file frame rate \(FPS\) 
 It does not add effects or alter content; it adjusts playback speed and, if needed, re‑encodes audio. <br/>
 Originals are never modified.
 
+
+Download [latest release](https://github.com/undelalune/free-fps/releases/latest/) for Windows / macOS
 <br/><br/>
-
-## Requirements
-> FFmpeg and FFprobe are required!
-   - Uses versions found in system `PATH`, or set explicit paths in app settings, i.e. you don't have to install it.
-   - Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides below).
-      
-
-## Quick links
-
-- App user guide: 
-  [Беларуская](app/src/md/by.MD), [Deutsch](app/src/md/de.MD), [English](app/src/md/en.MD), [Español](app/src/md/es.MD),
-  [Français](app/src/md/fr.MD), [Italiano](app/src/md/it.MD), [Polski](app/src/md/pl.MD), [Português](app/src/md/pt.MD),
-  [Русский](app/src/md/ru.MD), [Українська](app/src/md/ua.MD)
-
-- Scripts user guide: [Windows](scripts/win/README.md), [MacOS](scripts/unix/README.md) - you can also run the scripts directly with PowerShell or bash/sh if you don't want to use the desktop app.
-
-- Downloads
-    - Latest release: https://github.com/undelalune/free-fps/releases/latest/
-    - All releases: https://github.com/undelalune/free-fps/releases
-    - Windows: Installer and Portable \(Portable recommended - free-fps.exe file \)
-    - macOS: Universal build
 
 ## What it does
 
@@ -35,6 +16,23 @@ Originals are never modified.
 - Keeps or re‑encodes audio if requested.
 - No effects, no content edits.
 - Writes results to a separate output folder by default.
+
+
+## Requirements
+> FFmpeg and FFprobe are required!
+- Uses versions found in system `PATH`, or set explicit paths in app settings, i.e. you don't have to install it.
+- Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides below).
+
+
+## Quick links
+
+- App user guide:
+  [Беларуская](app/src/md/by.MD), [Deutsch](app/src/md/de.MD), [English](app/src/md/en.MD), [Español](app/src/md/es.MD),
+  [Français](app/src/md/fr.MD), [Italiano](app/src/md/it.MD), [Polski](app/src/md/pl.MD), [Português](app/src/md/pt.MD),
+  [Русский](app/src/md/ru.MD), [Українська](app/src/md/ua.MD)
+
+- You can also run the scripts directly with PowerShell or bash/sh if you don't want to use the desktop app. <br/>
+  Scripts user guide: [Windows](scripts/win/README.md), [MacOS](scripts/unix/README.md).
 
 ## Desktop app
 
@@ -59,12 +57,13 @@ Originals are never modified.
 </a>
 
 ## Tech stack
-[![tauri-img]][tauri-url] [![vue-img]][vue-url] [![vite-img]][vite-url] 
+[![tauri-img]][tauri-url] [![vue-img]][vue-url] [![vite-img]][vite-url]
 - Tauri 2 \(Rust\)
 - Vue 3, TypeScript, Naive UI, Vite
 - GitHub Actions for builds and releases
 
-## Build from source
+## For developers
+### Build from source
 
 - Prerequisites: Node.js LTS, Rust/Cargo, and Tauri prerequisites for your platform.
 - Commands:
