@@ -121,7 +121,7 @@ const selectFilePath = async (isFfmpeg: boolean = true) => {
       </n-flex>
 
       <div class="help-block">
-        <n-tooltip placement="top" delay="500">
+        <n-tooltip placement="top" :delay="500">
           <template #trigger>
             <n-button quaternary circle type="primary" @click="store.showHelp = true" size="small"
                       @mouseenter="store.heartIsBeating = true" @mouseleave="store.heartIsBeating = false">

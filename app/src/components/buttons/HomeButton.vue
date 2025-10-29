@@ -13,7 +13,7 @@ const goHome = () => {
 </script>
 
 <template>
-  <n-tooltip placement="bottom" trigger="hover" delay="500">
+  <n-tooltip placement="bottom" trigger="hover" :delay="500">
     <template #trigger>
       <n-button
           class="home-menu-btn"

@@ -76,7 +76,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
       <template #label>
         <span class="label-with-help">
           {{ t('mainView.setup.inputFolder') }}
-          <n-tooltip placement="top" style="max-width:300px" delay="500">
+          <n-tooltip placement="top" style="max-width:300px" :delay="500">
             <template #trigger>
               <n-icon size="16"><InfoCircle/></n-icon>
             </template>
@@ -97,7 +97,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
       <template #label>
         <span class="label-with-help">
           {{ t('mainView.setup.outputFolder') }}
-          <n-tooltip placement="top" style="max-width:240px" delay="500">
+          <n-tooltip placement="top" style="max-width:240px" :delay="500">
             <template #trigger>
               <n-icon size="16"><InfoCircle/></n-icon>
             </template>
@@ -122,7 +122,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
           <template #label>
             <span class="label-with-help">
               {{ t('mainView.setup.targetFps') }}
-              <n-tooltip placement="top" style="max-width:280px" delay="500">
+              <n-tooltip placement="top" style="max-width:280px" :delay="500">
                 <template #trigger>
                   <n-icon size="16"><InfoCircle/></n-icon>
                 </template>
@@ -155,7 +155,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
         <!-- Audio (grouped) -->
         <div class="non-form-el">
           <n-checkbox v-model:checked="store.keepAudio" :label="t('mainView.setup.keepAudio')"/>
-          <n-tooltip placement="top" style="max-width:200px" delay="500">
+          <n-tooltip placement="top" style="max-width:200px" :delay="500">
             <template #trigger>
               <n-icon size="16">
                 <InfoCircle/>
@@ -186,7 +186,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
         <div class="non-form-el">
           <n-checkbox v-model:checked="store.useCustomVideoQuality" style="max-width: 180px;"
                       :label="t('mainView.setup.customVideoQuality')"/>
-          <n-tooltip placement="top" style="max-width:200px" delay="500">
+          <n-tooltip placement="top" style="max-width:200px" :delay="500">
             <template #trigger>
               <n-icon size="16">
                 <InfoCircle/>
@@ -200,7 +200,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
           <template #label>
             <span class="label-with-help">
               {{ t('mainView.setup.setVideoQuality') }}
-              <n-tooltip placement="top" style="max-width: 260px;" delay="500">
+              <n-tooltip placement="top" style="max-width: 260px;" :delay="500">
                 <template #trigger>
                   <n-icon size="16"><InfoCircle/></n-icon>
                 </template>
@@ -219,7 +219,7 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
       <template #label>
         <span class="label-with-help">
           {{ t('mainView.setup.cpuLimit') }}
-          <n-tooltip placement="top" style="max-width:240px" delay="500">
+          <n-tooltip placement="top" style="max-width:240px" :delay="500">
             <template #trigger>
               <n-icon size="16"><InfoCircle/></n-icon>
             </template>
