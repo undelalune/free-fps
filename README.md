@@ -11,7 +11,7 @@ Originals are never modified.
 ## Requirements
 > FFmpeg and FFprobe are required!
    - Uses versions found in system `PATH`, or set explicit paths in app settings, i.e. you don't have to install it.
-   - Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides above).
+   - Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides below).
       
 
 ## Quick links

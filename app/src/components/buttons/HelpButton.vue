@@ -7,6 +7,12 @@ import {useStore} from "@/stores";
 const {t} = useI18n();
 const store = useStore();
 
+
+defineProps<{
+  edged?: boolean
+}>();
+
+
 const toggleShowHelp = () => {
   store.showHelp = true;
 }
@@ -20,6 +26,7 @@ const toggleShowHelp = () => {
           size="tiny"
           ghost
           :bordered="false"
+          :style="{ right: edged ? '28px' : '52px' }"
           @click="toggleShowHelp"
           @mouseenter="store.heartIsBeating = true"
           @mouseleave="store.heartIsBeating = false"

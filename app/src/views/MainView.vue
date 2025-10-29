@@ -52,8 +52,8 @@ onUnmounted(cleanup);
     <TitledHeader v-else :title="getTitle()">
       <RotateClockwise2/>
     </TitledHeader>
-    <HelpButton/>
-    <SettingsButton/>
+    <HelpButton :edged="!setupState"/>
+    <SettingsButton v-if="setupState"/>
 
     <div class="main-view-container">
       <Setup v-if="setupState" @next="onNext"/>
