@@ -8,6 +8,11 @@ Originals are never modified.
 
 <br/><br/>
 
+## Requirements
+> FFmpeg and FFprobe are required!
+   - Uses versions found in system `PATH`, or set explicit paths in app settings, i.e. you don't have to install it.
+   - Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides above).
+      
 
 ## Quick links
 
@@ -23,12 +28,6 @@ Originals are never modified.
     - All releases: https://github.com/undelalune/free-fps/releases
     - Windows: Installer and Portable \(Portable recommended - free-fps.exe file \)
     - macOS: Universal build
-
-## Requirements
-
-- FFmpeg and FFprobe are required.
-    - Uses versions found in system `PATH`, or set explicit paths in app settings.
-    - Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides above).
 
 ## What it does
 
