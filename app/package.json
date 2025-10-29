@@ -3,6 +3,9 @@
   "private": true,
   "license": "MIT",
   "description": "A utility built as an easy-to-use wrapper around ffmpeg for direct video frame rate (FPS) modification.",
+  "author": "https://github.com/undelalune",
+  "homepage": "https://github.com/undelalune/free-fps",
+
   "version": "1.0.0",
   "type": "module",
   "scripts": {
