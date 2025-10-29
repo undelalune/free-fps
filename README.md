@@ -1,10 +1,13 @@
-# Free‑FPS
+# Free‑FPS [![GitHub release][release-img]][release-url]  [![license][license-url]](LICENSE)
 
-<p align="center">
-  <img src="app/src/md/logo.png" alt="Free‑FPS logo" width="120" style="border-radius: 24px;">
-</p>
+<img src="app/src/md/logo.png" alt="Free‑FPS logo" align="left" width="120" style="border-radius: 24px;">
 
-Open‑source desktop app and scripts to change a video file frame rate \(FPS\) using FFmpeg. It does not add effects or alter content; it adjusts playback speed and, if needed, re‑encodes audio. Originals are never modified.
+Open‑source desktop app and scripts to change a video file frame rate \(FPS\) <ins>**using FFmpeg**</ins>. <br/>
+It does not add effects or alter content; it adjusts playback speed and, if needed, re‑encodes audio. <br/>
+Originals are never modified.
+
+<br/><br/>
+
 
 ## Quick links
 
@@ -44,7 +47,7 @@ Open‑source desktop app and scripts to change a video file frame rate \(FPS\) 
 ## Scripts
 
 - Windows PowerShell and macOS shell scripts perform the same conversion with fewer controls.
-- FFmpeg and FFprobe must be available in `PATH`. See per‑platform guides above.
+- FFmpeg and FFprobe must be available (in `PATH` or standalone). See per‑platform guides above.
 
 ## Support the project
 
@@ -57,15 +60,10 @@ Open‑source desktop app and scripts to change a video file frame rate \(FPS\) 
 </a>
 
 ## Tech stack
-
+[![tauri-img]][tauri-url] [![vue-img]][vue-url] [![vite-img]][vite-url] 
 - Tauri 2 \(Rust\)
 - Vue 3, TypeScript, Naive UI, Vite
 - GitHub Actions for builds and releases
-
-## Open source
-
-- License: MIT
-- Repository: https://github.com/undelalune/free-fps
 
 ## Build from source
 
@@ -74,3 +72,13 @@ Open‑source desktop app and scripts to change a video file frame rate \(FPS\) 
     - Install: `npm i`
     - Dev: `npm run tauri:dev`
     - Build: `npm run tauri:build`
+
+[release-img]:     https://img.shields.io/github/v/release/undelalune/free-fps
+[release-url]:     https://github.com/undelalune/free-fps/releases/latest/
+[license-url]:     https://img.shields.io/github/license/dec0dOS/amazing-github-template.svg?style=flat-rounded
+[tauri-img]:       https://img.shields.io/badge/Tauri-FFC131?style=for-the-badge&logo=Tauri&logoColor=white
+[tauri-url]:       https://tauri.app/
+[vue-img]:         https://img.shields.io/badge/Vue%20js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
+[vue-url]:         https://vuejs.org/
+[vite-img]:        https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E
+[vite-url]:        https://vite.dev/
