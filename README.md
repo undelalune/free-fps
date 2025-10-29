@@ -1,6 +1,6 @@
 # Free‑FPS [![GitHub release][release-img]][release-url]  [![license][license-url]](LICENSE)
 
-<img src="app/src/md/logo.png" alt="Free‑FPS logo" align="left" width="120" style="border-radius: 24px;">
+<img src="app/src/md/logo.png" alt="Free‑FPS logo" align="left" width="128" style="border-radius: 24px;">
 
 Open‑source desktop app and scripts to change a video file frame rate \(FPS\) <ins>**using FFmpeg**</ins>. <br/>
 It does not add effects or alter content; it adjusts playback speed and, if needed, re‑encodes audio. <br/>
