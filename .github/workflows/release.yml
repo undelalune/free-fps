@@ -14,7 +14,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-14, macos-13, windows-latest ]
+        include:
+          - os: windows-latest
+            bundles: nsis,app
+          - os: macos-14
+            bundles: dmg
+          - os: macos-13
+            bundles: dmg
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -49,9 +55,15 @@ jobs:
           projectPath: app
           tagName: v__VERSION__
           releaseName: Free FPS v__VERSION__
-          releaseBody: "Automated release built by CI."
+          releaseBody: |
+            Downloads:
+            - Windows portable: free-fps.exe
+            - Windows installer \(NSIS\): Free.FPS_x64-setup_windows.exe
+            - macOS Apple Silicon \(M1/M2/M3\): Free.FPS_aarch64_darwin.dmg
+            - macOS Intel: Free.FPS_x64_darwin.dmg
           releaseDraft: false
           prerelease: false
+          args: --bundles ${{ matrix.bundles }}
 
       - name: Attach portable exe (Windows)
         if: matrix.os == 'windows-latest'
@@ -59,6 +71,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: app/src-tauri/target/release/*.exe
+          files: app/src-tauri/target/release/bundle/app/*.exe
           tag_name: ${{ github.ref_name }}
           fail_on_unmatched_files: true
