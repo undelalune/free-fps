@@ -7,4 +7,4 @@
 
 
 
-[![Free-FPS macOS first run](first_run_mac.gif)](mac.mp4))
+[![Free-FPS macOS first run](first_run_mac.gif)]
