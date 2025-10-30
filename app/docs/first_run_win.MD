@@ -8,4 +8,4 @@
 - Ensure Microsoft Edge WebView2 runtime is installed (the app will prompt if missing).
 
 
-[![Free-FPS windows first run](first_run_win.gif)](win.mp4))
+[![Free-FPS windows first run](first_run_win.gif)]
