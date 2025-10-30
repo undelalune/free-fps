@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "app": {
+    "windows": [
+      {
+        "title": "Free FPS",
+        "width": 450,
+        "height": 711,
+        "backgroundColor": "#121821",
+        "resizable": false,
+        "fullscreen": false,
+        "center": true,
+        "decorations": true,
+        "alwaysOnTop": false,
+        "skipTaskbar": false,
+        "maximized": false,
+        "maximizable": false
+      }
+    ]
+  }
+}

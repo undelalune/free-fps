@@ -1,0 +1,51 @@
+{
+  "name": "free-fps",
+  "private": true,
+  "license": "MIT",
+  "description": "A utility built as an easy-to-use wrapper around ffmpeg for direct video frame rate (FPS) modification.",
+  "author": "https://github.com/undelalune",
+  "homepage": "https://github.com/undelalune/free-fps",
+
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:dev:mac": "PATH=$HOME/.cargo/bin:$PATH tauri dev --config src-tauri/tauri.macos.conf.json",
+    "tauri:build": "tauri build",
+    "tauri:build:mac": "PATH=$HOME/.cargo/bin:$PATH tauri build --config src-tauri/tauri.macos.conf.json"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.9.0",
+    "@tauri-apps/plugin-dialog": "^2.4.2",
+    "@tauri-apps/plugin-fs": "^2.4.4",
+    "@tauri-apps/plugin-opener": "^2.5.2",
+    "@tauri-apps/plugin-os": "^2.3.2",
+    "@tauri-apps/plugin-shell": "^2.3.3",
+    "@tauri-apps/plugin-store": "^2.4.1",
+    "dompurify": "^3.3.0",
+    "markdown-it": "14.0.0",
+    "pinia": "^3.0.3",
+    "vue": "^3.5.22",
+    "vue-i18n": "^11.1.12",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.9.2",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^24.9.2",
+    "@vicons/ionicons5": "^0.13.0",
+    "@vicons/tabler": "^0.13.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "naive-ui": "^2.43.1",
+    "typescript": "^5.9.3",
+    "unplugin-auto-import": "^20.2.0",
+    "unplugin-vue-components": "^30.0.0",
+    "vfonts": "^0.0.3",
+    "vite": "^7.1.12",
+    "vue-tsc": "^3.1.2"
+  }
+}
