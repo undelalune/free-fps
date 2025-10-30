@@ -17,10 +17,10 @@
           include:
             - os: windows-latest
               bundles: nsis,msi
-            - os: macos-14
-              bundles: dmg,app
+              extra_args: ""
             - os: macos-13
               bundles: dmg,app
+              extra_args: --target x86_64-apple-darwin
       runs-on: ${{ matrix.os }}
 
       steps:
@@ -60,11 +60,10 @@
               - Windows portable: `free-fps.exe`
               - Windows installer \(NSIS\): `Free.FPS_x64-setup_windows.exe`
               - Windows installer \(MSI\): `Free.FPS_x64_en-US_windows.msi`
-              - macOS Apple Silicon \(M1/M2/M3\): `Free.FPS_aarch64_darwin.dmg`
               - macOS Intel: `Free.FPS_x64_darwin.dmg`
             releaseDraft: false
             prerelease: false
-            args: --bundles ${{ matrix.bundles }}
+            args: --bundles ${{ matrix.bundles }} ${{ matrix.extra_args }}
 
         - name: Attach portable exe (Windows)
           if: matrix.os == 'windows-latest'
