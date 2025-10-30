@@ -16,6 +16,8 @@ Download [latest release](https://github.com/undelalune/free-fps/releases/latest
 - Keeps or re‑encodes audio if requested.
 - No effects, no content edits.
 - Writes results to a separate output folder by default.
+- Also doubles as a fast video compressor: keep the original FPS and raise compression (e.g., higher CRF or lower bitrate) to reduce file size.
+
 
 ## Requirements
 > FFmpeg and FFprobe are required!
@@ -23,24 +25,8 @@ Download [latest release](https://github.com/undelalune/free-fps/releases/latest
 - Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides below).
 
 ## First Run
-
-> Your OS may warn or block the first launch because the app is not signed/notarized.
-
-### Windows 10/11
-
-- Download the installer or portable build from [Releases](https://github.com/undelalune/free-fps/releases/latest/).
-- If Windows blocked the file, right‑click `Free‑FPS‑x.y.z‑setup.exe` or `Free‑FPS.exe` → `Properties` → check `Unblock` → `Apply`.
-- Double‑click to run. If SmartScreen shows `Windows protected your PC`:
-  - Click `More info`.
-  - Click `Run anyway`.
-- Ensure Microsoft Edge WebView2 runtime is installed (the app will prompt if missing).
-
-### macOS 10.15\+
-
-- Open `Free‑FPS.dmg` and drag `Free‑FPS.app` to `Applications`.
-- First launch: Finder → `Applications`, right‑click `Free‑FPS.app` → `Open` → `Open`.
-- If still blocked: `System Settings` → `Privacy & Security` → `Open Anyway`.
-- `ffmpeg`/`ffprobe`: if not in `PATH` and you point to local binaries, macOS may block them on first run; allow via `System Settings` → `Privacy & Security` → `Open Anyway`. 
+> Your OS may warn or block the first launch because the app is not signed/notarized. <br/>
+> Look here for instructions to allow it: [Windows 10/11](app/docs/first_run_win.MD) or [macOS 10.15\+](app/docs/first_run_mac.MD)
 
 
 ## Quick links
