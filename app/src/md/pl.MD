@@ -14,6 +14,7 @@
 Program narzędziowy do zmiany liczby klatek na sekundę (FPS) plików wideo z użyciem FFmpeg. W odróżnieniu od edytorów wideo, nie dodaje efektów ani nie zmienia treści - jedynie dostosowuje prędkość odtwarzania i, w razie potrzeby, ponownie koduje audio.
 
 Przydatny, jeśli pracujesz z wieloma nagraniami wykonanymi z różnymi częstotliwościami klatek, których nie da się połączyć ani edytować bez interpolacji lub utraty klatek.
+Może też służyć jako szybki kompresor wideo: zachowaj oryginalny FPS i zwiększ kompresję (np. wyższy CRF lub niższy bitrate), aby zmniejszyć rozmiar pliku.
 
 Ważne:
 Program jest przeznaczony dla użytkowników rozumiejących działanie konwersji FPS. Zmiana częstotliwości klatek wpływa na prędkość i długość wideo. Narzędzie nie modyfikuje oryginalnych plików!

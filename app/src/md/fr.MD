@@ -14,6 +14,7 @@
 Une utilitaire pour modifier la fréquence d'images (FPS) des fichiers vidéo en utilisant FFmpeg. Contrairement aux éditeurs vidéo, il n'ajoute pas d'effets et ne modifie pas le contenu - il ajuste uniquement la vitesse de lecture et, si nécessaire, ré-encode l'audio.
 
 Utile si vous travaillez avec plusieurs vidéos tournées à des fréquences d'images différentes et qu'il est impossible de les assembler ou de les éditer sans interpolation ou perte d'images.
+Fait aussi office de compresseur vidéo rapide : conservez le FPS d’origine et augmentez la compression (par exemple, CRF plus élevé ou débit binaire plus faible) pour réduire la taille du fichier.
 
 Important:
 Le programme s'adresse aux utilisateurs qui comprennent ce que fait une conversion de FPS. Changer la fréquence d'images affecte la vitesse et la durée de la vidéo. L'outil ne modifie pas les fichiers originaux !

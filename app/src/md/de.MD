@@ -14,6 +14,7 @@
 Eine Hilfsanwendung zum Ändern der Bildwiederholfrequenz (FPS) von Videodateien mittels FFmpeg. Im Gegensatz zu Videoschnittprogrammen fügt sie keine Effekte hinzu und verändert keinen Inhalt - sie passt nur die Wiedergabegeschwindigkeit an und kodiert bei Bedarf das Audio neu.
 
 Nützlich, wenn Sie mit mehreren Videos arbeiten, die mit unterschiedlichen Bildraten aufgenommen wurden und sich ohne Interpolation oder Frameverlust nicht zusammenfügen oder bearbeiten lassen.
+Dient auch als schneller Videokompressor: Behalten Sie die ursprüngliche FPS bei und erhöhen Sie die Kompression (z. B. höherer CRF oder niedrigere Bitrate), um die Dateigröße zu reduzieren.
 
 Wichtig:
 Das Programm richtet sich an Anwender, die verstehen, was eine FPS-Konvertierung bewirkt. Die Änderung der Bildrate beeinflusst die Geschwindigkeit und Dauer des Videos. Das Werkzeug verändert nicht die Originaldateien!

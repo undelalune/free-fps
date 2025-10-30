@@ -14,6 +14,7 @@
 A utility program for changing the video file frame rate (FPS) using FFmpeg. Unlike video editors, it does not add effects or alter content - it only adjusts playback speed and, if needed, re-encodes audio as well.
 
 Useful if you work with multiple videos shot at different frame rates that cannot be combined or edited without interpolation or frame loss.
+Also doubles as a fast video compressor: keep the original FPS and raise compression (e.g., higher CRF or lower bitrate) to reduce file size.
 
 Important:
 The program is intended for users who understand what FPS conversion does. Changing the frame rate affects the speed and duration of the video. The tool does not modify the original files!

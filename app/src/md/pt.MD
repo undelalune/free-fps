@@ -14,6 +14,7 @@
 Um utilitário para alterar a taxa de fotogramas (FPS) de ficheiros de vídeo usando o FFmpeg. Ao contrário dos editores de vídeo, não adiciona efeitos nem altera o conteúdo: apenas ajusta a velocidade de reprodução e, se necessário, recodifica também o áudio.
 
 Útil se trabalha com vários vídeos gravados a diferentes taxas de fotogramas que não podem ser combinados ou editados sem interpolação ou perda de fotogramas.
+Também funciona como um compressor de vídeo rápido: mantenha o FPS original e aumente a compressão (p. ex., CRF mais alto ou bitrate mais baixo) para reduzir o tamanho do arquivo.
 
 Importante:
 O programa destina-se a utilizadores que entendem o que faz a conversão de FPS. Alterar a taxa de fotogramas afeta a velocidade e a duração do vídeo. A ferramenta não modifica os ficheiros originais!

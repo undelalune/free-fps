@@ -14,6 +14,7 @@
 Un programma di utilità per modificare la frequenza dei fotogrammi (FPS) dei file video utilizzando FFmpeg. A differenza degli editor video, non aggiunge effetti né altera il contenuto: regola solo la velocità di riproduzione e, se necessario, ricodifica anche l'audio.
 
 Utile se lavori con più video girati a frequenze diverse che non possono essere combinati o montati senza interpolazione o perdita di fotogrammi.
+Funziona anche come compressore video veloce: mantieni l’FPS originale e aumenta la compressione (ad es., CRF più alto o bitrate più basso) per ridurre le dimensioni del file.
 
 Importante:
 Il programma è destinato a utenti che comprendono cosa comporti la conversione degli FPS. Cambiare la frequenza dei fotogrammi influisce su velocità e durata del video. Lo strumento non modifica i file originali!

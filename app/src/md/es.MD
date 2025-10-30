@@ -14,6 +14,7 @@
 Una utilidad para cambiar la tasa de fotogramas (FPS) de archivos de video usando FFmpeg. A diferencia de los editores de video, no añade efectos ni altera el contenido: solo ajusta la velocidad de reproducción y, si es necesario, vuelve a codificar el audio.
 
 Útil si trabajas con varios videos grabados a diferentes tasas de fotogramas que no pueden combinarse ni editarse sin interpolación o pérdida de cuadros.
+También sirve como un compresor de vídeo rápido: mantén el FPS original y aumenta la compresión (p. ej., CRF más alto o bitrate más bajo) para reducir el tamaño del archivo.
 
 Importante:
 El programa está destinado a usuarios que entienden qué hace la conversión de FPS. Cambiar la tasa de fotogramas afecta la velocidad y la duración del video. ¡La herramienta no modifica los archivos originales!
