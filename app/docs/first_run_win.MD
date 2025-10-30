@@ -7,7 +7,5 @@
     - Click `Run anyway`.
 - Ensure Microsoft Edge WebView2 runtime is installed (the app will prompt if missing).
 
-<video width="480" height="270" controls loop>
-  <source src="win.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+
+[![Free-FPS windows first run](first_run_win.gif)](win.mp4))
