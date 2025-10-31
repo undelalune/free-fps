@@ -4,9 +4,10 @@ use chrono::{DateTime, Utc};
 use regex::Regex;
 use serde::Deserialize;
 use std::process::Stdio;
-use tokio::{fs, io::AsyncBufReadExt, process::Command};
+use tokio::{fs, io::AsyncBufReadExt, process::Command, time::{timeout, Duration}};
 use tokio_util::sync::CancellationToken;
 
+const DEFAULT_CONVERSION_TIMEOUT_SECS: u64 = 3600; // 1 hour default timeout
 // ===== ffprobe parsing =====
 
 #[derive(Debug, Deserialize)]
@@ -185,13 +186,14 @@ pub async fn probe_video(
 // ===== Conversion helpers =====
 
 fn threads_from_cpu_limit(cpu_limit: Option<u8>) -> usize {
+    let max_cpus = num_cpus::get();
     match cpu_limit {
         Some(pct) => {
             let pct = pct.clamp(1, 100) as f32 / 100.0;
-            let n = ((num_cpus::get() as f32) * pct).floor() as usize;
-            n.max(1)
+            let n = ((max_cpus as f32) * pct).ceil() as usize;
+            n.max(1).min(max_cpus)
         }
-        None => num_cpus::get(),
+        None => max_cpus,
     }
 }
 
@@ -663,14 +665,27 @@ pub async fn convert_video_with_progress<F>(
 where
     F: FnMut(f32) + Send + 'static,
 {
-    match convert_video_with_progress_impl(opts, on_progress, cancel).await {
-        Ok(v) => Ok(v),
-        Err(e) => {
-            if let AppErrorCode::Cancelled = e.code {
-                Err("Cancelled".to_string())
-            } else {
-                Err((e.code as u16).to_string())
+    // Add timeout protection (1 hour default, can be made configurable)
+    let conversion_future = convert_video_with_progress_impl(opts, on_progress, cancel.clone());
+    let timeout_duration = Duration::from_secs(DEFAULT_CONVERSION_TIMEOUT_SECS);
+    
+    match timeout(timeout_duration, conversion_future).await {
+        Ok(result) => {
+            match result {
+                Ok(v) => Ok(v),
+                Err(e) => {
+                    if let AppErrorCode::Cancelled = e.code {
+                        Err("Cancelled".to_string())
+                    } else {
+                        Err((e.code as u16).to_string())
+                    }
+                }
             }
+        }
+        Err(_) => {
+            let _ = log_error("ConversionTimeout", &format!("Conversion exceeded {} seconds", DEFAULT_CONVERSION_TIMEOUT_SECS)).await;
+            cancel.cancel(); // Trigger cancellation
+            Err((AppErrorCode::FfmpegFailed as u16).to_string())
         }
     }
 }

@@ -32,6 +32,8 @@ export default {
         23: "Calidad de video (CRF) fuera de rango. Usa valores entre 0 (sin pérdida) y 51 (peor calidad).",
         24: "Tasa de bits de audio inválida. Ingresa un valor positivo.",
         25: "No se pudieron leer los metadatos del video.",
+        26: "Se detectó un intento de escape de directorios (path traversal). Por seguridad, la ruta del archivo queda fuera del directorio permitido.",
+        27: "Ruta de archivo inválida. Asegúrate de que la ruta existe y es accesible.",
     },
     mainView: {
         setup: {

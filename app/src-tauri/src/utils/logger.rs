@@ -10,6 +10,7 @@ use tokio::io::AsyncWriteExt;
 
 static LOG_PATH: OnceLock<PathBuf> = OnceLock::new();
 const ROTATE_AFTER: Duration = Duration::from_secs(60 * 60 * 24 * 7); // 7 days
+const MAX_LOG_SIZE: u64 = 10 * 1024 * 1024; // 10MB
 
 // Call this once at app startup to place the log next to `settings.json`
 pub fn init_log_path(app: &tauri::AppHandle) {
@@ -42,18 +43,29 @@ pub async fn rotate_log_if_needed() {
     }
 
     if let Ok(meta) = metadata(log_path()).await {
-        if let Ok(modified) = meta.modified() {
-            if SystemTime::now()
+        let size_exceeded = meta.len() > MAX_LOG_SIZE;
+        let time_exceeded = if let Ok(modified) = meta.modified() {
+            SystemTime::now()
                 .duration_since(modified)
                 .map(|d| d > ROTATE_AFTER)
                 .unwrap_or(false)
-            {
-                let _ = OpenOptions::new()
-                    .write(true)
-                    .truncate(true)
-                    .open(log_path())
-                    .await;
-            }
+        } else {
+            false
+        };
+
+        if size_exceeded || time_exceeded {
+            // Rotate by truncating the log file
+            let _ = OpenOptions::new()
+                .write(true)
+                .truncate(true)
+                .open(log_path())
+                .await;
+
+            // Log rotation event
+            let ts = Utc::now().to_rfc3339();
+            let reason = if size_exceeded { "size exceeded" } else { "time exceeded" };
+            let line = format!("[{}] [LOG] Log rotated ({})", ts, reason);
+            append_line(&line).await;
         }
     }
 }

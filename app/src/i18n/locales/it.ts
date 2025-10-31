@@ -32,6 +32,8 @@ export default {
         23: "Valore CRF non valido. Usa valori tra 0 e 51.",
         24: "Bitrate audio non valido.",
         25: "Impossibile leggere i metadati video.",
+        26: "Rilevato tentativo di uscita dalla directory consentita (path traversal). Per sicurezza, il percorso del file è fuori dalla cartella autorizzata.",
+        27: "Percorso file non valido. Assicurati che il percorso esista e sia accessibile.",
     },
     mainView: {
         setup: {

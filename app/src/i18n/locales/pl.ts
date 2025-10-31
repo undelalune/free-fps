@@ -32,6 +32,8 @@ export default {
         23: "Wartość CRF poza zakresem (0–51).",
         24: "Nieprawidłowy bitrate audio. Wprowadź dodatnią liczbę.",
         25: "Nie można odczytać metadanych wideo.",
+        26: "Wykryto próbę wyjścia poza dozwolony katalog (path traversal). Ze względów bezpieczeństwa ścieżka pliku jest poza katalogiem dozwolonym.",
+        27: "Nieprawidłowa ścieżka pliku. Upewnij się, że ścieżka istnieje i jest dostępna.",
     },
     mainView: {
         setup: {

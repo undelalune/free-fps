@@ -23,7 +23,11 @@
     {
       "identifier": "fs:scope",
       "allow": [
-        "https://**"
+        "$APPDATA/**",
+        "$VIDEO/**",
+        "$DOCUMENT/**",
+        "$DESKTOP/**",
+        "$DOWNLOAD/**"
       ]
     },
     "os:default"

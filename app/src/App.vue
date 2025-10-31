@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import {useStore} from "@/stores";
-import {onMounted} from "vue";
+import {onMounted, onBeforeUnmount} from "vue";
 import FFFoundDialogProvider from "@/components/dialogs/FFFoundDialogProvider.vue";
 import HelpDialog from "@/components/dialogs/HelpDialog.vue";
 import {getCurrentWindow} from "@tauri-apps/api/window";
@@ -34,29 +34,38 @@ onMounted(() => {
   addCloseHandler();
 })
 
-onUnmounted(() => {
-  if (unlisten.value) {
-    unlisten.value();
+onBeforeUnmount(async () => {
+  try {
+    if (unlisten.value) {
+      unlisten.value();
+    }
+  } catch (error) {
+    console.warn('Failed to unlisten:', error);
+  } finally {
     unlisten.value = null;
   }
 });
 
 const addCloseHandler = async () => {
-  unlisten.value = await getCurrentWindow().onCloseRequested(async (event) => {
-    if (store.processing) {
-      const confirmed = await confirm(t('common.closeAppDialogTitle'), {
-        okLabel: t('common.yes'),
-        cancelLabel: t('common.no'),
-      });
-      if (!confirmed) {
-        event.preventDefault();
-        return;
-      } else {
-        await videoAPI.cancelConversion();
-        store.processing = false;
+  try {
+    unlisten.value = await getCurrentWindow().onCloseRequested(async (event) => {
+      if (store.processing) {
+        const confirmed = await confirm(t('common.closeAppDialogTitle'), {
+          okLabel: t('common.yes'),
+          cancelLabel: t('common.no'),
+        });
+        if (!confirmed) {
+          event.preventDefault();
+          return;
+        } else {
+          await videoAPI.cancelConversion();
+          store.processing = false;
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Failed to add close handler:', error);
+  }
 }
 
 </script>

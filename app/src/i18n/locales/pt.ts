@@ -32,6 +32,8 @@ export default {
         23: "Valor CRF inválido. Use um número entre 0 (sem perda) e 51 (menor qualidade).",
         24: "Taxa de bits de áudio inválida.",
         25: "Não foi possível ler os metadados do vídeo.",
+        26: "Tentativa de saída do diretório permitido (path traversal) detectada. Por segurança, o caminho do arquivo está fora da pasta autorizada.",
+        27: "Caminho de arquivo inválido. Certifique-se de que o caminho existe e está acessível.",
     },
     mainView: {
         setup: {
