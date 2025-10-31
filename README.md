@@ -19,13 +19,26 @@ Download [latest release](https://github.com/undelalune/free-fps/releases/latest
 - Also doubles as a fast video compressor: keep the original FPS and raise compression (e.g., higher CRF or lower bitrate) to reduce file size.
 
 <p align="center">
-  <img src="app/docs/previews/reset.png" alt="reset" width="240" style="max-width: 240px; width: auto;" loading="lazy">
-  <img src="app/docs/previews/settings.png" alt="settings" width="240" style="max-width: 240px; width: auto;" loading="lazy">
-  <img src="app/docs/previews/home.png" alt="home" width="240" style="max-width: 240px; width: auto;" loading="lazy">
-  <img src="app/docs/previews/processing1.png" alt="processing1" width="240" style="max-width: 240px; width: auto;" loading="lazy">
-  <img src="app/docs/previews/processing2.png" alt="processing2" width="240" style="max-width: 240px; width: auto;" loading="lazy">
-  <img src="app/docs/previews/help.png" alt="help" width="240" style="max-width: 240px; width: auto;" loading="lazy">
+  <a href="app/docs/previews/reset.png?raw=1">
+    <img src="app/docs/previews/reset.png" alt="reset" width="260" style="max-width: 260px; width: auto;" loading="lazy">
+  </a>
+  <a href="app/docs/previews/settings.png?raw=1">
+    <img src="app/docs/previews/settings.png" alt="settings" width="260" style="max-width: 260px; width: auto;" loading="lazy">
+  </a>
+  <a href="app/docs/previews/home.png?raw=1">
+    <img src="app/docs/previews/home.png" alt="home" width="260" style="max-width: 260px; width: auto;" loading="lazy">
+  </a>
+  <a href="app/docs/previews/processing1.png?raw=1">
+    <img src="app/docs/previews/processing1.png" alt="processing1" width="260" style="max-width: 260px; width: auto;" loading="lazy">
+  </a>
+  <a href="app/docs/previews/processing2.png?raw=1">
+    <img src="app/docs/previews/processing2.png" alt="processing2" width="260" style="max-width: 260px; width: auto;" loading="lazy">
+  </a>
+  <a href="app/docs/previews/help.png?raw=1">
+    <img src="app/docs/previews/help.png" alt="help" width="260" style="max-width: 260px; width: auto;" loading="lazy">
+  </a>
 </p>
+
 
 
 ## Requirements
