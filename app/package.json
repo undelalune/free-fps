@@ -6,7 +6,7 @@
   "author": "https://github.com/undelalune",
   "homepage": "https://github.com/undelalune/free-fps",
 
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
