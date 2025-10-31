@@ -32,6 +32,8 @@ export default {
         23: "The specified video quality (CRF) is out of range. Please enter a value between 0 (lossless) and 51 (worst quality).",
         24: "The specified audio bitrate is invalid. Please enter a positive numeric value.",
         25: "Failed to read video metadata. The file may be corrupted or in an unsupported format.",
+        26: "Path traversal detected. The file path is outside the allowed directory for security reasons.",
+        27: "Invalid file path provided. Please ensure the path exists and is accessible.",
     },
     mainView: {
         setup: {

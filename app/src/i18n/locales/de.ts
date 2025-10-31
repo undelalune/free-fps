@@ -32,6 +32,8 @@ export default {
         23: "Ungültiger CRF-Wert. Bitte Wert zwischen 0 (verlustfrei) und 51 (niedrigste Qualität) eingeben.",
         24: "Ungültige Audio-Bitrate. Bitte positive Zahl eingeben.",
         25: "Videometadaten konnten nicht gelesen werden. Datei beschädigt oder nicht unterstützt.",
+        26: "Versuch, das erlaubte Verzeichnis zu verlassen (path traversal) erkannt. Der Dateipfad liegt aus Sicherheitsgründen außerhalb des erlaubten Verzeichnisses.",
+        27: "Ungültiger Dateipfad. Bitte stellen Sie sicher, dass der Pfad existiert und zugänglich ist.",
     },
     mainView: {
         setup: {

@@ -54,7 +54,9 @@ export enum ErrorCode {
     EmptyInputFile = 22,
     VideoQualityOutOfRange = 23,
     AudioBitrateInvalid = 24,
-    ReadMetadataFailed = 25
+    ReadMetadataFailed = 25,
+    PathTraversalDetected = 26,
+    InvalidInputPath = 27
 }
 
 export type AppError = { code: ErrorCode; details?: string };

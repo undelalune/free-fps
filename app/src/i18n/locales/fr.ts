@@ -32,6 +32,8 @@ export default {
         23: "La qualité vidéo (CRF) est hors plage. Entrez une valeur entre 0 (sans perte) et 51 (pire qualité).",
         24: "Le débit audio est invalide. Entrez une valeur numérique positive.",
         25: "Impossible de lire les métadonnées vidéo. Le fichier est peut‑être corrompu ou non pris en charge.",
+        26: "Tentative d'évasion de répertoire (path traversal) détectée. Pour des raisons de sécurité, le chemin du fichier est en dehors du répertoire autorisé.",
+        27: "Chemin de fichier invalide. Assurez-vous que le chemin existe et est accessible.",
     },
     mainView: {
         setup: {

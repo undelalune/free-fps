@@ -25,6 +25,8 @@ pub enum AppErrorCode {
     VideoQualityOutOfRange = 23,
     AudioBitrateInvalid = 24,
     ReadMetadataFailed = 25,
+    PathTraversalDetected = 26,
+    InvalidInputPath = 27,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

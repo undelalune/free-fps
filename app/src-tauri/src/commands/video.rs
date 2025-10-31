@@ -1,18 +1,89 @@
 use crate::errors::{AppError, AppErrorCode, AppResult};
 use crate::utils::ffmpeg::{convert_video_with_progress, ConvertOptions};
+use crate::utils::rate_limiter::RateLimiter;
 use chrono::{DateTime, Utc};
 use filetime::{set_file_times, FileTime};
 use open;
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Emitter, State};
+use tokio::fs;
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 
 use crate::commands::thumbnail::{get_video_thumbnail_data_url, ThumbnailParams};
 
 use crate::utils::bins::resolve_bin;
+
+// Security: Validate that a path is within a base folder to prevent path traversal
+fn validate_safe_path(path: &str, base_folder: &str) -> AppResult<PathBuf> {
+    let base = PathBuf::from(base_folder).canonicalize().map_err(|e| {
+        AppError::new(
+            AppErrorCode::InvalidInputPath,
+            format!("Invalid base folder: {}", e),
+        )
+    })?;
+
+    let target = PathBuf::from(path).canonicalize().map_err(|e| {
+        AppError::new(
+            AppErrorCode::InvalidInputPath,
+            format!("Invalid file path: {}", e),
+        )
+    })?;
+
+    if !target.starts_with(&base) {
+        return Err(AppError::new(
+            AppErrorCode::PathTraversalDetected,
+            format!("Path '{}' is outside allowed directory", path),
+        ));
+    }
+
+    Ok(target)
+}
+
+// Validate conversion parameters
+fn validate_conversion_params(params: &VideoConversionParams) -> AppResult<()> {
+    if params.target_fps <= 0.0 || params.target_fps > 1000.0 {
+        return Err(AppError::new(
+            AppErrorCode::InvalidFps,
+            format!(
+                "FPS must be between 0.1 and 1000, got {}",
+                params.target_fps
+            ),
+        ));
+    }
+
+    if params.keep_audio {
+        if params.audio_bitrate == 0 || params.audio_bitrate > 512 {
+            return Err(AppError::new(
+                AppErrorCode::AudioBitrateInvalid,
+                format!(
+                    "Audio bitrate must be between 1 and 512 kbps, got {}",
+                    params.audio_bitrate
+                ),
+            ));
+        }
+    }
+
+    if params.use_custom_video_quality && params.video_quality > 51 {
+        return Err(AppError::new(
+            AppErrorCode::VideoQualityOutOfRange,
+            format!("CRF must be between 0 and 51, got {}", params.video_quality),
+        ));
+    }
+
+    if params.cpu_limit == 0 || params.cpu_limit > 100 {
+        return Err(AppError::new(
+            AppErrorCode::Io,
+            format!(
+                "CPU limit must be between 1 and 100, got {}",
+                params.cpu_limit
+            ),
+        ));
+    }
+
+    Ok(())
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VideoFile {
@@ -56,8 +127,9 @@ pub struct ConversionProgress {
     pub status: ConversionStatus,
 }
 
-#[derive(Default)]
 pub struct ConversionController {
+    scan_limiter: RateLimiter,
+    conversion_limiter: RateLimiter,
     token: Mutex<Option<CancellationToken>>,
 }
 
@@ -75,6 +147,24 @@ impl ConversionController {
     pub async fn cancel(&self) {
         if let Some(tok) = self.token.lock().await.take() {
             tok.cancel();
+        }
+    }
+
+    pub fn scan_limiter(&self) -> &RateLimiter {
+        &self.scan_limiter
+    }
+
+    pub fn conversion_limiter(&self) -> &RateLimiter {
+        &self.conversion_limiter
+    }
+}
+
+impl Default for ConversionController {
+    fn default() -> Self {
+        Self {
+            token: Mutex::new(None),
+            scan_limiter: RateLimiter::new(1), // Only 1 scan at a time
+            conversion_limiter: RateLimiter::new(1), // Only 1 conversion at a time
         }
     }
 }
@@ -138,25 +228,43 @@ async fn list_video_files(
     folder_path: String,
     cancel: CancellationToken,
 ) -> AppResult<Vec<VideoFile>> {
+    use tokio::fs as async_fs;
+
     let path = Path::new(&folder_path);
-    if !path.exists() {
+    if !async_fs::try_exists(path).await.unwrap_or(false) {
         return Err(AppError::code_only(AppErrorCode::FolderNotFound));
     }
+
+    // Canonicalize the base folder for security validation
+    let base_canonical = async_fs::canonicalize(path)
+        .await
+        .map_err(|e| AppError::new(AppErrorCode::InvalidInputPath, e.to_string()))?;
 
     let supported_extensions = ["mp4", "mkv", "avi", "mov", "webm"];
     let mut video_files = Vec::new();
 
-    let dir = fs::read_dir(path).map_err(AppError::from)?;
-    for entry in dir {
+    let mut dir = async_fs::read_dir(path).await.map_err(AppError::from)?;
+    while let Some(entry) = dir.next_entry().await.map_err(AppError::from)? {
         if cancel.is_cancelled() {
             return Err(AppError::code_only(AppErrorCode::Cancelled));
         }
-        let entry = entry.map_err(AppError::from)?;
-        let file_type = entry.file_type().map_err(AppError::from)?;
+
+        let file_type = entry.file_type().await.map_err(AppError::from)?;
         if !file_type.is_file() {
             continue;
         }
+
         let file_path = entry.path();
+
+        // Security: Ensure file is within the base folder
+        if let Ok(canonical) = async_fs::canonicalize(&file_path).await {
+            if !canonical.starts_with(&base_canonical) {
+                continue; // Skip files outside base folder
+            }
+        } else {
+            continue; // Skip files that can't be canonicalized
+        }
+
         let extension = file_path
             .extension()
             .and_then(|e| e.to_str())
@@ -164,7 +272,7 @@ async fn list_video_files(
 
         if let Some(ext) = extension {
             if supported_extensions.contains(&ext.as_str()) {
-                let metadata = entry.metadata().map_err(AppError::from)?;
+                let metadata = entry.metadata().await.map_err(AppError::from)?;
                 video_files.push(VideoFile {
                     path: file_path.to_string_lossy().to_string(),
                     name: file_path
@@ -266,6 +374,9 @@ pub async fn get_video_files(
     folder_path: String,
     state: State<'_, ConversionController>,
 ) -> AppResult<Vec<VideoFile>> {
+    // Rate limiting: Only one scan at a time
+    let _permit = state.scan_limiter().acquire().await;
+
     let cancel = state.new_token().await;
     list_video_files(folder_path, cancel).await
 }
@@ -276,31 +387,34 @@ pub async fn convert_videos(
     params: VideoConversionParams,
     state: State<'_, ConversionController>,
 ) -> AppResult<String> {
+    // Rate limiting: Only one conversion at a time
+    let _permit = state.conversion_limiter().acquire().await;
     let cancel = state.new_token().await;
+
+    // Validate parameters first
+    validate_conversion_params(&params)?;
 
     let ffmpeg_bin = resolve_ffmpeg_from_convert(&params)?;
     let ffprobe_bin = resolve_ffprobe(&params);
 
     let inputs: Vec<VideoFile> = if !params.files.is_empty() {
-        params
-            .files
-            .iter()
-            .map(|p| {
-                let pb = PathBuf::from(p);
-                let name = pb
-                    .file_name()
-                    .unwrap_or_default()
-                    .to_string_lossy()
-                    .to_string();
-                let size = fs::metadata(&pb).map(|m| m.len()).unwrap_or(0);
-                VideoFile {
-                    path: pb.to_string_lossy().to_string(),
-                    name,
-                    size,
-                    thumbnail: None,
-                }
-            })
-            .collect()
+        let mut video_files = Vec::new();
+        for p in &params.files {
+            let pb = PathBuf::from(p);
+            let name = pb
+                .file_name()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_string();
+            let size = fs::metadata(&pb).await.map(|m| m.len()).unwrap_or(0);
+            video_files.push(VideoFile {
+                path: pb.to_string_lossy().to_string(),
+                name,
+                size,
+                thumbnail: None,
+            });
+        }
+        video_files
     } else {
         list_video_files(params.input_folder.clone(), cancel.clone()).await?
     };
@@ -328,6 +442,22 @@ pub async fn convert_videos(
             return Err(AppError::code_only(AppErrorCode::Cancelled));
         }
 
+        // Security: Validate the file path is within input folder
+        match validate_safe_path(&video_file.path, &params.input_folder) {
+            Ok(p) => p,
+            Err(e) => {
+                let err_evt = ConversionProgress {
+                    current_file: video_file.name.clone(),
+                    current_file_index: index + 1,
+                    total_files,
+                    percentage: 0.0,
+                    status: ConversionStatus::Error,
+                };
+                let _ = app.emit("conversion-progress", &err_evt);
+                eprintln!("Path validation failed for {}: {:?}", video_file.path, e);
+                continue;
+            }
+        };
         let input_path = Path::new(&video_file.path);
 
         if !input_path.is_file() {
@@ -405,6 +535,7 @@ pub async fn convert_videos(
                     parse_creation_time(ct)
                 } else {
                     fs::metadata(&video_file.path)
+                        .await
                         .ok()
                         .and_then(|m| m.modified().ok())
                 };

@@ -6,6 +6,18 @@ import { useMessage } from 'naive-ui';
 import type { AppError } from '@/types';
 import { ConversionStatus, ErrorCode } from '@/types';
 
+// Debounce utility
+function debounce<T extends (...args: any[]) => any>(
+    fn: T,
+    delay: number
+): (...args: Parameters<T>) => void {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    return (...args: Parameters<T>) => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
+}
+
 export function useVideoConversion() {
     const store = useStore();
     const { t } = useI18n();
@@ -24,7 +36,7 @@ export function useVideoConversion() {
         message[type](t(key), { duration, closable: true });
     };
 
-    const scanFolder = async (folderPath?: string | null) => {
+    const scanFolderInternal = async (folderPath?: string | null) => {
         const scanId = ++currentScanId.value;
 
         if (!folderPath) {
@@ -40,7 +52,6 @@ export function useVideoConversion() {
 
         try {
             const files = await videoAPI.getVideoFiles(folderPath);
-
             if (scanId === currentScanId.value) {
                 store.videoFiles = files.map((f, index) => ({ ...f, convert: true, progress: 0, position: index }));
             }
@@ -55,6 +66,9 @@ export function useVideoConversion() {
             }
         }
     };
+
+    // Debounced version to prevent race conditions from rapid folder changes
+    const scanFolder = debounce(scanFolderInternal, 300);
 
     const performConversion = async () => {
         if (selectedFiles.value.length === 0) {
