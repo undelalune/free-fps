@@ -18,15 +18,15 @@ jobs:
           - os: windows-latest
             name: windows
             bundles: nsis
-            extra_args: ""
+            extra_args: --config app/src-tauri/tauri.windows.conf.json
           - os: windows-latest
             name: windows-store
             bundles: nsis
             extra_args: --config app/src-tauri/tauri.microsoftstore.conf.json
-          - os: macos-13
+          - os: macos-15-intel
             name: macos
             bundles: dmg,app
-            extra_args: --target x86_64-apple-darwin
+            extra_args: --target x86_64-apple-darwin --config app/src-tauri/tauri.macos.conf.json
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -37,23 +37,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.19.0
-          cache: npm
-          cache-dependency-path: app/package-lock.json
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Validate lock file (app)
-        working-directory: app
-        shell: bash
-        run: |
-          npm install --package-lock-only
-          if [ -n "$(git status --porcelain package-lock.json)" ]; then
-            echo "package-lock.json is out of sync with package.json. Update it locally and commit."
-            exit 1
-          fi
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            app/src-tauri -> app/src-tauri/target
 
-      - name: Clean install deps (app)
+      - name: Install deps (app)
         working-directory: app
         shell: bash
         run: npm ci --no-audit --no-fund
