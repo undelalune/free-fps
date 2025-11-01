@@ -18,7 +18,7 @@ jobs:
           - os: windows-latest
             name: windows
             bundles: nsis
-            extra_args: ""
+            extra_args: --config app/src-tauri/tauri.windows.conf.json
           - os: windows-latest
             name: windows-store
             bundles: nsis
@@ -26,7 +26,7 @@ jobs:
           - os: macos-15-intel
             name: macos
             bundles: dmg,app
-            extra_args: --target x86_64-apple-darwin
+            extra_args: --target x86_64-apple-darwin --config app/src-tauri/tauri.macos.conf.json
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -38,24 +38,6 @@ jobs:
         with:
           node-version: 22.19.0
 
-      - name: Resolve npm cache dir
-        id: npm-cache
-        shell: bash
-        run: |
-          set -e
-          dir="$(npm config get cache)"
-          mkdir -p "$dir"
-          echo "dir=$dir" >> "$GITHUB_OUTPUT"
-
-      - name: Cache npm (app)
-        if: ${{ hashFiles('app/package-lock.json') != '' }}
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-npm-${{ hashFiles('app/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -65,17 +47,7 @@ jobs:
           workspaces: |
             app/src-tauri -> app/src-tauri/target
 
-      - name: Validate lock file (app)
-        working-directory: app
-        shell: bash
-        run: |
-          npm install --package-lock-only
-          if [ -n "$(git status --porcelain package-lock.json)" ]; then
-            echo "package-lock.json is out of sync with package.json. Update it locally and commit."
-            exit 1
-          fi
-
-      - name: Clean install deps (app)
+      - name: Install deps (app)
         working-directory: app
         shell: bash
         run: npm ci --no-audit --no-fund
