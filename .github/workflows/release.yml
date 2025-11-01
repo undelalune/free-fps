@@ -23,7 +23,7 @@ jobs:
             name: windows-store
             bundles: nsis
             extra_args: --config app/src-tauri/tauri.microsoftstore.conf.json
-          - os: macos-13
+          - os: macos-15-intel
             name: macos
             bundles: dmg,app
             extra_args: --target x86_64-apple-darwin
@@ -37,11 +37,33 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.19.0
-          cache: npm
-          cache-dependency-path: app/package-lock.json
+
+      - name: Resolve npm cache dir
+        id: npm-cache
+        shell: bash
+        run: |
+          set -e
+          dir="$(npm config get cache)"
+          mkdir -p "$dir"
+          echo "dir=$dir" >> "$GITHUB_OUTPUT"
+
+      - name: Cache npm (app)
+        if: ${{ hashFiles('app/package-lock.json') != '' }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            app/src-tauri -> app/src-tauri/target
 
       - name: Validate lock file (app)
         working-directory: app
