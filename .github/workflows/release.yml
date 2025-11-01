@@ -84,9 +84,20 @@ jobs:
         if: matrix.name == 'windows-store'
         shell: bash
         run: |
-          set -e
-          FILE=$(ls app/src-tauri/target/release/bundle/nsis/*_windows.exe | head -n1)
-          cp "$FILE" "app/src-tauri/target/release/bundle/nsis/Free.FPS_x64-setup_windows_store.exe"
+          set -euo pipefail
+          dir="app/src-tauri/target/release/bundle/nsis"
+          if [ ! -d "$dir" ]; then
+            echo "NSIS bundle dir not found: $dir"
+            ls -R app/src-tauri/target/release || true
+            exit 1
+          fi
+          FILE="$(find "$dir" -maxdepth 1 -type f -name "*-setup.exe" | head -n1 || true)"
+          if [ -z "${FILE:-}" ]; then
+            echo "NSIS installer not found in $dir"
+            ls -al "$dir" || true
+            exit 1
+          fi
+          cp "$FILE" "$dir/Free.FPS_x64-setup_windows_store.exe"
 
       - name: Attach Microsoft Store installer (Windows)
         if: matrix.name == 'windows-store'
