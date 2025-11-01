@@ -5,10 +5,12 @@
   "description": "A utility built as an easy-to-use wrapper around ffmpeg for direct video frame rate (FPS) modification.",
   "author": "https://github.com/undelalune",
   "homepage": "https://github.com/undelalune/free-fps",
-
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
+    "release:patch": "standard-version --release-as patch",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
     "dev": "vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
@@ -46,6 +48,25 @@
     "unplugin-vue-components": "^30.0.0",
     "vfonts": "^0.0.3",
     "vite": "^7.1.12",
-    "vue-tsc": "^3.1.2"
+    "vue-tsc": "^3.1.2",
+    "standard-version": "^9.5.0"
+  },
+  "standard-version": {
+    "skip": {
+      "changelog": true
+    },
+    "bumpFiles": [
+      {
+        "filename": "package.json"
+      },
+      {
+        "filename": "src-tauri/tauri.conf.json",
+        "type": "json"
+      },
+      {
+        "filename": "src-tauri/Cargo.toml",
+        "updater": "scripts/cargo-toml-updater.cjs"
+      }
+    ]
   }
 }
