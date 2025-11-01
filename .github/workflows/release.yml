@@ -43,15 +43,20 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Node deps (app)
+      - name: Validate lock file (app)
         working-directory: app
         shell: bash
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
+          npm install --package-lock-only
+          if [ -n "$(git status --porcelain package-lock.json)" ]; then
+            echo "package-lock.json is out of sync with package.json. Update it locally and commit."
+            exit 1
           fi
+
+      - name: Clean install deps (app)
+        working-directory: app
+        shell: bash
+        run: npm ci --no-audit --no-fund
 
       - name: Build and release with Tauri
         uses: tauri-apps/tauri-action@v0
@@ -64,8 +69,8 @@ jobs:
           releaseBody: |
             Downloads:
             - Windows portable: `free-fps.exe`
-            - Windows installer (NSIS): `Free.FPS_x64-setup_windows.exe`
-            - Windows installer (NSIS, Store): `Free.FPS_x64-setup_windows_store.exe`
+            - Windows installer \(NSIS\): `Free.FPS_x64-setup_windows.exe`
+            - Windows installer \(NSIS, Store\): `Free.FPS_x64-setup_windows_store.exe`
             - macOS Intel: `Free.FPS_x64_darwin.dmg`
           releaseDraft: false
           prerelease: false
