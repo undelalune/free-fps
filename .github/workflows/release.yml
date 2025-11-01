@@ -18,15 +18,15 @@ jobs:
           - os: windows-latest
             name: windows
             bundles: nsis
-            extra_args: --config app/src-tauri/tauri.windows.conf.json
+            extra_args: --config src-tauri/tauri.windows.conf.json
           - os: windows-latest
             name: windows-store
             bundles: nsis
-            extra_args: --config app/src-tauri/tauri.microsoftstore.conf.json
+            extra_args: --config src-tauri/tauri.microsoftstore.conf.json
           - os: macos-15-intel
             name: macos
             bundles: dmg,app
-            extra_args: --target x86_64-apple-darwin --config app/src-tauri/tauri.macos.conf.json
+            extra_args: --target x86_64-apple-darwin --config src-tauri/tauri.macos.conf.json
     runs-on: ${{ matrix.os }}
 
     steps:
