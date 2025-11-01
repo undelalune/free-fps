@@ -1,76 +1,100 @@
-  name: Release
+name: Release
 
-  on:
-    push:
-      tags:
-        - "v*"
-    workflow_dispatch:
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
 
-  permissions:
-    contents: write
+permissions:
+  contents: write
 
-  jobs:
-    build-and-release:
-      strategy:
-        fail-fast: false
-        matrix:
-          include:
-            - os: windows-latest
-              bundles: nsis,msi
-              extra_args: ""
-            - os: macos-13
-              bundles: dmg,app
-              extra_args: --target x86_64-apple-darwin
-      runs-on: ${{ matrix.os }}
+jobs:
+  build-and-release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+            bundles: nsis
+            extra_args: ""
+          - os: windows-latest
+            name: windows-store
+            bundles: nsis
+            extra_args: --config app/src-tauri/tauri.microsoftstore.conf.json
+          - os: macos-13
+            name: macos
+            bundles: dmg,app
+            extra_args: --target x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
 
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        - name: Setup Node
-          uses: actions/setup-node@v4
-          with:
-            node-version: 22.19.0
-            cache: npm
-            cache-dependency-path: app/package-lock.json
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+          cache: npm
+          cache-dependency-path: app/package-lock.json
 
-        - name: Setup Rust
-          uses: dtolnay/rust-toolchain@stable
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
 
-        - name: Install Node deps (app)
-          working-directory: app
-          shell: bash
-          run: |
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install
-            fi
+      - name: Install Node deps (app)
+        working-directory: app
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
-        - name: Build and release with Tauri
-          uses: tauri-apps/tauri-action@v0
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            projectPath: app
-            tagName: v__VERSION__
-            releaseName: Free FPS v__VERSION__
-            releaseBody: |
-              Downloads:
-              - Windows portable: `free-fps.exe`
-              - Windows installer \(NSIS\): `Free.FPS_x64-setup_windows.exe`
-              - Windows installer \(MSI\): `Free.FPS_x64_en-US_windows.msi`
-              - macOS Intel: `Free.FPS_x64_darwin.dmg`
-            releaseDraft: false
-            prerelease: false
-            args: --bundles ${{ matrix.bundles }} ${{ matrix.extra_args }}
+      - name: Build and release with Tauri
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: app
+          tagName: v__VERSION__
+          releaseName: Free FPS v__VERSION__
+          releaseBody: |
+            Downloads:
+            - Windows portable: `free-fps.exe`
+            - Windows installer (NSIS): `Free.FPS_x64-setup_windows.exe`
+            - Windows installer (NSIS, Store): `Free.FPS_x64-setup_windows_store.exe`
+            - macOS Intel: `Free.FPS_x64_darwin.dmg`
+          releaseDraft: false
+          prerelease: false
+          args: --bundles ${{ matrix.bundles }} ${{ matrix.extra_args }}
 
-        - name: Attach portable exe (Windows)
-          if: matrix.os == 'windows-latest'
-          uses: softprops/action-gh-release@v2
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            files: app/src-tauri/target/release/*.exe
-            tag_name: ${{ github.ref_name }}
-            fail_on_unmatched_files: true
+      - name: Attach portable exe (Windows)
+        if: matrix.name == 'windows'
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: app/src-tauri/target/release/*.exe
+          tag_name: ${{ github.ref_name }}
+          fail_on_unmatched_files: true
+
+      - name: Prepare Store EXE name
+        if: matrix.name == 'windows-store'
+        shell: bash
+        run: |
+          set -e
+          FILE=$(ls app/src-tauri/target/release/bundle/nsis/*_windows.exe | head -n1)
+          cp "$FILE" "app/src-tauri/target/release/bundle/nsis/Free.FPS_x64-setup_windows_store.exe"
+
+      - name: Attach Microsoft Store installer (Windows)
+        if: matrix.name == 'windows-store'
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: app/src-tauri/target/release/bundle/nsis/Free.FPS_x64-setup_windows_store.exe
+          tag_name: ${{ github.ref_name }}
+          fail_on_unmatched_files: true
