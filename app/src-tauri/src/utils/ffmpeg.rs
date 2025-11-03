@@ -4,11 +4,16 @@ use chrono::{DateTime, Utc};
 use regex::Regex;
 use serde::Deserialize;
 use std::process::Stdio;
-use tokio::{fs, io::AsyncBufReadExt, process::Command, time::{timeout, Duration}};
+use tokio::{
+    fs,
+    io::AsyncBufReadExt,
+    process::Command,
+    time::{timeout, Duration},
+};
 use tokio_util::sync::CancellationToken;
 
 const DEFAULT_CONVERSION_TIMEOUT_SECS: u64 = 3600; // 1 hour default timeout
-// ===== ffprobe parsing =====
+                                                   // ===== ffprobe parsing =====
 
 #[derive(Debug, Deserialize)]
 struct FfprobeJson {
@@ -368,7 +373,7 @@ fn build_command_preview(
     output: &str,
     target_fps: f32,
     setpts: f64,
-    threads: usize,
+    threads: Option<usize>,
     video_args: &[String],
     audio_args: &[String],
     meta_creation_time: Option<&String>,
@@ -384,8 +389,10 @@ fn build_command_preview(
     parts.push(target_fps.to_string());
     parts.extend(video_args.iter().cloned());
     parts.extend(audio_args.iter().cloned());
-    parts.push("-threads".to_string());
-    parts.push(threads.to_string());
+    if let Some(t) = threads {
+        parts.push("-threads".to_string());
+        parts.push(t.to_string());
+    }
     if let Some(ct) = meta_creation_time {
         parts.push("-metadata".to_string());
         parts.push(format!(r#"creation_time={}"#, ct));
@@ -403,7 +410,7 @@ fn build_ffmpeg_command(
     output: &str,
     target_fps: f32,
     setpts: f64,
-    threads: usize,
+    threads: Option<usize>,
     video_args: Vec<String>,
     audio_args: Vec<String>,
     meta_creation_time: Option<String>,
@@ -419,9 +426,11 @@ fn build_ffmpeg_command(
         .arg("-r")
         .arg(format!("{}", target_fps))
         .args(video_args)
-        .args(audio_args)
-        .arg("-threads")
-        .arg(threads.to_string());
+        .args(audio_args);
+
+    if let Some(t) = threads {
+        cmd.arg("-threads").arg(t.to_string());
+    }
 
     if let Some(ct) = meta_creation_time {
         cmd.arg("-metadata").arg(format!(r#"creation_time={}"#, ct));
@@ -553,7 +562,11 @@ where
 
     let audio_args = build_audio_args(opts.keep_audio, opts.audio_bitrate, timings.atempo).await?;
 
-    let threads = threads_from_cpu_limit(opts.cpu_limit);
+    let threads_opt = if opts.cpu_limit == Some(100) {
+        None
+    } else {
+        Some(threads_from_cpu_limit(opts.cpu_limit))
+    };
     let meta_creation_time = creation_time_for_input(&probe, opts.input).await;
 
     // Preview + log
@@ -563,7 +576,7 @@ where
         opts.output,
         opts.target_fps,
         timings.setpts,
-        threads,
+        threads_opt,
         &video_args,
         &audio_args,
         meta_creation_time.as_ref(),
@@ -577,7 +590,7 @@ where
         opts.output,
         opts.target_fps,
         timings.setpts,
-        threads,
+        threads_opt,
         video_args,
         audio_args,
         meta_creation_time.clone(),
@@ -668,22 +681,27 @@ where
     // Add timeout protection (1 hour default, can be made configurable)
     let conversion_future = convert_video_with_progress_impl(opts, on_progress, cancel.clone());
     let timeout_duration = Duration::from_secs(DEFAULT_CONVERSION_TIMEOUT_SECS);
-    
+
     match timeout(timeout_duration, conversion_future).await {
-        Ok(result) => {
-            match result {
-                Ok(v) => Ok(v),
-                Err(e) => {
-                    if let AppErrorCode::Cancelled = e.code {
-                        Err("Cancelled".to_string())
-                    } else {
-                        Err((e.code as u16).to_string())
-                    }
+        Ok(result) => match result {
+            Ok(v) => Ok(v),
+            Err(e) => {
+                if let AppErrorCode::Cancelled = e.code {
+                    Err("Cancelled".to_string())
+                } else {
+                    Err((e.code as u16).to_string())
                 }
             }
-        }
+        },
         Err(_) => {
-            let _ = log_error("ConversionTimeout", &format!("Conversion exceeded {} seconds", DEFAULT_CONVERSION_TIMEOUT_SECS)).await;
+            let _ = log_error(
+                "ConversionTimeout",
+                &format!(
+                    "Conversion exceeded {} seconds",
+                    DEFAULT_CONVERSION_TIMEOUT_SECS
+                ),
+            )
+            .await;
             cancel.cancel(); // Trigger cancellation
             Err((AppErrorCode::FfmpegFailed as u16).to_string())
         }
