@@ -112,7 +112,7 @@ jobs:
         with:
           inlineScript: |
             MSI_FILE=$(ls ./msi/*.msi | head -n 1)
-            echo "Uploading $MSI_FILE to container '$AZURE_CONTAINER_NAME' as 'Free.FPS_x64_en-US_windows-del.msi'"
+            echo "Uploading $MSI_FILE to container '$AZURE_CONTAINER_NAME' as 'Free.FPS_x64_en-US_windows.msi'"
             az storage blob upload \
               --overwrite true \
               --account-name "$AZURE_STORAGE_ACCOUNT" \
