@@ -20,9 +20,12 @@
   },
   "bundle": {
     "resources": [
+      "licenses/*"
+    ],
+    "externalBin": [
       "binaries/ffmpeg",
       "binaries/ffprobe",
-      "licenses/*"
+      "binaries/ffplay"
     ]
   }
 }

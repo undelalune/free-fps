@@ -47,6 +47,112 @@ jobs:
             npm install
           fi
 
+      # Cache FFmpeg archive for Windows
+      - name: Cache FFmpeg downloads (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache@v4
+        with:
+          path: app/src-tauri/.cache/ffmpeg/windows
+          key: ffmpeg-win64-9bcab687db3f6457469740b559b5f9d804cd84036d6882aaa2007715205e6e90
+          restore-keys: |
+            ffmpeg-win64-
+
+      # Download, verify, and extract only the required files for Windows
+      - name: Prepare FFmpeg (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Base = "app/src-tauri"
+          $Cache = "$Base/.cache/ffmpeg/windows"
+          $BinOut = "$Base/binaries"
+          New-Item -ItemType Directory -Force -Path $Cache, $BinOut | Out-Null
+
+          $Url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip"
+          $Zip = Join-Path $Cache "ffmpeg-master-latest-win64-gpl-shared.zip"
+          if (-not (Test-Path $Zip)) {
+            Invoke-WebRequest -Uri $Url -OutFile $Zip -UseBasicParsing
+          }
+
+          # Verify sha256
+          $Expected = "9bcab687db3f6457469740b559b5f9d804cd84036d6882aaa2007715205e6e90"
+          $Hash = (Get-FileHash -Algorithm SHA256 $Zip).Hash.ToLower()
+          if ($Hash -ne $Expected) {
+            throw "Checksum mismatch for FFmpeg zip. Expected $Expected, got $Hash"
+          }
+
+          # Extract zip
+          $Tmp = Join-Path $Cache "win-extract"
+          if (Test-Path $Tmp) { Remove-Item -Recurse -Force $Tmp }
+          Expand-Archive -Path $Zip -DestinationPath $Tmp -Force
+
+          # Copy only required files from /bin
+          $InnerBin = Join-Path $Tmp "ffmpeg-master-latest-win64-gpl-shared\bin"
+          if (-not (Test-Path $InnerBin)) {
+            throw "Inner bin folder not found: $InnerBin"
+          }
+
+          # Clean output to ensure no unnecessary files
+          Get-ChildItem -Path $BinOut -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse
+
+          $Files = @(
+            "avcodec-62.dll",
+            "avdevice-62.dll",
+            "avfilter-11.dll",
+            "avformat-62.dll",
+            "avutil-60.dll",
+            "ffmpeg.exe",
+            "ffplay.exe",
+            "ffprobe.exe",
+            "swresample-6.dll",
+            "swscale-9.dll"
+          )
+          foreach ($f in $Files) {
+            Copy-Item -Force (Join-Path $InnerBin $f) $BinOut
+          }
+          Get-ChildItem $BinOut | ForEach-Object { Write-Host "Prepared $($_.Name)" }
+
+      # Cache FFmpeg archives for macOS
+      - name: Cache FFmpeg downloads (macOS)
+        if: matrix.os == 'macos-13'
+        uses: actions/cache@v4
+        with:
+          path: app/src-tauri/.cache/ffmpeg/macos
+          key: ffmpeg-macos-evermeet-8.0
+          restore-keys: |
+            ffmpeg-macos-
+
+      # Download, extract, chmod +x, and de-quarantine FFmpeg for macOS
+      - name: Prepare FFmpeg sidecars (macOS)
+        if: matrix.os == 'macos-13'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BASE="app/src-tauri"
+          CACHE="$BASE/.cache/ffmpeg/macos"
+          BIN="$BASE/binaries"
+          mkdir -p "$CACHE" "$BIN"
+
+          FFMPEG_URL="https://evermeet.cx/ffmpeg/ffmpeg-8.0.zip"
+          FFPROBE_URL="https://evermeet.cx/ffmpeg/ffprobe-8.0.zip"
+          FFPLAY_URL="https://evermeet.cx/ffmpeg/ffplay-8.0.zip"
+
+          [ -f "$CACHE/ffmpeg-8.0.zip" ]  || curl -L --retry 3 -o "$CACHE/ffmpeg-8.0.zip"  "$FFMPEG_URL"
+          [ -f "$CACHE/ffprobe-8.0.zip" ] || curl -L --retry 3 -o "$CACHE/ffprobe-8.0.zip" "$FFPROBE_URL"
+          [ -f "$CACHE/ffplay-8.0.zip" ]  || curl -L --retry 3 -o "$CACHE/ffplay-8.0.zip"  "$FFPLAY_URL"
+
+          # Clean output to ensure no unnecessary files
+          rm -f "$BIN/"* || true
+
+          unzip -o "$CACHE/ffmpeg-8.0.zip"  -d "$BIN"
+          unzip -o "$CACHE/ffprobe-8.0.zip" -d "$BIN"
+          unzip -o "$CACHE/ffplay-8.0.zip"  -d "$BIN"
+
+          chmod +x "$BIN/ffmpeg" "$BIN/ffprobe" "$BIN/ffplay" || true
+          xattr -dr com.apple.quarantine "$BIN/ffmpeg" "$BIN/ffprobe" "$BIN/ffplay" 2>/dev/null || true
+          ls -la "$BIN"
+
       - name: Build with Tauri (no release)
         if: github.event_name == 'workflow_dispatch'
         uses: tauri-apps/tauri-action@v0
@@ -66,8 +172,8 @@ jobs:
           releaseBody: |
             Downloads:
             - Windows portable: `free-fps.exe`
-            - Windows installer \(NSIS\): `Free.FPS_x64-setup_windows.exe`
-            - Windows installer \(MSI\): `Free.FPS_x64_en-US_windows.msi`
+            - Windows installer (NSIS): `Free.FPS_x64-setup_windows.exe`
+            - Windows installer (MSI): `Free.FPS_x64_en-US_windows.msi`
             - macOS Intel: `Free.FPS_x64_darwin.dmg`
           releaseDraft: false
           prerelease: false

@@ -43,17 +43,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": [
-      "binaries/ffmpeg.exe",
-      "binaries/ffprobe.exe",
-      "binaries/avcodec-62.dll",
-      "binaries/avdevice-62.dll",
-      "binaries/avfilter-11.dll",
-      "binaries/avformat-62.dll",
-      "binaries/avutil-60.dll",
-      "binaries/swresample-6.dll",
-      "binaries/swscale-9.dll",
-      "licenses/*"
-    ]
+    "resources": ["binaries/*", "licenses/*"]
   }
 }
