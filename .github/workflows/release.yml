@@ -68,14 +68,14 @@ jobs:
           $BinOut = "$Base/binaries"
           New-Item -ItemType Directory -Force -Path $Cache, $BinOut | Out-Null
 
-          $Url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip"
-          $Zip = Join-Path $Cache "ffmpeg-master-latest-win64-gpl-shared.zip"
+          $Url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-11-04-13-14/ffmpeg-N-121640-g08eda05967-win64-gpl-shared.zip"
+          $Zip = Join-Path $Cache "ffmpeg-N-121640-g08eda05967-win64-gpl-shared.zip"
           if (-not (Test-Path $Zip)) {
             Invoke-WebRequest -Uri $Url -OutFile $Zip -UseBasicParsing
           }
 
           # Verify sha256
-          $Expected = "9bcab687db3f6457469740b559b5f9d804cd84036d6882aaa2007715205e6e90"
+          $Expected = "90197b4845b87d74401ddb34ae9f6cce5e1fa59ca544c789f36ff1d3efa0d132"
           $Hash = (Get-FileHash -Algorithm SHA256 $Zip).Hash.ToLower()
           if ($Hash -ne $Expected) {
             throw "Checksum mismatch for FFmpeg zip. Expected $Expected, got $Hash"
@@ -87,7 +87,7 @@ jobs:
           Expand-Archive -Path $Zip -DestinationPath $Tmp -Force
 
           # Copy only required files from /bin
-          $InnerBin = Join-Path $Tmp "ffmpeg-master-latest-win64-gpl-shared\bin"
+          $InnerBin = Join-Path $Tmp "ffmpeg-N-121640-g08eda05967-win64-gpl-shared\bin"
           if (-not (Test-Path $InnerBin)) {
             throw "Inner bin folder not found: $InnerBin"
           }
@@ -133,24 +133,31 @@ jobs:
           CACHE="$BASE/.cache/ffmpeg/macos"
           BIN="$BASE/binaries"
           mkdir -p "$CACHE" "$BIN"
-
+      
           FFMPEG_URL="https://evermeet.cx/ffmpeg/ffmpeg-8.0.zip"
           FFPROBE_URL="https://evermeet.cx/ffmpeg/ffprobe-8.0.zip"
           FFPLAY_URL="https://evermeet.cx/ffmpeg/ffplay-8.0.zip"
-
+      
           [ -f "$CACHE/ffmpeg-8.0.zip" ]  || curl -L --retry 3 -o "$CACHE/ffmpeg-8.0.zip"  "$FFMPEG_URL"
           [ -f "$CACHE/ffprobe-8.0.zip" ] || curl -L --retry 3 -o "$CACHE/ffprobe-8.0.zip" "$FFPROBE_URL"
           [ -f "$CACHE/ffplay-8.0.zip" ]  || curl -L --retry 3 -o "$CACHE/ffplay-8.0.zip"  "$FFPLAY_URL"
-
-          # Clean output to ensure no unnecessary files
+      
           rm -f "$BIN/"* || true
-
+      
           unzip -o "$CACHE/ffmpeg-8.0.zip"  -d "$BIN"
           unzip -o "$CACHE/ffprobe-8.0.zip" -d "$BIN"
           unzip -o "$CACHE/ffplay-8.0.zip"  -d "$BIN"
-
+      
           chmod +x "$BIN/ffmpeg" "$BIN/ffprobe" "$BIN/ffplay" || true
           xattr -dr com.apple.quarantine "$BIN/ffmpeg" "$BIN/ffprobe" "$BIN/ffplay" 2>/dev/null || true
+      
+          # Create target-suffixed copies expected by Tauri when using --target x86_64-apple-darwin
+          cp "$BIN/ffmpeg"  "$BIN/ffmpeg-x86_64-apple-darwin"
+          cp "$BIN/ffprobe" "$BIN/ffprobe-x86_64-apple-darwin"
+          cp "$BIN/ffplay"  "$BIN/ffplay-x86_64-apple-darwin"
+          chmod +x "$BIN/ffmpeg-x86_64-apple-darwin" "$BIN/ffprobe-x86_64-apple-darwin" "$BIN/ffplay-x86_64-apple-darwin" || true
+          xattr -dr com.apple.quarantine "$BIN/ffmpeg-x86_64-apple-darwin" "$BIN/ffprobe-x86_64-apple-darwin" "$BIN/ffplay-x86_64-apple-darwin" 2>/dev/null || true
+      
           ls -la "$BIN"
 
       - name: Build with Tauri (no release)
