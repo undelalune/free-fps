@@ -23,7 +23,6 @@ const toggleShowHelp = () => {
           @click="toggleShowHelp"
           @mouseenter="store.heartIsBeating = true"
           @mouseleave="store.heartIsBeating = false"
-          :disabled="store.processing"
       >
         <n-icon size="18">
           <Help/>

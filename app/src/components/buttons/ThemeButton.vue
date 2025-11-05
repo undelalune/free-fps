@@ -19,7 +19,6 @@ const store = useStore();
           ghost
           :bordered="false"
           @click="store.switchTheme()"
-          :disabled="store.processing"
       >
         <n-icon size="18">
           <Sun v-if="store.isDarkTheme"/>
