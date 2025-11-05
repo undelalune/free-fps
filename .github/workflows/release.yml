@@ -191,29 +191,44 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $Base = "app/src-tauri"
-          $Release = "$Base/target/release"
-          $Stage = "$Release/portable"
-          $OutZip = "$Release/free-fps_portable.zip"
-
+          $Base    = "app/src-tauri"
+          $Release = Join-Path $Base "target\release"
+          $Stage   = Join-Path $Release "portable"
+          $OutZip  = Join-Path $Release "free-fps_portable.zip"
+          
+          if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
           New-Item -ItemType Directory -Force -Path $Stage | Out-Null
-
+          
           # Find the portable exe and copy as free-fps.exe
-          $Exe = Get-ChildItem "$Release/*.exe" | Where-Object { $_.Name -notmatch 'setup|msi' } | Select-Object -First 1
+          $Exe = Get-ChildItem -Path $Release -Filter *.exe -File |
+            Where-Object { $_.Name -notmatch 'setup|msi' } |
+            Select-Object -First 1
           if (-not $Exe) { throw "Portable exe not found in $Release" }
-          Copy-Item $Exe.FullName "$Stage/free-fps.exe" -Force
-
+          Copy-Item $Exe.FullName (Join-Path $Stage "free-fps.exe") -Force
+          
           # Include FFmpeg sidecars
-          Copy-Item -Recurse -Force "$Base/binaries" "$Stage/binaries"
-
-          # Collect licenses into licenses/
-          $LicDir = "$Stage/licenses"
+          Copy-Item -Recurse -Force (Join-Path $Base "binaries") (Join-Path $Stage "binaries")
+          
+          # Collect licenses into licenses/, excluding release/stage paths
+          $LicDir = Join-Path $Stage "licenses"
           New-Item -ItemType Directory -Force -Path $LicDir | Out-Null
-          Get-ChildItem -Path ".", "app", "app/src-tauri" -Include LICENSE*,COPYING*,NOTICE*,THIRD* -File -Recurse -ErrorAction SilentlyContinue | `
-            Copy-Item -Destination $LicDir -Force
-
+          
+          $ReleaseFull = (Resolve-Path $Release).Path
+          $StageFull   = (Resolve-Path $Stage).Path
+          $LicenseFiles = Get-ChildItem -Path ".", "app", "app/src-tauri" `
+            -Include LICENSE*,COPYING*,NOTICE*,THIRD* -File -Recurse -ErrorAction SilentlyContinue |
+            Where-Object {
+              $p = $_.FullName
+              -not ($p.StartsWith($StageFull, [System.StringComparison]::OrdinalIgnoreCase)) -and
+              -not ($p.StartsWith($ReleaseFull, [System.StringComparison]::OrdinalIgnoreCase))
+            } | Select-Object -Unique
+          
+          if ($LicenseFiles) {
+            $LicenseFiles | Copy-Item -Destination $LicDir -Force
+          }
+          
           if (Test-Path $OutZip) { Remove-Item $OutZip -Force }
-          Compress-Archive -Path "$Stage/*" -DestinationPath $OutZip -Force
+          Compress-Archive -Path (Join-Path $Stage "*") -DestinationPath $OutZip -Force
           Write-Host "Created $OutZip"
 
       - name: Attach portable.zip (Windows)
