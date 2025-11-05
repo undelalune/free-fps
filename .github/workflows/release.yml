@@ -133,31 +133,31 @@ jobs:
           CACHE="$BASE/.cache/ffmpeg/macos"
           BIN="$BASE/binaries"
           mkdir -p "$CACHE" "$BIN"
-      
+          
           FFMPEG_URL="https://evermeet.cx/ffmpeg/ffmpeg-8.0.zip"
           FFPROBE_URL="https://evermeet.cx/ffmpeg/ffprobe-8.0.zip"
           FFPLAY_URL="https://evermeet.cx/ffmpeg/ffplay-8.0.zip"
-      
+          
           [ -f "$CACHE/ffmpeg-8.0.zip" ]  || curl -L --retry 3 -o "$CACHE/ffmpeg-8.0.zip"  "$FFMPEG_URL"
           [ -f "$CACHE/ffprobe-8.0.zip" ] || curl -L --retry 3 -o "$CACHE/ffprobe-8.0.zip" "$FFPROBE_URL"
           [ -f "$CACHE/ffplay-8.0.zip" ]  || curl -L --retry 3 -o "$CACHE/ffplay-8.0.zip"  "$FFPLAY_URL"
-      
+          
           rm -f "$BIN/"* || true
-      
+          
           unzip -o "$CACHE/ffmpeg-8.0.zip"  -d "$BIN"
           unzip -o "$CACHE/ffprobe-8.0.zip" -d "$BIN"
           unzip -o "$CACHE/ffplay-8.0.zip"  -d "$BIN"
-      
+          
           chmod +x "$BIN/ffmpeg" "$BIN/ffprobe" "$BIN/ffplay" || true
           xattr -dr com.apple.quarantine "$BIN/ffmpeg" "$BIN/ffprobe" "$BIN/ffplay" 2>/dev/null || true
-      
+          
           # Create target-suffixed copies expected by Tauri when using --target x86_64-apple-darwin
           cp "$BIN/ffmpeg"  "$BIN/ffmpeg-x86_64-apple-darwin"
           cp "$BIN/ffprobe" "$BIN/ffprobe-x86_64-apple-darwin"
           cp "$BIN/ffplay"  "$BIN/ffplay-x86_64-apple-darwin"
           chmod +x "$BIN/ffmpeg-x86_64-apple-darwin" "$BIN/ffprobe-x86_64-apple-darwin" "$BIN/ffplay-x86_64-apple-darwin" || true
           xattr -dr com.apple.quarantine "$BIN/ffmpeg-x86_64-apple-darwin" "$BIN/ffprobe-x86_64-apple-darwin" "$BIN/ffplay-x86_64-apple-darwin" 2>/dev/null || true
-      
+          
           ls -la "$BIN"
 
       - name: Build with Tauri (no release)
@@ -186,13 +186,43 @@ jobs:
           prerelease: false
           args: --bundles ${{ matrix.bundles }} ${{ matrix.extra_args }}
 
-      - name: Attach portable exe (Windows)
+      - name: Create portable.zip (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Base = "app/src-tauri"
+          $Release = "$Base/target/release"
+          $Stage = "$Release/portable"
+          $OutZip = "$Release/free-fps_portable.zip"
+
+          New-Item -ItemType Directory -Force -Path $Stage | Out-Null
+
+          # Find the portable exe and copy as free-fps.exe
+          $Exe = Get-ChildItem "$Release/*.exe" | Where-Object { $_.Name -notmatch 'setup|msi' } | Select-Object -First 1
+          if (-not $Exe) { throw "Portable exe not found in $Release" }
+          Copy-Item $Exe.FullName "$Stage/free-fps.exe" -Force
+
+          # Include FFmpeg sidecars
+          Copy-Item -Recurse -Force "$Base/binaries" "$Stage/binaries"
+
+          # Collect licenses into licenses/
+          $LicDir = "$Stage/licenses"
+          New-Item -ItemType Directory -Force -Path $LicDir | Out-Null
+          Get-ChildItem -Path ".", "app", "app/src-tauri" -Include LICENSE*,COPYING*,NOTICE*,THIRD* -File -Recurse -ErrorAction SilentlyContinue | `
+            Copy-Item -Destination $LicDir -Force
+
+          if (Test-Path $OutZip) { Remove-Item $OutZip -Force }
+          Compress-Archive -Path "$Stage/*" -DestinationPath $OutZip -Force
+          Write-Host "Created $OutZip"
+
+      - name: Attach portable.zip (Windows)
         if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: app/src-tauri/target/release/*.exe
+          files: app/src-tauri/target/release/free-fps_portable.zip
           tag_name: ${{ github.ref_name }}
           fail_on_unmatched_files: true
 

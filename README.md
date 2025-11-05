@@ -97,7 +97,7 @@ Download [latest release](https://github.com/undelalune/free-fps/releases/latest
 > This software uses FFmpeg (GPL v3.0). License and source code information available in the app's Help section.
 
 - [GNU GPLv3](app/src-tauri/licenses/LICENSE.txt)
-- [FFMPEG_NOTICE.txt](app/src-tauri/licenses/FFMPEG_NOTICE.txt)
+- [FFMPEG_NOTICE](app/src-tauri/licenses/FFMPEG_NOTICE.txt)
 
 
 [release-img]:     https://img.shields.io/github/v/release/undelalune/free-fps
