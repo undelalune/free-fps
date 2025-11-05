@@ -34,7 +34,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "license": "MIT",
+    "license": "GPL-3.0-only",
     "copyright": "© 2025 undelalune",
     "icon": [
       "icons/32x32.png",
@@ -42,6 +42,18 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
+    ],
+    "resources": [
+      "binaries/ffmpeg.exe",
+      "binaries/ffprobe.exe",
+      "binaries/avcodec-62.dll",
+      "binaries/avdevice-62.dll",
+      "binaries/avfilter-11.dll",
+      "binaries/avformat-62.dll",
+      "binaries/avutil-60.dll",
+      "binaries/swresample-6.dll",
+      "binaries/swscale-9.dll",
+      "licenses/*"
     ]
   }
 }

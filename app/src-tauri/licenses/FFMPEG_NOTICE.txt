@@ -1,0 +1,89 @@
+FFmpeg Notice
+=============
+
+This application includes FFmpeg, licensed under the GNU General Public License v3.0.
+
+FFmpeg Version: N-121640-g08eda05967-20251104
+FFmpeg Website: https://ffmpeg.org
+FFmpeg License: GNU GPL v3.0
+License Text: See LICENSE.txt (included with this application)
+
+WHAT IS FFMPEG?
+FFmpeg is a complete, cross-platform solution to record, convert and stream audio
+and video. It is free software developed by a large community of contributors.
+
+SOURCE CODE AVAILABILITY:
+-------------------------
+The complete source code for FFmpeg is freely available.
+
+You can obtain the FFmpeg source code by:
+
+1. Direct Download:
+   Visit: https://ffmpeg.org/download.html
+   Download: https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
+   (Or specific version: https://ffmpeg.org/releases/ffmpeg-[VERSION].tar.xz)
+
+2. Git Repository:
+   git clone https://git.ffmpeg.org/ffmpeg.git
+
+3. GitHub Mirror:
+   https://github.com/FFmpeg/FFmpeg
+
+4. Request from Developer:
+   If you would like to receive the source code on physical media,
+   please contact: [your email or website]
+
+   We will provide the source code for a charge no more than the cost
+   of physically performing the distribution.
+
+COMPILATION INSTRUCTIONS:
+-------------------------
+To compile FFmpeg from source, follow the instructions at:
+https://trac.ffmpeg.org/wiki/CompilationGuide
+
+
+YOUR RIGHTS UNDER GPL v3:
+--------------------------
+FFmpeg is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation, version 3 of the License.
+
+FFmpeg is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+for more details.
+
+Key rights granted to you:
+• Freedom to run the program for any purpose
+• Freedom to study how the program works and modify it
+• Freedom to redistribute copies
+• Freedom to distribute modified versions
+
+The complete GPL v3 license is included in FFMPEG_LICENSE.txt
+
+
+ADDITIONAL INFORMATION:
+-----------------------
+FFmpeg Copyright: © 2000-2025 The FFmpeg developers
+FFmpeg Contributors: https://ffmpeg.org/developer.html
+
+This application is a separate work from FFmpeg and is not endorsed
+by the FFmpeg project.
+
+
+THIRD-PARTY LIBRARIES IN FFMPEG:
+---------------------------------
+For detailed licensing information about components, see:
+https://ffmpeg.org/legal.html
+
+
+CONTACT:
+--------
+For questions about FFmpeg licensing:
+Visit: https://ffmpeg.org/contact.html
+
+For questions about this application:
+https://github.com/undelalune/free-fps
+
+
+Last Updated: 05/11/2025

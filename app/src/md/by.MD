@@ -1,10 +1,11 @@
-<img src="logo.png" style="border-radius: 8px; margin-right:16px; margin-top:12px; height: 89px;" align="right" alt="Free FPS Logo" />
+<img src="logo.png" style="border-radius: 8px; margin-right:16px; margin-top: 20px; height: 89px;" align="right" alt="Free FPS Logo" />
 
 - [Пра гэтую праграму](#about-this-tool)
-- [З чаго пачаць?](#how-to-start)
-- [Экран налад](#settings-page)
 - [Галоўная старонка](#main-page)
 - [Старонка канвертацыі](#processing-page)
+- [Ліцэнзія](#license)
+- [Старонняе праграмнае забеспячэнне](#3d-party-license)
+- [Зыходны код](#source-code)
 
 ---
 
@@ -19,8 +20,8 @@
 Важна:
 Праграма разлічана на карыстальнікаў, якія разумеюць, што робіць канвертацыя FPS. Змена частаты кадраў уплывае на хуткасць і працягласць відэа. Інструмент не змяняе арыгінальныя файлы!
 
-Гэта праграма распаўсюджваецца бясплатна ("As Is") па ліцэнзіі MIT.
-Калі вы жадаеце падтрымаць аўтара, можаце зрабіць гэта тут:
+Гэта праграма распаўсюджваецца бясплатна ("As Is") на ўмовах ліцэнзіі GNU General Public License v3.0 (GPL-3.0).
+Калі вы жадаеце падтрымасьць аўтара, можаце зрабіць гэта тут:
 
 <a href="https://buymeacoffee.com/undelalune" target="_blank" rel="noopener" title="Go to buymeacoffee.com">
 <img src="bmc-logo.svg" style="float: right; margin-right:24px; height: 36px;" alt="bmc Logo" />
@@ -31,38 +32,6 @@
 </a>
 
 <br>
-
----
-
-<a id="how-to-start"></a>
-### З чаго пачаць?
-
-Пасля запуску праграма аўтаматычна правярае, ці даступныя пакеты ffmpeg і ffprobe ў сістэмным `PATH` і прапануе выкарыстоўваць іх.
-Калі іх няма, загрузіце FFmpeg з афіцыйнага сайта і распакуйце архіў.<br>
-Windows: <a href="https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" target="_blank" rel="noopener" title="Download ffmpeg/ffprobe archive">ffmpeg/ffprobe</a><br>
-macOS: <a href="https://evermeet.cx/ffmpeg/ffmpeg-8.0.zip" target="_blank" rel="noopener" title="Download ffmpeg">ffmpeg</a> |
-<a href="https://evermeet.cx/ffmpeg/ffprobe-8.0.zip" target="_blank" rel="noopener" title="Download ffprobe archive">ffprobe</a>
-
-Устаноўка ў сістэму неабавязковая - дастаткова ўказаць шляхі да выканальных файлаў у наладках прыкладання.
-
-- **Windows**: `bin/ffmpeg.exe` і `bin/ffprobe.exe`
-- **macOS**: `ffmpeg` і `ffprobe` (у каранёвай папцы)
-
-Пасля гэтага можна прыступаць да працы.
-
----
-
-<a id="settings-page"></a>
-### Экран налад
-
-- **Шлях да ffmpeg** - шлях да выканальнага файла `ffmpeg`. Гэта поле абавязковае.
-- **Шлях да ffprobe** - шлях да `ffprobe`. Неабавязкова, але пажадана для больш стабільнай працы.
-- **Выкарыстоўваць усталяваны (ffmpeg / ffprobe)** - становіцца даступным, калі знойдзены ўсталяваныя версіі.
-- **Мова** - выберыце мову інтэрфейсу.
-- **Тэма** - выберыце каляровую тэму праграмыы.
-- **Скінуць наладкі** - скінуць захаваныя дадзеныя (толькі значэнні палёў формы).
-
-Праграма аўтаматычна захоўвае вашы налады - паўторна ўводзіць іх пры кожным запуску не трэба.
 
 ---
 
@@ -94,4 +63,35 @@ macOS: <a href="https://evermeet.cx/ffmpeg/ffmpeg-8.0.zip" target="_blank" rel="
 
 ---
 
-<p style="text-align:center;">© 2025 undelalune</p>
+<a id="license"></a>
+### Ліцэнзія
+Free FPS — гэта свабоднае праграмнае забеспячэнне пад ліцэнзіяй **GNU General Public License v3.0**. Вам дазваляецца:
+- Выкарыстоўваць праграму для любых мэтаў
+- Вучыцца і змяняць зыходны код
+- Распаўсюджваць копіі
+- Распаўсюджваць змененыя версіі (згодна з GPL v3)
+
+Прачытайце [ліцэнзію](FreeFPSLicense) праекта.
+
+---
+
+<a id="3d-party-license"></a>
+### Старонняе праграмнае забеспячэнне
+Гэта праграма выкарыстоўвае **FFmpeg**, якое таксама ліцэнзавана паводле GPL v3.0.
+- Сайт FFmpeg: https://ffmpeg.org
+- Прачытайце [FFmpeg Notice](FFmpegNotice)
+- Прачытайце [FFmpeg License](FFmpegLicense)
+
+---
+
+<a id="source-code"></a>
+### Зыходны код
+
+Поўны зыходны код даступны па адрасе:  
+https://github.com/undelalune/free-fps
+
+<br/>
+
+---
+
+<p style="text-align:center;">Copyright © 2025 undelalune</p>

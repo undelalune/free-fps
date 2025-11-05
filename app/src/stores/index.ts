@@ -9,12 +9,6 @@ export const useStore = defineStore('index', () => {
     const settings = useSettingsStore();
     const {
         useDarkTheme,
-        ffmpegPath,
-        ffprobePath,
-        ffmpegInstalledVersion,
-        ffprobeInstalledVersion,
-        ffmpegUseInstalled,
-        ffprobeUseInstalled,
         userLocale,
         loadAllSettings,
         inputFolder,
@@ -29,7 +23,6 @@ export const useStore = defineStore('index', () => {
         cpuLimit,
         resetDefaults,
         setLocale,
-        applyToolsStatus,
     } = settings;
 
     const isDarkTheme = computed(() => useDarkTheme?.value);
@@ -44,13 +37,6 @@ export const useStore = defineStore('index', () => {
 
     const theme = computed(() => (useDarkTheme.value ? darkThemeOverrides : lightThemeOverrides));
     const locale = computed(() => i18n.locale.value as Locale);
-    const ffparams = computed(() => ({
-        ffmpeg_path: ffmpegPath.value,
-        ffprobe_path: ffprobePath.value,
-        ffmpeg_use_installed: ffmpegUseInstalled.value,
-        ffprobe_use_installed: ffprobeUseInstalled.value,
-    }));
-
 
     const switchTheme = () => {
         useDarkTheme.value = !useDarkTheme.value;
@@ -73,12 +59,6 @@ export const useStore = defineStore('index', () => {
     return {
         // state
         theme,
-        ffmpegPath,
-        ffprobePath,
-        ffmpegInstalledVersion,
-        ffprobeInstalledVersion,
-        ffmpegUseInstalled,
-        ffprobeUseInstalled,
         isDarkTheme,
         locale,
         storeInitialized,
@@ -99,12 +79,10 @@ export const useStore = defineStore('index', () => {
         statusMessage,
         showHelp,
         heartIsBeating,
-        ffparams,
         // actions
         init,
         switchTheme,
         setLocale,
         resetSettings,
-        applyToolsStatus,
     };
 });

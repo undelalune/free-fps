@@ -2,7 +2,8 @@
 name = "free-fps"
 version = "1.0.2"
 description = "Free FPS"
-authors = ["you"]
+authors = ["undelalune"]
+license = "GPL-3-only"
 edition = "2021"
 
 [lib]
@@ -32,7 +33,6 @@ regex = "1.12.2"
 num_cpus = "1.17.0"
 open = "5.3.2"
 
-# Added for timestamp handling and metadata parsing
 chrono = { version = "0.4.42", features = ["serde"] }
 filetime = "0.2.26"
 base64 = "0.22.1"
@@ -42,10 +42,8 @@ libc = "0.2.177"
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
 
-# Windows-only dependency for setting file creation time
-# toml
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.59", features = [
+windows = { version = "0.62.2", features = [
     "Foundation",
     "Storage",
     "Storage_FileProperties",
@@ -53,7 +51,7 @@ windows = { version = "0.59", features = [
     "Win32_System_WinRT",
     "Win32_Foundation",
 ] }
-windows-sys = { version = "0.59", features = [
+windows-sys = { version = "0.61.2", features = [
     "Win32_Foundation",
     "Win32_Storage_FileSystem",
     "Win32_System_Threading",

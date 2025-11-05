@@ -15,6 +15,9 @@ export default {
         helpTitle: "Інструкцыя карыстальніка",
         closeAppDialogTitle: "Канвертацыя відэа яшчэ не скончана. Вы ўпэўненыя, што хочаце яе скасаваць і выйсці?",
         ty: "Я$хачу$падзякаваць$аўтару!",
+        darkTheme: "Цёмная тэма",
+        lightTheme: "Светлая тэма",
+        language: "Мова",
     },
     errors: {
         1: "Аперацыя скасаваная карыстальнікам.",
@@ -34,6 +37,7 @@ export default {
         25: "Немагчыма прачытаць метаданыя відэа.",
         26: "Выяўлена спроба выхаду за межы дазволенай дырэкторыі (path traversal). З меркаванняў бяспекі шлях да файла знаходзіцца па-за дазволенай тэчкай.",
         27: "Няправільны шлях да файла. Пераканайцеся, што шлях існуе і даступны.",
+        28: "Адсутнічае файл ліцэнзіі.",
     },
     mainView: {
         setup: {
@@ -84,31 +88,5 @@ export default {
             operationCompletedWithErrors: "Завершана з памылкамі.",
             previewNotAvailable: "Выява недаступная. Файл пашкоджаны або не падтрымліваецца.",
         }
-    },
-    settingsView: {
-        pathToFfmpeg: "Шлях да ffmpeg:",
-        pathToFfprobe: "Шлях да ffprobe:",
-        ffmpegPlaceholder: "Абярыце ffmpeg",
-        ffprobePlaceholder: "Абярыце ffprobe",
-        darkTheme: "Цёмная тэма",
-        lightTheme: "Светлая тэма",
-        chooseLanguage: "Мова:",
-        useInstalled: "Выкарыстоўваць усталяваны",
-        resetSettings: "Скінуць налады",
-        resetSettingsDesc: "Скіне ўсе налады па змаўчанні.",
-        helpText: "Калі нешта не зразумела - прачытайце інструкцыю.",
-        openHelp: "Адкрыць дапамогу",
-        executables: "Інструменты FFmpeg",
-        wrongExecutable: "Выбраны няправільны выканальны файл {tool}."
-    },
-    fFFoundDialog: {
-        foundFfToolsTitle: "Знойдзены ffmpeg / ffprobe",
-        foundFfToolsDesc: "Знойдзены наступныя ўстаноўкі:",
-        noVersion: "Не знойдзена",
-        useInstalled: "Выкарыстоўваць усталяваны",
-        useCustom: "Выкарыстоўваць свой",
-        noFfToolsTitle: "ffmpeg і ffprobe не знойдзены",
-        noFfToolsDesc: "Укажыце шляхі ў наладах.",
-        goToSettings: "Адкрыць налады"
     }
 }

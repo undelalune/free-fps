@@ -41,6 +41,12 @@ const canConvert = computed(() =>
     !store.folderScanning && selectedFiles.value.some(v => v.status !== ConversionStatus.Success)
 );
 
+watch (() => store.processing, (newVal) => {
+  if (newVal && store.processingPos === 0) {
+    scrollToProcessing(0);
+  }
+});
+
 watch(() => store.processingPos, (newVal) => {
   if (newVal) {
     setTimeout(()=> {
@@ -92,7 +98,6 @@ const toggleSelectAll = (checked: boolean) => {
                      :key="v.name"
                      :id="'vi_' + v.position"
                      :videoItem="v"
-                     :ff-params="store.ffparams"
                      :processing="store.processing"/>
         </n-scrollbar>
 

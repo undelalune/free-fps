@@ -43,7 +43,7 @@ const darkThemeOverrides: GlobalThemeOverrides = {
         // optionTextColor: '#eeee00',
         // optionTextColorPressed: '#eeee00',
         // optionTextColorDisabled: '#555555',
-        optionTextColorActive: '#D1F8EF',
+        // optionTextColorActive: '#D1F8EF',
     },
     Switch: {
         // ...darkTheme.Select,
@@ -64,6 +64,9 @@ const darkThemeOverrides: GlobalThemeOverrides = {
         maxWidth: '400px',
         colorWarning: '#0c0e10',
         iconColorWarning: '#ff9B2F',
+    },
+    Dropdown: {
+        optionColorActive: '#4f4f4f',
     }
 }
 

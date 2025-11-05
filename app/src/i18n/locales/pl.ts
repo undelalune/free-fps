@@ -15,6 +15,9 @@ export default {
         helpTitle: "Instrukcja użytkownika",
         closeAppDialogTitle: "Konwersja wideo nie została jeszcze zakończona. Czy na pewno chcesz ją przerwać i wyjść?",
         ty: "Chcę$podziękować$autorowi!",
+        darkTheme: "Ciemny motyw",
+        lightTheme: "Jasny motyw",
+        language: "Język",
     },
     errors: {
         1: "Operacja anulowana przez użytkownika.",
@@ -34,6 +37,7 @@ export default {
         25: "Nie można odczytać metadanych wideo.",
         26: "Wykryto próbę wyjścia poza dozwolony katalog (path traversal). Ze względów bezpieczeństwa ścieżka pliku jest poza katalogiem dozwolonym.",
         27: "Nieprawidłowa ścieżka pliku. Upewnij się, że ścieżka istnieje i jest dostępna.",
+        28: "Brak pliku licencji.",
     },
     mainView: {
         setup: {
@@ -84,31 +88,5 @@ export default {
             operationCompletedWithErrors: "Zakończono z błędami.",
             previewNotAvailable: "Obraz podglądu niedostępny. Plik uszkodzony lub nieobsługiwany.",
         }
-    },
-    settingsView: {
-        pathToFfmpeg: "Ścieżka do ffmpeg:",
-        pathToFfprobe: "Ścieżka do ffprobe:",
-        ffmpegPlaceholder: "Wybierz ffmpeg",
-        ffprobePlaceholder: "Wybierz ffprobe",
-        darkTheme: "Ciemny motyw",
-        lightTheme: "Jasny motyw",
-        chooseLanguage: "Język:",
-        useInstalled: "Użyj zainstalowanego",
-        resetSettings: "Resetuj ustawienia",
-        resetSettingsDesc: "Przywróci ustawienia domyślne.",
-        helpText: "Jeśli coś jest niejasne, zajrzyj do instrukcji.",
-        openHelp: "Otwórz pomoc",
-        executables: "Narzędzia FFmpeg",
-        wrongExecutable: "Wybrano nieprawidłowy plik wykonywalny {tool}."
-    },
-    fFFoundDialog: {
-        foundFfToolsTitle: "Znaleziono ffmpeg / ffprobe",
-        foundFfToolsDesc: "Znaleziono następujące instalacje:",
-        noVersion: "Nie znaleziono",
-        useInstalled: "Użyj zainstalowanego",
-        useCustom: "Użyj własnej wersji",
-        noFfToolsTitle: "Nie znaleziono ffmpeg ani ffprobe",
-        noFfToolsDesc: "Ustaw ścieżki w ustawieniach.",
-        goToSettings: "Przejdź do ustawień"
     }
 }

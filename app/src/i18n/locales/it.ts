@@ -14,7 +14,10 @@ export default {
         help: "Aiuto",
         helpTitle: "Istruzioni per l'utente",
         closeAppDialogTitle: "La conversione video non è ancora terminata. Vuoi davvero annullarla e uscire?",
-        ty: "Vorrei$ringraziare$l'autore!"
+        ty: "Vorrei$ringraziare$l'autore!",
+        darkTheme: "Tema scuro",
+        lightTheme: "Tema chiaro",
+        language: "Lingua",
     },
     errors: {
         1: "Operazione annullata dall’utente.",
@@ -34,6 +37,7 @@ export default {
         25: "Impossibile leggere i metadati video.",
         26: "Rilevato tentativo di uscita dalla directory consentita (path traversal). Per sicurezza, il percorso del file è fuori dalla cartella autorizzata.",
         27: "Percorso file non valido. Assicurati che il percorso esista e sia accessibile.",
+        28: "Manca il file di licenza.",
     },
     mainView: {
         setup: {
@@ -84,31 +88,5 @@ export default {
             operationCompletedWithErrors: "Conversione completata con errori.",
             previewNotAvailable: "Immagine non disponibile. File danneggiato o non supportato.",
         }
-    },
-    settingsView: {
-        pathToFfmpeg: "Percorso ffmpeg:",
-        pathToFfprobe: "Percorso ffprobe:",
-        ffmpegPlaceholder: "Seleziona ffmpeg",
-        ffprobePlaceholder: "Seleziona ffprobe",
-        darkTheme: "Tema scuro",
-        lightTheme: "Tema chiaro",
-        chooseLanguage: "Lingua:",
-        useInstalled: "Usa versione installata",
-        resetSettings: "Reimposta impostazioni",
-        resetSettingsDesc: "Ripristina i valori predefiniti.",
-        helpText: "Se qualcosa non è chiaro, consulta la guida utente.",
-        openHelp: "Apri aiuto",
-        executables: "Strumenti FFmpeg",
-        wrongExecutable: "File eseguibile {tool} non valido selezionato."
-    },
-    fFFoundDialog: {
-        foundFfToolsTitle: "ffmpeg / ffprobe trovati",
-        foundFfToolsDesc: "Sono state trovate le seguenti installazioni:",
-        noVersion: "Non trovato",
-        useInstalled: "Usa installato",
-        useCustom: "Usa personalizzato",
-        noFfToolsTitle: "ffmpeg e ffprobe non trovati",
-        noFfToolsDesc: "Imposta i percorsi nelle impostazioni.",
-        goToSettings: "Vai alle impostazioni"
     }
 }

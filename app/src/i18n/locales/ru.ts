@@ -15,6 +15,9 @@ export default {
         helpTitle: "Инструкция пользователя",
         closeAppDialogTitle: "Конвертация видео еще не завершена. Вы уверены, что хотите отменить её и выйти?",
         ty: "Я$хочу$поблагодарить$автора!",
+        darkTheme: "Тёмная тема",
+        lightTheme: "Светлая тема",
+        language: "Язык",
     },
     errors: {
         1: "Операция отменена пользователем.",
@@ -34,6 +37,7 @@ export default {
         25: "Не удалось прочитать метаданные видео.",
         26: "Обнаружена попытка выхода за пределы разрешённого каталога (path traversal). По соображениям безопасности путь к файлу находится вне разрешённой директории.",
         27: "Неверный путь к файлу. Убедитесь, что путь существует и доступен.",
+        28: "Отсутствует файл лицензии.",
     },
     mainView: {
         setup: {
@@ -84,31 +88,5 @@ export default {
             operationCompletedWithErrors: "Завершено с ошибками.",
             previewNotAvailable: "Изображение недоступно. Файл повреждён или не поддерживается.",
         }
-    },
-    settingsView: {
-        pathToFfmpeg: "Путь к ffmpeg:",
-        pathToFfprobe: "Путь к ffprobe:",
-        ffmpegPlaceholder: "Выберите ffmpeg",
-        ffprobePlaceholder: "Выберите ffprobe",
-        darkTheme: "Тёмная тема",
-        lightTheme: "Светлая тема",
-        chooseLanguage: "Язык:",
-        useInstalled: "Использовать установленный",
-        resetSettings: "Сбросить настройки",
-        resetSettingsDesc: "Сбрасывает все параметры по умолчанию.",
-        helpText: "Если что-то непонятно - прочтите инструкцию.",
-        openHelp: "Открыть инструкцию",
-        executables: "Инструменты FFmpeg",
-        wrongExecutable: "Выбран неверный исполняемый файл {tool}."
-    },
-    fFFoundDialog: {
-        foundFfToolsTitle: "Найдены ffmpeg / ffprobe",
-        foundFfToolsDesc: "Обнаружены следующие установки:",
-        noVersion: "Не найдено",
-        useInstalled: "Использовать установленный",
-        useCustom: "Использовать свой",
-        noFfToolsTitle: "ffmpeg и ffprobe не найдены",
-        noFfToolsDesc: "Укажите пути в настройках.",
-        goToSettings: "Открыть настройки"
     }
 }

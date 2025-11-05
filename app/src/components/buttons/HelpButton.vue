@@ -7,12 +7,6 @@ import {useStore} from "@/stores";
 const {t} = useI18n();
 const store = useStore();
 
-
-defineProps<{
-  edged?: boolean
-}>();
-
-
 const toggleShowHelp = () => {
   store.showHelp = true;
 }
@@ -22,11 +16,10 @@ const toggleShowHelp = () => {
   <n-tooltip placement="bottom" trigger="hover" :delay="500">
     <template #trigger>
       <n-button
-          class="help-menu-btn"
+          color="#888" style="padding: 0;"
           size="tiny"
           ghost
           :bordered="false"
-          :style="{ right: edged ? '28px' : '52px' }"
           @click="toggleShowHelp"
           @mouseenter="store.heartIsBeating = true"
           @mouseleave="store.heartIsBeating = false"
@@ -40,12 +33,3 @@ const toggleShowHelp = () => {
     <span>{{ t('common.help') }}</span>
   </n-tooltip>
 </template>
-
-<style scoped>
-.help-menu-btn {
-  position: absolute;
-  top: 16px;
-  right: 52px;
-  color: #888;
-}
-</style>

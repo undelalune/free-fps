@@ -1,4 +1,4 @@
-# Free‑FPS [![GitHub release][release-img]][release-url]  [![license][license-url]](LICENSE)
+# Free‑FPS [![GitHub release][release-img]][release-url]  [![license][license-url]](app/src-tauri/licenses/LICENSE)
 
 <img src="app/src/md/logo.png" alt="Free‑FPS logo" align="left" width="128" style="border-radius: 24px;">
 
@@ -19,14 +19,14 @@ Download [latest release](https://github.com/undelalune/free-fps/releases/latest
 - Also doubles as a fast video compressor: keep the original FPS and raise compression (e.g., higher CRF or lower bitrate) to reduce file size.
 
 <p align="center">
-  <a href="app/docs/previews/reset.png?raw=1">
-    <img src="app/docs/previews/reset.png" alt="reset" width="260" style="max-width: 260px; width: auto;" loading="lazy">
-  </a>
-  <a href="app/docs/previews/settings.png?raw=1">
-    <img src="app/docs/previews/settings.png" alt="settings" width="260" style="max-width: 260px; width: auto;" loading="lazy">
-  </a>
   <a href="app/docs/previews/home.png?raw=1">
     <img src="app/docs/previews/home.png" alt="home" width="260" style="max-width: 260px; width: auto;" loading="lazy">
+  </a>
+  <a href="app/docs/previews/home2.png?raw=1">
+    <img src="app/docs/previews/home2.png" alt="home2" width="260" style="max-width: 260px; width: auto;" loading="lazy">
+  </a>
+  <a href="app/docs/previews/processing3.png?raw=1">
+    <img src="app/docs/previews/processing3.png" alt="processing3" width="260" style="max-width: 260px; width: auto;" loading="lazy">
   </a>
   <a href="app/docs/previews/processing1.png?raw=1">
     <img src="app/docs/previews/processing1.png" alt="processing1" width="260" style="max-width: 260px; width: auto;" loading="lazy">
@@ -39,12 +39,6 @@ Download [latest release](https://github.com/undelalune/free-fps/releases/latest
   </a>
 </p>
 
-
-
-## Requirements
-> FFmpeg and FFprobe are required!
-- Uses versions found in system `PATH`, or set explicit paths in app settings, i.e. you don't have to install it.
-- Get FFmpeg: [FFmpeg downloads](https://ffmpeg.org/download.html) (or see localized App's guides below).
 
 ## First Run
 > Your OS may warn or block the first launch because the app is not signed/notarized. <br/>
@@ -97,6 +91,14 @@ Download [latest release](https://github.com/undelalune/free-fps/releases/latest
     - Install: `npm i`
     - Dev: `npm run tauri:dev`
     - Build: `npm run tauri:build`
+
+### Licence
+
+> This software uses FFmpeg (GPL v3.0). License and source code information available in the app's Help section.
+
+- [GNU GPLv3](app/src-tauri/licenses/LICENSE.txt)
+- [FFMPEG_NOTICE.txt](app/src-tauri/licenses/FFMPEG_NOTICE.txt)
+
 
 [release-img]:     https://img.shields.io/github/v/release/undelalune/free-fps
 [release-url]:     https://github.com/undelalune/free-fps/releases/latest/

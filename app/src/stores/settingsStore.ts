@@ -1,17 +1,10 @@
-import { nextTick } from 'vue';
-import { i18n, Locale } from '@/i18n';
-import { useSettingsPersistence } from '@/composables/useSettingsPersistence';
-import type { FfToolsStatus } from '@/types';
+import {nextTick} from 'vue';
+import {i18n, Locale} from '@/i18n';
+import {useSettingsPersistence} from '@/composables/useSettingsPersistence';
 
 export function useSettingsStore() {
     const {
         useDarkTheme,
-        ffmpegPath,
-        ffprobePath,
-        ffmpegInstalledVersion,
-        ffprobeInstalledVersion,
-        ffmpegUseInstalled,
-        ffprobeUseInstalled,
         userLocale,
         loadAllSettings,
 
@@ -27,12 +20,6 @@ export function useSettingsStore() {
         cpuLimit,
     } = useSettingsPersistence({
         useDarkTheme: true,
-        ffmpegPath: '',
-        ffprobePath: '',
-        ffmpegInstalledVersion: '',
-        ffprobeInstalledVersion: '',
-        ffmpegUseInstalled: false,
-        ffprobeUseInstalled: false,
         userLocale: 'en' as Locale,
 
         inputFolder: '',
@@ -54,12 +41,6 @@ export function useSettingsStore() {
 
     const resetDefaults = async (onDone?: () => void) => {
         useDarkTheme.value = true;
-        ffmpegPath.value = '';
-        ffprobePath.value = '';
-        ffmpegInstalledVersion.value = '';
-        ffprobeInstalledVersion.value = '';
-        ffmpegUseInstalled.value = false;
-        ffprobeUseInstalled.value = false;
 
         inputFolder.value = '';
         outputFolder.value = '';
@@ -79,42 +60,9 @@ export function useSettingsStore() {
         if (onDone) onDone();
     };
 
-    function applyToolsStatus(res: FfToolsStatus) {
-        const prevFfmpegVer = ffmpegInstalledVersion.value || '';
-        const prevFfprobeVer = ffprobeInstalledVersion.value || '';
-        const prevFfmpegPath = ffmpegPath.value || '';
-        const prevFfprobePath = ffprobePath.value || '';
-
-        const curFfmpegVer = res?.ffmpeg || '';
-        const curFfprobeVer = res?.ffprobe || '';
-
-        const isFirstRun = !prevFfmpegVer && !prevFfprobeVer && !prevFfmpegPath && !prevFfprobePath;
-        const changed = prevFfmpegVer !== curFfmpegVer || prevFfprobeVer !== curFfprobeVer;
-
-        ffmpegInstalledVersion.value = curFfmpegVer;
-        ffprobeInstalledVersion.value = curFfprobeVer;
-
-        if (!curFfmpegVer) ffmpegUseInstalled.value = false;
-        if (!curFfprobeVer) ffprobeUseInstalled.value = false;
-
-        return {
-            isFirstRun,
-            changed,
-            showDialog: isFirstRun || changed,
-            curFfmpegVer,
-            curFfprobeVer,
-        };
-    }
-
     return {
         // refs
         useDarkTheme,
-        ffmpegPath,
-        ffprobePath,
-        ffmpegInstalledVersion,
-        ffprobeInstalledVersion,
-        ffmpegUseInstalled,
-        ffprobeUseInstalled,
         userLocale,
         inputFolder,
         outputFolder,
@@ -131,6 +79,5 @@ export function useSettingsStore() {
         loadAllSettings,
         resetDefaults,
         setLocale,
-        applyToolsStatus,
     };
 }

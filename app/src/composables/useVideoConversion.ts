@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { useStore } from '@/stores';
-import { videoAPI } from '@/api/tauri.ts';
+import { tauriAPI } from '@/api/tauri.ts';
 import { useI18n } from 'vue-i18n';
 import { useMessage } from 'naive-ui';
 import type { AppError } from '@/types';
@@ -27,10 +27,6 @@ export function useVideoConversion() {
     const unlistenProgress = ref<(() => void) | null>(null);
 
     const selectedFiles = computed(() => store.videoFiles.filter(f => f.convert));
-    const isFfmpegConfigured = computed(() =>
-        (store.ffmpegUseInstalled && store.ffmpegInstalledVersion) ||
-        (!store.ffmpegUseInstalled && store.ffmpegPath)
-    );
 
     const showMsg = (type: 'success' | 'warning', key: string, duration = 5000) => {
         message[type](t(key), { duration, closable: true });
@@ -45,13 +41,13 @@ export function useVideoConversion() {
         }
 
         if (store.folderScanning) {
-            await videoAPI.cancelConversion().catch(console.warn);
+            await tauriAPI.cancelConversion().catch(console.warn);
         }
 
         store.folderScanning = true;
 
         try {
-            const files = await videoAPI.getVideoFiles(folderPath);
+            const files = await tauriAPI.getVideoFiles(folderPath);
             if (scanId === currentScanId.value) {
                 store.videoFiles = files.map((f, index) => ({ ...f, convert: true, progress: 0, position: index }));
             }
@@ -79,11 +75,7 @@ export function useVideoConversion() {
         store.processing = true;
 
         try {
-            await videoAPI.convertVideos({
-                ffmpeg_path: store.ffmpegPath || '',
-                ffprobe_path: store.ffprobePath || '',
-                ffmpeg_use_installed: store.ffmpegUseInstalled,
-                ffprobe_use_installed: store.ffprobeUseInstalled,
+            await tauriAPI.convertVideos({
                 input_folder: store.inputFolder,
                 output_folder: store.outputFolder,
                 target_fps: store.useCustomFps ? store.customFps : store.targetFps,
@@ -116,13 +108,13 @@ export function useVideoConversion() {
     };
 
     const cancelConversion = async () => {
-        await videoAPI.cancelConversion().catch(console.warn);
+        await tauriAPI.cancelConversion().catch(console.warn);
         store.processing = false;
         store.processingPos = 0;
     };
 
     const setupProgressListener = async () => {
-        unlistenProgress.value = await videoAPI.onConversionProgress((data) => {
+        unlistenProgress.value = await tauriAPI.onConversionProgress((data) => {
             if (!data || data.status === ConversionStatus.Cancelled) return;
 
             const video = store.videoFiles.find(v => v.name === data.current_file);
@@ -137,7 +129,6 @@ export function useVideoConversion() {
     const cleanup = () => unlistenProgress.value?.();
 
     return {
-        isFfmpegConfigured,
         scanFolder,
         rescanFolder: () => scanFolder(store.inputFolder),
         performConversion,

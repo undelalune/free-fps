@@ -1,7 +1,7 @@
 {
   "name": "free-fps",
   "private": true,
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "description": "A utility built as an easy-to-use wrapper around ffmpeg for direct video frame rate (FPS) modification.",
   "author": "https://github.com/undelalune",
   "homepage": "https://github.com/undelalune/free-fps",
@@ -32,8 +32,7 @@
     "markdown-it": "14.0.0",
     "pinia": "^3.0.3",
     "vue": "^3.5.22",
-    "vue-i18n": "^11.1.12",
-    "vue-router": "^4.6.3"
+    "vue-i18n": "^11.1.12"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.9.2",

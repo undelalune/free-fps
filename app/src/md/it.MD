@@ -1,10 +1,11 @@
-<img src="logo.png" style="border-radius: 8px; margin-right:16px; margin-top:12px; height: 89px;" align="right" alt="Free FPS Logo" />
+<img src="logo.png" style="border-radius: 8px; margin-right:16px; margin-top: 20px; height: 89px;" align="right" alt="Free FPS Logo" />
 
 - [Informazioni su questo strumento](#about-this-tool)
-- [Come iniziare?](#how-to-start)
-- [Pagina impostazioni](#settings-page)
 - [Pagina principale](#main-page)
 - [Pagina di conversione](#processing-page)
+- [Licenza](#license)
+- [Software di terze parti](#3d-party-license)
+- [Codice sorgente](#source-code)
 
 ---
 
@@ -19,7 +20,7 @@ Funziona anche come compressore video veloce: mantieni l’FPS originale e aumen
 Importante:
 Il programma è destinato a utenti che comprendono cosa comporti la conversione degli FPS. Cambiare la frequenza dei fotogrammi influisce su velocità e durata del video. Lo strumento non modifica i file originali!
 
-Questo programma è distribuito gratuitamente ("così com'è") sotto licenza MIT.
+Questo programma è distribuito gratuitamente ("così com'è") sotto la licenza GNU General Public License v3.0 (GPL-3.0).
 Se vuoi sostenere l'autore, puoi farlo qui:
 
 <a href="https://buymeacoffee.com/undelalune" target="_blank" rel="noopener" title="Go to buymeacoffee.com">
@@ -31,38 +32,6 @@ Se vuoi sostenere l'autore, puoi farlo qui:
 </a>
 
 <br>
-
----
-
-<a id="how-to-start"></a>
-### Come iniziare?
-
-All'avvio, l'app verifica automaticamente se i pacchetti ffmpeg e ffprobe sono disponibili nel `PATH` di sistema e propone di usarli.
-Se non sono presenti, scarica FFmpeg dal sito ufficiale ed estrai l'archivio.<br>
-Windows: <a href="https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" target="_blank" rel="noopener" title="Download ffmpeg/ffprobe archive">ffmpeg/ffprobe</a><br>
-macOS: <a href="https://evermeet.cx/ffmpeg/ffmpeg-8.0.zip" target="_blank" rel="noopener" title="Download ffmpeg">ffmpeg</a> |
-<a href="https://evermeet.cx/ffmpeg/ffprobe-8.0.zip" target="_blank" rel="noopener" title="Download ffprobe archive">ffprobe</a>
-
-L'installazione nel sistema non è necessaria: è sufficiente indicare i percorsi degli eseguibili nelle impostazioni dell'app.
-
-- **Windows**: `bin/ffmpeg.exe` e `bin/ffprobe.exe`
-- **macOS**: `ffmpeg` e `ffprobe` (nella root della cartella)
-
-Dopodiché puoi iniziare a lavorare.
-
----
-
-<a id="settings-page"></a>
-### Pagina impostazioni
-
-- **Percorso ffmpeg** - percorso all'eseguibile `ffmpeg`. Campo obbligatorio.
-- **Percorso ffprobe** - percorso a `ffprobe`. Facoltativo, ma consigliato per un funzionamento più stabile.
-- **Usa versione installata (ffmpeg / ffprobe)** - disponibile se vengono trovate versioni installate.
-- **Lingua** - seleziona la lingua dell'interfaccia.
-- **Tema** - scegli il tema colore dell'app.
-- **Reimposta impostazioni** - ripristina i valori predefiniti (solo i valori dei campi).
-
-L'app salva automaticamente le impostazioni: non è necessario reinserirle a ogni avvio.
 
 ---
 
@@ -94,4 +63,35 @@ L'app salva automaticamente le impostazioni: non è necessario reinserirle a ogn
 
 ---
 
-<p style="text-align:center;">© 2025 undelalune</p>
+<a id="license"></a>
+### Licenza
+Free FPS è un software libero con licenza **GNU General Public License v3.0**. Sei libero di:
+- Usare questo software per qualsiasi scopo
+- Studiare e modificare il codice sorgente
+- Ridistribuire copie
+- Distribuire versioni modificate (sotto GPL v3)
+
+Leggi la [licenza](FreeFPSLicense) del progetto.
+
+---
+
+<a id="3d-party-license"></a>
+### Software di terze parti
+Questo programma utilizza **FFmpeg**, anch’esso con licenza GPL v3.0.
+- Sito web di FFmpeg: https://ffmpeg.org
+- Leggi [FFmpeg Notice](FFmpegNotice)
+- Leggi [FFmpeg License](FFmpegLicense)
+
+---
+
+<a id="source-code"></a>
+### Codice sorgente
+
+Il codice sorgente completo è disponibile su:  
+https://github.com/undelalune/free-fps
+
+<br/>
+
+---
+
+<p style="text-align:center;">Copyright © 2025 undelalune</p>

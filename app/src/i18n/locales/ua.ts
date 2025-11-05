@@ -15,6 +15,9 @@ export default {
         helpTitle: "Інструкція користувача",
         closeAppDialogTitle: "Конвертацію відео ще не завершено. Ви впевнені, що хочете скасувати її та вийти?",
         ty: "Я$хочу$подякувати$автору!",
+        darkTheme: "Темна тема",
+        lightTheme: "Світла тема",
+        language: "Мова",
     },
     errors: {
         1: "Операцію скасовано користувачем.",
@@ -34,6 +37,7 @@ export default {
         25: "Не вдалося прочитати метадані відео.",
         26: "Виявлено спробу виходу за межі дозволеної директорії (path traversal). З міркувань безпеки шлях до файлу поза дозволеною текою.",
         27: "Невірний шлях до файлу. Переконайтеся, що шлях існує та доступний.",
+        28: "Відсутній файл ліцензії.",
     },
     mainView: {
         setup: {
@@ -84,31 +88,5 @@ export default {
             operationCompletedWithErrors: "Завершено з помилками.",
             previewNotAvailable: "Зображення недоступне. Файл пошкоджений або не підтримується.",
         }
-    },
-    settingsView: {
-        pathToFfmpeg: "Шлях до ffmpeg:",
-        pathToFfprobe: "Шлях до ffprobe:",
-        ffmpegPlaceholder: "Оберіть ffmpeg",
-        ffprobePlaceholder: "Оберіть ffprobe",
-        darkTheme: "Темна тема",
-        lightTheme: "Світла тема",
-        chooseLanguage: "Мова:",
-        useInstalled: "Використати встановлений",
-        resetSettings: "Скинути налаштування",
-        resetSettingsDesc: "Скидає всі налаштування до стандартних.",
-        helpText: "Якщо щось незрозуміло - прочитайте інструкцію.",
-        openHelp: "Відкрити допомогу",
-        executables: "Інструменти FFmpeg",
-        wrongExecutable: "Вибрано неправильний виконуваний файл {tool}."
-    },
-    fFFoundDialog: {
-        foundFfToolsTitle: "Знайдено ffmpeg / ffprobe",
-        foundFfToolsDesc: "Знайдено такі встановлення:",
-        noVersion: "Не знайдено",
-        useInstalled: "Використати встановлений",
-        useCustom: "Використати власний",
-        noFfToolsTitle: "Не знайдено ffmpeg і ffprobe",
-        noFfToolsDesc: "Вкажіть шляхи в налаштуваннях.",
-        goToSettings: "Відкрити налаштування"
     }
 }

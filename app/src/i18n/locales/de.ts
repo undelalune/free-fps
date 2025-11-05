@@ -15,6 +15,9 @@ export default {
         helpTitle: "Benutzeranleitung",
         closeAppDialogTitle: "Die Videokonvertierung ist noch nicht abgeschlossen. Möchten Sie sie wirklich abbrechen und beenden?",
         ty: "Ich$möchte$dem$Autor$danken!",
+        darkTheme: "Dunkles Design",
+        lightTheme: "Helles Design",
+        language: "Sprache",
     },
     errors: {
         1: "Vorgang vom Benutzer abgebrochen.",
@@ -34,6 +37,7 @@ export default {
         25: "Videometadaten konnten nicht gelesen werden. Datei beschädigt oder nicht unterstützt.",
         26: "Versuch, das erlaubte Verzeichnis zu verlassen (path traversal) erkannt. Der Dateipfad liegt aus Sicherheitsgründen außerhalb des erlaubten Verzeichnisses.",
         27: "Ungültiger Dateipfad. Bitte stellen Sie sicher, dass der Pfad existiert und zugänglich ist.",
+        28: "Die Lizenzdatei fehlt.",
     },
     mainView: {
         setup: {
@@ -84,31 +88,5 @@ export default {
             operationCompletedWithErrors: "Konvertierung mit Fehlern abgeschlossen.",
             previewNotAvailable: "Vorschaubild nicht verfügbar. Datei beschädigt oder nicht unterstützt.",
         }
-    },
-    settingsView: {
-        pathToFfmpeg: "Pfad zu ffmpeg:",
-        pathToFfprobe: "Pfad zu ffprobe:",
-        ffmpegPlaceholder: "ffmpeg-Datei wählen",
-        ffprobePlaceholder: "ffprobe-Datei wählen",
-        darkTheme: "Dunkles Design",
-        lightTheme: "Helles Design",
-        chooseLanguage: "Sprache:",
-        useInstalled: "Installierte Version verwenden",
-        resetSettings: "Einstellungen zurücksetzen",
-        resetSettingsDesc: "Setzt alle Einstellungen auf Standardwerte zurück.",
-        helpText: "Wenn etwas unklar ist, bitte Anleitung lesen.",
-        openHelp: "Hilfe öffnen",
-        executables: "FFmpeg-Werkzeuge",
-        wrongExecutable: "Ungültige {tool}-Datei ausgewählt."
-    },
-    fFFoundDialog: {
-        foundFfToolsTitle: "ffmpeg / ffprobe gefunden",
-        foundFfToolsDesc: "Folgende Installationen wurden gefunden:",
-        noVersion: "Nicht gefunden",
-        useInstalled: "Installierte verwenden",
-        useCustom: "Eigene Installation verwenden",
-        noFfToolsTitle: "ffmpeg und ffprobe nicht gefunden",
-        noFfToolsDesc: "Bitte Pfade zu den Programmen in den Einstellungen angeben.",
-        goToSettings: "Zu den Einstellungen"
     }
 }

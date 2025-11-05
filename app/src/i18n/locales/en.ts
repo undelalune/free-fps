@@ -14,7 +14,10 @@ export default {
         help: "Help",
         helpTitle: "User guide",
         closeAppDialogTitle: "Video conversion is not finished yet. Are you sure you want to cancel it and exit?",
-        ty: "I would$like$to thank$the author!"
+        ty: "I would$like$to thank$the author!",
+        darkTheme: "Dark Theme",
+        lightTheme: "Light Theme",
+        language: "Language",
     },
     errors: {
         1: "Operation canceled by the user.",
@@ -34,6 +37,7 @@ export default {
         25: "Failed to read video metadata. The file may be corrupted or in an unsupported format.",
         26: "Path traversal detected. The file path is outside the allowed directory for security reasons.",
         27: "Invalid file path provided. Please ensure the path exists and is accessible.",
+        28: "The license file is missing.",
     },
     mainView: {
         setup: {
@@ -84,31 +88,5 @@ export default {
             operationCompletedWithErrors: "Conversion completed with errors.",
             previewNotAvailable: "Preview image unavailable. File may be damaged or unsupported.",
         }
-    },
-    settingsView: {
-        pathToFfmpeg: "Path to ffmpeg:",
-        pathToFfprobe: "Path to ffprobe:",
-        ffmpegPlaceholder: "Select ffmpeg executable",
-        ffprobePlaceholder: "Select ffprobe executable",
-        darkTheme: "Dark Theme",
-        lightTheme: "Light Theme",
-        chooseLanguage: "Language:",
-        useInstalled: "Use installed version",
-        resetSettings: "Reset settings",
-        resetSettingsDesc: "This will reset all settings to their default values.",
-        helpText: "If something is unclear, please refer to the user guide.",
-        openHelp: "Open Help",
-        executables: "FFmpeg Tools",
-        wrongExecutable: "Invalid {tool} executable selected."
-    },
-    fFFoundDialog: {
-        foundFfToolsTitle: "ffmpeg / ffprobe found",
-        foundFfToolsDesc: "The following installations were found on your system:",
-        noVersion: "Not found",
-        useInstalled: "Use installed",
-        useCustom: "Use custom installation",
-        noFfToolsTitle: "Neither ffmpeg nor ffprobe was found on your system",
-        noFfToolsDesc: "Please set the paths to the executables in the settings.",
-        goToSettings: "Go to Settings"
     }
 }

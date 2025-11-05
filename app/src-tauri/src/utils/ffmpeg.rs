@@ -1,3 +1,19 @@
+// Free FPS - Video Frame Rate Converter
+// Copyright (C) 2025 undelalune
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 use crate::errors::{AppError, AppErrorCode};
 use crate::utils::logger::{log_error, log_ffmpeg_command, rotate_log_if_needed};
 use chrono::{DateTime, Utc};
@@ -12,8 +28,9 @@ use tokio::{
 };
 use tokio_util::sync::CancellationToken;
 
-const DEFAULT_CONVERSION_TIMEOUT_SECS: u64 = 3600; // 1 hour default timeout
-                                                   // ===== ffprobe parsing =====
+const DEFAULT_CONVERSION_TIMEOUT_SECS: u64 = 10800; // 3 hours
+
+// ===== ffprobe parsing =====
 
 #[derive(Debug, Deserialize)]
 struct FfprobeJson {
@@ -63,7 +80,6 @@ fn system_time_to_rfc3339_z(t: std::time::SystemTime) -> String {
     dt.to_rfc3339()
 }
 
-// Used only for the logged command preview
 fn quote_if_needed(s: &str) -> String {
     if s.contains(' ') || s.contains('"') {
         format!(r#""{}""#, s.replace('"', "\\\""))
@@ -305,7 +321,7 @@ async fn build_video_args(
             "EmptyInputFile",
             &format!("input={} size={}", input, size_bytes),
         )
-        .await;
+            .await;
         return Err(AppError::code_only(AppErrorCode::EmptyInputFile));
     }
     if new_duration <= 0.0 {
@@ -313,7 +329,7 @@ async fn build_video_args(
             "InvalidNewDuration",
             &format!("input={} new_duration={}", input, new_duration),
         )
-        .await;
+            .await;
         return Err(AppError::code_only(AppErrorCode::InvalidNewDuration));
     }
 
@@ -558,7 +574,7 @@ where
         opts.video_quality,
         timings.new_duration,
     )
-    .await?;
+        .await?;
 
     let audio_args = build_audio_args(opts.keep_audio, opts.audio_bitrate, timings.atempo).await?;
 
@@ -678,7 +694,7 @@ pub async fn convert_video_with_progress<F>(
 where
     F: FnMut(f32) + Send + 'static,
 {
-    // Add timeout protection (1 hour default, can be made configurable)
+    // Add timeout protection (3 hours default)
     let conversion_future = convert_video_with_progress_impl(opts, on_progress, cancel.clone());
     let timeout_duration = Duration::from_secs(DEFAULT_CONVERSION_TIMEOUT_SECS);
 
@@ -701,7 +717,7 @@ where
                     DEFAULT_CONVERSION_TIMEOUT_SECS
                 ),
             )
-            .await;
+                .await;
             cancel.cancel(); // Trigger cancellation
             Err((AppErrorCode::FfmpegFailed as u16).to_string())
         }

@@ -17,5 +17,12 @@
         "maximizable": false
       }
     ]
+  },
+  "bundle": {
+    "resources": [
+      "binaries/ffmpeg",
+      "binaries/ffprobe",
+      "licenses/*"
+    ]
   }
 }

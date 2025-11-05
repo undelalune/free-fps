@@ -1,6 +1,7 @@
 # Free‑FPS App \(Tauri 2 \+ Vue 3 \+ Naive UI\)
 
-Developer docs for the desktop app in `app`. The app changes video file frame rate \(FPS\) using FFmpeg/FFprobe. Built with Vue 3 and Naive UI. Open‑source under MIT.
+Developer docs for the desktop app in `app`. The app changes video file frame rate \(FPS\) using FFmpeg/FFprobe. 
+Built with Vue 3 and Naive UI. Project is open‑source under GPL‑3.0 license.
 
 ## Prerequisites
 
@@ -9,7 +10,6 @@ Developer docs for the desktop app in `app`. The app changes video file frame ra
 - Tauri platform prerequisites
     - Windows: MSVC toolchain \(Visual Studio Build Tools or VS\) and Microsoft Edge WebView2 runtime
     - macOS: Xcode Command Line Tools
-- Runtime tools: `ffmpeg` and `ffprobe` \(required to use the app features; not required to build\)
 
 FFmpeg can be in system `PATH` or configured in the app settings at runtime.
 
@@ -79,4 +79,4 @@ Tauri config files live in `app/src-tauri`.
 
 ## License
 
-MIT
+GNU General Public License v3.0. This software uses FFmpeg (GPL v3.0). License and source code information available in the app's Help section.

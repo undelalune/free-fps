@@ -15,6 +15,9 @@ export default {
         helpTitle: "Mode d'emploi",
         closeAppDialogTitle: "La conversion vidéo n'est pas encore terminée. Voulez-vous vraiment l'annuler et quitter ?",
         ty: "Je$voudrais$remercier$l'auteur!",
+        darkTheme: "Thème sombre",
+        lightTheme: "Thème clair",
+        language: "Langue",
     },
     errors: {
         1: "Opération annulée par l'utilisateur.",
@@ -34,6 +37,7 @@ export default {
         25: "Impossible de lire les métadonnées vidéo. Le fichier est peut‑être corrompu ou non pris en charge.",
         26: "Tentative d'évasion de répertoire (path traversal) détectée. Pour des raisons de sécurité, le chemin du fichier est en dehors du répertoire autorisé.",
         27: "Chemin de fichier invalide. Assurez-vous que le chemin existe et est accessible.",
+        28: "Le fichier de licence est manquant.",
     },
     mainView: {
         setup: {
@@ -84,31 +88,5 @@ export default {
             operationCompletedWithErrors: "Conversion terminée avec des erreurs.",
             previewNotAvailable: "Image non disponible. Fichier corrompu ou non pris en charge.",
         }
-    },
-    settingsView: {
-        pathToFfmpeg: "Chemin vers ffmpeg:",
-        pathToFfprobe: "Chemin vers ffprobe:",
-        ffmpegPlaceholder: "Sélectionner l'exécutable ffmpeg",
-        ffprobePlaceholder: "Sélectionner l'exécutable ffprobe",
-        darkTheme: "Thème sombre",
-        lightTheme: "Thème clair",
-        chooseLanguage: "Langue:",
-        useInstalled: "Utiliser la version installée",
-        resetSettings: "Réinitialiser les paramètres",
-        resetSettingsDesc: "Réinitialise tous les paramètres aux valeurs par défaut.",
-        helpText: "Si quelque chose n'est pas clair, consultez le guide.",
-        openHelp: "Ouvrir l'aide",
-        executables: "Outils FFmpeg",
-        wrongExecutable: "Fichier exécutable {tool} invalide sélectionné."
-    },
-    fFFoundDialog: {
-        foundFfToolsTitle: "ffmpeg / ffprobe détectés",
-        foundFfToolsDesc: "Les installations suivantes ont été trouvées sur votre système:",
-        noVersion: "Non trouvé",
-        useInstalled: "Utiliser la version installée",
-        useCustom: "Utiliser une installation personnalisée",
-        noFfToolsTitle: "Ni ffmpeg ni ffprobe n'ont été trouvés sur votre système",
-        noFfToolsDesc: "Veuillez définir les chemins vers les exécutables dans les paramètres.",
-        goToSettings: "Aller aux paramètres"
     }
 }

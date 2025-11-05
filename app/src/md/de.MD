@@ -1,10 +1,11 @@
-<img src="logo.png" style="border-radius: 8px; margin-right:16px; margin-top:12px; height: 89px;" align="right" alt="Free FPS Logo" />
+<img src="logo.png" style="border-radius: 8px; margin-right:16px; margin-top: 20px; height: 89px;" align="right" alt="Free FPS Logo" />
 
 - [Über dieses Programm](#about-this-tool)
-- [Wie starten?](#how-to-start)
-- [Einstellungsseite](#settings-page)
 - [Hauptseite](#main-page)
 - [Konvertierungsseite](#processing-page)
+- [Lizenz](#license)
+- [Software von Drittanbietern](#3d-party-license)
+- [Quellcode](#source-code)
 
 ---
 
@@ -19,7 +20,7 @@ Dient auch als schneller Videokompressor: Behalten Sie die ursprüngliche FPS be
 Wichtig:
 Das Programm richtet sich an Anwender, die verstehen, was eine FPS-Konvertierung bewirkt. Die Änderung der Bildrate beeinflusst die Geschwindigkeit und Dauer des Videos. Das Werkzeug verändert nicht die Originaldateien!
 
-Dieses Programm wird kostenlos („As Is“) unter der MIT-Lizenz verteilt.
+Dieses Programm wird kostenlos („As Is“) unter der GNU General Public License v3.0 (GPL-3.0) verteilt.
 Wenn Sie den Autor unterstützen möchten, können Sie das hier tun:
 
 <a href="https://buymeacoffee.com/undelalune" target="_blank" rel="noopener" title="Go to buymeacoffee.com">
@@ -31,38 +32,6 @@ Wenn Sie den Autor unterstützen möchten, können Sie das hier tun:
 </a>
 
 <br>
-
----
-
-<a id="how-to-start"></a>
-### Wie starten?
-
-Beim Start prüft die Anwendung automatisch, ob die Pakete ffmpeg und ffprobe im System-`PATH` verfügbar sind, und bietet an, diese zu verwenden.
-Wenn sie nicht vorhanden sind, laden Sie FFmpeg von der offiziellen Seite herunter und entpacken das Archiv.<br>
-Windows: <a href="https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" target="_blank" rel="noopener" title="Download ffmpeg/ffprobe archive">ffmpeg/ffprobe</a><br>
-macOS: <a href="https://evermeet.cx/ffmpeg/ffmpeg-8.0.zip" target="_blank" rel="noopener" title="Download ffmpeg">ffmpeg</a> |
-<a href="https://evermeet.cx/ffmpeg/ffprobe-8.0.zip" target="_blank" rel="noopener" title="Download ffprobe archive">ffprobe</a>
-
-Eine Installation im System ist nicht erforderlich - geben Sie einfach die Pfade zu den ausführbaren Dateien in den Anwendungseinstellungen an.
-
-- **Windows**: `bin/ffmpeg.exe` und `bin/ffprobe.exe`
-- **macOS**: `ffmpeg` und `ffprobe` (im Stammverzeichnis des Ordners)
-
-Danach können Sie mit der Arbeit beginnen.
-
----
-
-<a id="settings-page"></a>
-### Einstellungsseite
-
-- **Pfad zu ffmpeg** - Pfad zur ausführbaren Datei `ffmpeg`. Dieses Feld ist erforderlich.
-- **Pfad zu ffprobe** - Pfad zu `ffprobe`. Optional, aber empfohlen für stabilere Funktion.
-- **Installierte Version verwenden (ffmpeg / ffprobe)** - wird verfügbar, wenn installierte Versionen gefunden werden.
-- **Sprache** - wählen Sie die Programmsprache.
-- **Design** - wählen Sie das Farbschema der Anwendung.
-- **Einstellungen zurücksetzen** - gespeicherte Daten zurücksetzen (nur Formfeldwerte).
-
-Die Anwendung speichert Ihre Einstellungen automatisch - ein erneutes Eingeben bei jedem Start ist nicht nötig.
 
 ---
 
@@ -94,4 +63,35 @@ Die Anwendung speichert Ihre Einstellungen automatisch - ein erneutes Eingeben b
 
 ---
 
-<p style="text-align:center;">© 2025 undelalune</p>
+<a id="license"></a>
+### Lizenz
+Free FPS ist freie Software unter der **GNU General Public License v3.0**. Sie dürfen:
+- Diese Software für jeden Zweck verwenden
+- Den Quellcode studieren und ändern
+- Kopien weitergeben
+- Geänderte Versionen verbreiten (unter GPL v3)
+
+Lesen Sie die [Projektlizenz](FreeFPSLicense).
+
+---
+
+<a id="3d-party-license"></a>
+### Software von Drittanbietern
+Dieses Programm verwendet **FFmpeg**, das ebenfalls unter GPL v3.0 lizenziert ist.
+- FFmpeg-Website: https://ffmpeg.org
+- Lesen Sie [FFmpeg Notice](FFmpegNotice)
+- Lesen Sie [FFmpeg License](FFmpegLicense)
+
+---
+
+<a id="source-code"></a>
+### Quellcode
+
+Der vollständige Quellcode ist verfügbar unter:  
+https://github.com/undelalune/free-fps
+
+<br/>
+
+---
+
+<p style="text-align:center;">Copyright © 2025 undelalune</p>

@@ -1,95 +1,22 @@
+// Free FPS - Video Frame Rate Converter
+// Copyright (C) 2025 undelalune
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 use crate::errors::{AppError, AppErrorCode, AppResult};
-use base64::{engine::general_purpose, Engine as _};
-use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
-use tokio::io::AsyncReadExt;
-use tokio::process::Command;
+use std::path::{PathBuf};
 use tokio_util::sync::CancellationToken;
-
-use crate::utils::proc::apply_no_window_tokio;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ThumbnailParams {
-    pub path: String,
-    pub ffmpeg_path: String,
-    pub ffprobe_path: String,
-    pub ffmpeg_use_installed: bool,
-    pub ffprobe_use_installed: bool,
-}
-
-fn resolve_ffmpeg_from_thumb(params: &ThumbnailParams) -> AppResult<String> {
-    crate::commands::video::resolve_ffmpeg_common(params.ffmpeg_use_installed, &params.ffmpeg_path)
-}
-
-async fn extract_thumbnail_data_url(
-    ffmpeg_bin: &str,
-    input: &Path,
-    cancel: &CancellationToken,
-) -> AppResult<Option<String>> {
-    if cancel.is_cancelled() {
-        return Ok(None);
-    }
-
-    let mut cmd = Command::new(ffmpeg_bin);
-    cmd.kill_on_drop(true);
-    apply_no_window_tokio(&mut cmd);
-
-    cmd.arg("-hide_banner")
-        .arg("-loglevel")
-        .arg("error")
-        .arg("-nostdin")
-        .arg("-y")
-        .arg("-ss")
-        .arg("1")
-        .arg("-i")
-        .arg(input)
-        .arg("-frames:v")
-        .arg("1")
-        .arg("-vf")
-        .arg("scale=320:-2")
-        .arg("-q:v")
-        .arg("5")
-        .arg("-f")
-        .arg("mjpeg")
-        .arg("-")
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::null());
-
-    let mut child = cmd
-        .spawn()
-        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
-
-    let Some(mut stdout) = child.stdout.take() else {
-        return Ok(None);
-    };
-
-    let read_task = tokio::spawn(async move {
-        let mut buf = Vec::new();
-        let _ = stdout.read_to_end(&mut buf).await;
-        buf
-    });
-
-    let cancel_for_wait = cancel.clone();
-    tokio::select! {
-        _ = cancel_for_wait.cancelled() => {
-            let _ = child.kill().await;
-            let _ = child.wait().await;
-            let _ = read_task.await;
-            Ok(None)
-        }
-        status = child.wait() => {
-            let status = status.map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
-            let out = read_task.await
-                .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
-            if !status.success() || out.is_empty() {
-                return Ok(None);
-            }
-            let b64 = general_purpose::STANDARD.encode(out);
-            Ok(Some(format!("data:image/jpeg;base64,{}", b64)))
-        }
-    }
-}
 
 // System thumbnail extraction (Windows)
 #[cfg(target_os = "windows")]
@@ -326,12 +253,11 @@ async fn extract_thumbnail_system(
     Ok(None)
 }
 
-
 pub async fn get_video_thumbnail_data_url(
-    params: ThumbnailParams,
+    path: &str,
     cancel: &CancellationToken,
 ) -> AppResult<Option<String>> {
-    let p = PathBuf::from(&params.path);
+    let p = PathBuf::from(path);
     if !p.exists() || !p.is_file() {
         return Ok(None);
     }
@@ -344,8 +270,8 @@ pub async fn get_video_thumbnail_data_url(
         let sys_res = tauri::async_runtime::spawn_blocking(move || {
             tauri::async_runtime::block_on(extract_thumbnail_system(&path_cloned, 320, &cancel2))
         })
-        .await
-        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+            .await
+            .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
 
         if let Ok(Some(sys_thumb)) = sys_res {
             return Ok(Some(sys_thumb));
@@ -358,7 +284,6 @@ pub async fn get_video_thumbnail_data_url(
         }
     }
 
-    // Fallback to ffmpeg.
-    let ffmpeg_bin = resolve_ffmpeg_from_thumb(&params)?;
-    extract_thumbnail_data_url(&ffmpeg_bin, &p, cancel).await
+    // No FFmpeg fallback - return None if system thumbnail fails
+    Ok(None)
 }

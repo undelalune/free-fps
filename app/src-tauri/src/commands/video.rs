@@ -1,4 +1,21 @@
+// Free FPS - Video Frame Rate Converter
+// Copyright (C) 2025 undelalune
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 use crate::errors::{AppError, AppErrorCode, AppResult};
+use crate::utils::bundled_ffmpeg::{get_ffmpeg_path, get_ffprobe_path};
 use crate::utils::ffmpeg::{convert_video_with_progress, ConvertOptions};
 use crate::utils::rate_limiter::RateLimiter;
 use chrono::{DateTime, Utc};
@@ -11,9 +28,7 @@ use tokio::fs;
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 
-use crate::commands::thumbnail::{get_video_thumbnail_data_url, ThumbnailParams};
-
-use crate::utils::bins::resolve_bin;
+use crate::commands::thumbnail::{get_video_thumbnail_data_url};
 
 // Security: Validate that a path is within a base folder to prevent path traversal
 fn validate_safe_path(path: &str, base_folder: &str) -> AppResult<PathBuf> {
@@ -95,10 +110,6 @@ pub struct VideoFile {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VideoConversionParams {
-    pub ffmpeg_path: String,
-    pub ffprobe_path: String,
-    pub ffmpeg_use_installed: bool,
-    pub ffprobe_use_installed: bool,
     pub input_folder: String,
     pub output_folder: String,
     pub target_fps: f32,
@@ -168,60 +179,14 @@ impl Default for ConversionController {
         }
     }
 }
-fn resolve_installed_bin(tool: &str) -> String {
-    resolve_bin(None, tool)
-}
-
-pub(crate) fn resolve_ffmpeg_common(
-    ffmpeg_use_installed: bool,
-    ffmpeg_path: &str,
-) -> AppResult<String> {
-    if ffmpeg_use_installed {
-        Ok(resolve_installed_bin("ffmpeg"))
-    } else if !ffmpeg_path.trim().is_empty() {
-        let p = std::path::Path::new(ffmpeg_path);
-        if p.exists() {
-            Ok(p.to_string_lossy().to_string())
-        } else {
-            Err(AppError::new(
-                AppErrorCode::FfmpegNotFound,
-                format!("ffmpeg not found at {}", ffmpeg_path),
-            ))
-        }
-    } else {
-        Err(AppError::new(
-            AppErrorCode::FfmpegNotFound,
-            "ffmpeg path not provided and ffmpeg_use_installed = false",
-        ))
-    }
-}
-
-fn resolve_ffmpeg_from_convert(params: &VideoConversionParams) -> AppResult<String> {
-    resolve_ffmpeg_common(params.ffmpeg_use_installed, &params.ffmpeg_path)
-}
-
-fn resolve_ffprobe(params: &VideoConversionParams) -> Option<String> {
-    if params.ffprobe_use_installed {
-        Some(resolve_installed_bin("ffprobe"))
-    } else if !params.ffprobe_path.trim().is_empty() {
-        let p = std::path::Path::new(&params.ffprobe_path);
-        if p.exists() {
-            Some(p.to_string_lossy().to_string())
-        } else {
-            None
-        }
-    } else {
-        None
-    }
-}
 
 #[tauri::command]
 pub async fn get_video_thumbnail(
-    params: ThumbnailParams,
+    path: String,
     state: tauri::State<'_, ConversionController>,
 ) -> AppResult<Option<String>> {
     let cancel = state.new_token().await;
-    get_video_thumbnail_data_url(params, &cancel).await
+    get_video_thumbnail_data_url(&path, &cancel).await
 }
 
 async fn list_video_files(
@@ -394,8 +359,9 @@ pub async fn convert_videos(
     // Validate parameters first
     validate_conversion_params(&params)?;
 
-    let ffmpeg_bin = resolve_ffmpeg_from_convert(&params)?;
-    let ffprobe_bin = resolve_ffprobe(&params);
+    // Get bundled FFmpeg paths
+    let ffmpeg_bin = get_ffmpeg_path(&app)?;
+    let ffprobe_bin = get_ffprobe_path(&app).ok();
 
     let inputs: Vec<VideoFile> = if !params.files.is_empty() {
         let mut video_files = Vec::new();
@@ -496,10 +462,13 @@ pub async fn convert_videos(
         let total = total_files;
         let cancel_clone = cancel.clone();
 
+        let ffmpeg_str = ffmpeg_bin.to_string_lossy().to_string();
+        let ffprobe_str = ffprobe_bin.as_ref().map(|p| p.to_string_lossy().to_string());
+
         let convert_res = convert_video_with_progress(
             ConvertOptions {
-                ffmpeg_bin: &ffmpeg_bin,
-                ffprobe_bin: ffprobe_bin.as_deref(),
+                ffmpeg_bin: &ffmpeg_str,
+                ffprobe_bin: ffprobe_str.as_deref(),
                 input: &video_file.path,
                 output: &output_path.to_string_lossy(),
                 target_fps: params.target_fps,
@@ -527,7 +496,7 @@ pub async fn convert_videos(
             },
             cancel.clone(),
         )
-        .await;
+            .await;
 
         match convert_res {
             Ok(creation_time_str) => {
@@ -544,7 +513,6 @@ pub async fn convert_videos(
                     let _ = set_file_times(&output_path, ft, ft);
                     #[cfg(target_os = "windows")]
                     {
-                        use super::video::set_creation_time_windows;
                         let _ = set_creation_time_windows(&output_path, ts);
                     }
                 }
@@ -609,6 +577,6 @@ pub async fn cancel_conversion(
             status: ConversionStatus::Cancelled,
         },
     )
-    .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
     Ok(())
 }
