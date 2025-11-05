@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::errors::{AppError, AppErrorCode, AppResult};
+use crate::errors::{AppResult};
 use std::path::{PathBuf};
 use tokio_util::sync::CancellationToken;
 
@@ -265,6 +265,7 @@ pub async fn get_video_thumbnail_data_url(
     // Try system thumbnail first.
     #[cfg(target_os = "windows")]
     {
+        use crate::errors::{AppError, AppErrorCode};
         let path_cloned = p.clone();
         let cancel2 = cancel.clone();
         let sys_res = tauri::async_runtime::spawn_blocking(move || {
