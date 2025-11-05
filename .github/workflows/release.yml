@@ -178,7 +178,7 @@ jobs:
           releaseName: Free FPS v__VERSION__
           releaseBody: |
             Downloads:
-            - Windows portable: `free-fps.exe`
+            - Windows portable: `free-fps_portable.zip`
             - Windows installer (NSIS): `Free.FPS_x64-setup_windows.exe`
             - Windows installer (MSI): `Free.FPS_x64_en-US_windows.msi`
             - macOS Intel: `Free.FPS_x64_darwin.dmg`
