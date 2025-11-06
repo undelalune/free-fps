@@ -102,7 +102,6 @@ jobs:
             "avformat-62.dll",
             "avutil-60.dll",
             "ffmpeg.exe",
-            "ffplay.exe",
             "ffprobe.exe",
             "swresample-6.dll",
             "swscale-9.dll"
@@ -128,7 +127,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
+          
           BASE="app/src-tauri"
           CACHE="$BASE/.cache/ffmpeg/macos"
           BIN="$BASE/binaries"
@@ -136,29 +135,26 @@ jobs:
           
           FFMPEG_URL="https://evermeet.cx/ffmpeg/ffmpeg-8.0.zip"
           FFPROBE_URL="https://evermeet.cx/ffmpeg/ffprobe-8.0.zip"
-          FFPLAY_URL="https://evermeet.cx/ffmpeg/ffplay-8.0.zip"
           
           [ -f "$CACHE/ffmpeg-8.0.zip" ]  || curl -L --retry 3 -o "$CACHE/ffmpeg-8.0.zip"  "$FFMPEG_URL"
           [ -f "$CACHE/ffprobe-8.0.zip" ] || curl -L --retry 3 -o "$CACHE/ffprobe-8.0.zip" "$FFPROBE_URL"
-          [ -f "$CACHE/ffplay-8.0.zip" ]  || curl -L --retry 3 -o "$CACHE/ffplay-8.0.zip"  "$FFPLAY_URL"
           
           rm -f "$BIN/"* || true
           
           unzip -o "$CACHE/ffmpeg-8.0.zip"  -d "$BIN"
           unzip -o "$CACHE/ffprobe-8.0.zip" -d "$BIN"
-          unzip -o "$CACHE/ffplay-8.0.zip"  -d "$BIN"
           
-          chmod +x "$BIN/ffmpeg" "$BIN/ffprobe" "$BIN/ffplay" || true
-          xattr -dr com.apple.quarantine "$BIN/ffmpeg" "$BIN/ffprobe" "$BIN/ffplay" 2>/dev/null || true
+          chmod +x "$BIN/ffmpeg" "$BIN/ffprobe" || true
+          xattr -dr com.apple.quarantine "$BIN/ffmpeg" "$BIN/ffprobe" 2>/dev/null || true
           
           # Create target-suffixed copies expected by Tauri when using --target x86_64-apple-darwin
           cp "$BIN/ffmpeg"  "$BIN/ffmpeg-x86_64-apple-darwin"
           cp "$BIN/ffprobe" "$BIN/ffprobe-x86_64-apple-darwin"
-          cp "$BIN/ffplay"  "$BIN/ffplay-x86_64-apple-darwin"
-          chmod +x "$BIN/ffmpeg-x86_64-apple-darwin" "$BIN/ffprobe-x86_64-apple-darwin" "$BIN/ffplay-x86_64-apple-darwin" || true
-          xattr -dr com.apple.quarantine "$BIN/ffmpeg-x86_64-apple-darwin" "$BIN/ffprobe-x86_64-apple-darwin" "$BIN/ffplay-x86_64-apple-darwin" 2>/dev/null || true
+          chmod +x "$BIN/ffmpeg-x86_64-apple-darwin" "$BIN/ffprobe-x86_64-apple-darwin" || true
+          xattr -dr com.apple.quarantine "$BIN/ffmpeg-x86_64-apple-darwin" "$BIN/ffprobe-x86_64-apple-darwin" 2>/dev/null || true
           
           ls -la "$BIN"
+
 
       - name: Build with Tauri (no release)
         if: github.event_name == 'workflow_dispatch'
