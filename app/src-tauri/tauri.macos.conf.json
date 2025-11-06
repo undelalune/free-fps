@@ -24,8 +24,7 @@
     ],
     "externalBin": [
       "binaries/ffmpeg",
-      "binaries/ffprobe",
-      "binaries/ffplay"
+      "binaries/ffprobe"
     ]
   }
 }
