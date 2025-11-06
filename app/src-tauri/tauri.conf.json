@@ -36,6 +36,13 @@
     "targets": "all",
     "license": "GPL-3.0-only",
     "copyright": "© 2025 undelalune",
+    "publisher": "undelalune",
+    "windows": {
+      "nsis": {
+        "installMode": "perMachine",
+        "installerIcon": "icons/icon.ico"
+      }
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
