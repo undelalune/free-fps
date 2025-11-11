@@ -78,7 +78,6 @@ Free FPS — це вільне програмне забезпечення, лі
 <a id="3d-party-license"></a>
 ### Стороннє програмне забезпечення
 Ця програма використовує **FFmpeg**, яке також ліцензоване за GPL v3.0.
-- Сайт FFmpeg: https://ffmpeg.org
 - Читайте [FFmpeg Notice](FFmpegNotice)
 - Читайте [FFmpeg License](FFmpegLicense)
 

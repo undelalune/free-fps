@@ -78,7 +78,6 @@ Lisez le [licence](FreeFPSLicense) du projet.
 <a id="3d-party-license"></a>
 ### Logiciels tiers
 Ce programme utilise **FFmpeg**, également sous licence GPL v3.0.
-- Site FFmpeg : https://ffmpeg.org
 - Lire [FFmpeg Notice](FFmpegNotice)
 - Lire [FFmpeg License](FFmpegLicense)
 

@@ -80,7 +80,6 @@ Free FPS \- свободное программное обеспечение, л
 ### Стороннее программное обеспечение
 
 Эта программа использует **FFmpeg**, который также лицензирован по условиям GPL v3.0.
-- FFmpeg Website: https://ffmpeg.org
 - Прочитайте [FFmpeg Notice](FFmpegNotice)
 - Прочитайте [FFmpeg License](FFmpegLicense)
 

@@ -80,7 +80,6 @@ Przeczytaj [licencję](FreeFPSLicense) projektu.
 ### Oprogramowanie stron trzecich
 
 Ten program wykorzystuje **FFmpeg**, który także jest licencjonowany na warunkach GPL v3.0.
-- FFmpeg Website: https://ffmpeg.org
 - Przeczytaj [FFmpeg Notice](FFmpegNotice)
 - Przeczytaj [FFmpeg License](FFmpegLicense)
 
