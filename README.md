@@ -7,7 +7,8 @@ It does not add effects or alter content; it adjusts playback speed and, if need
 Originals are never modified.
 
 
-Download [latest release](https://github.com/undelalune/free-fps/releases/latest/) for Windows / macOS
+Download [latest release](https://github.com/undelalune/free-fps/releases/latest/) for Windows / macOS \
+The app for Windows is also available in the [Microsoft Store](https://apps.microsoft.com/detail/XPDDSLRMNXD2CS?hl=en-US&gl=US&ocid=pdpshare)
 <br/><br/>
 
 ## What it does
