@@ -39,7 +39,7 @@
     "publisher": "undelalune",
     "windows": {
       "nsis": {
-        "installMode": "perMachine",
+        "installMode": "both",
         "installerIcon": "icons/icon.ico"
       }
     },
