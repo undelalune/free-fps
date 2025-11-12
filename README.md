@@ -111,7 +111,7 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
 
 [release-img]:     https://img.shields.io/github/v/release/undelalune/free-fps
 [release-url]:     https://github.com/undelalune/free-fps/releases/latest/
-[license-url]:     https://img.shields.io/github/license/Nats-ji/paper-sand-dupe-unpatched?style=flat-rounded
+[license-url]:     https://img.shields.io/badge/license-GPLv3.0-orange.svg
 [tauri-img]:       https://img.shields.io/badge/Tauri-FFC131?style=for-the-badge&logo=Tauri&logoColor=white
 [tauri-url]:       https://tauri.app/
 [vue-img]:         https://img.shields.io/badge/Vue%20js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
