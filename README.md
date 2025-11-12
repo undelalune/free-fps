@@ -90,7 +90,7 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
 - GitHub Actions for builds and releases
 
 ## Tags
-`video-converter` `fps-converter` `frame-rate` `ffmpeg` `video-processing` `fps-changer` `video-editor` `frame-rate-converter` `video-tool` `open-source`
+`video converter` `fps converter` `change video fps` `change fps` `convert fps` `frame rate` `ffmpeg` `video processing` `fps changer` `video editor` `frame rate converter` `video tool` `opensource`
 
 ## For developers
 ### Build from source
