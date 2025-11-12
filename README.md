@@ -1,4 +1,4 @@
-# Free‑FPS [![GitHub release][release-img]][release-url]  [![license][license-url]](app/src-tauri/licenses/LICENSE.txt)
+# Free FPS. Video FPS Converter [![GitHub release][release-img]][release-url]  [![license][license-url]](app/src-tauri/licenses/LICENSE.txt)
 
 <img src="app/src/md/logo.png" alt="Free‑FPS logo" align="left" width="128" style="border-radius: 24px;">
 
@@ -37,6 +37,14 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
   </a>
 </p>
 
+**Key Features:**
+- Convert video frame rates (FPS) with precision
+- Support for MP4, MKV, AVI, MOV, WebM and other formats
+- Batch processing - convert multiple videos at once
+- Preserve or adjust audio speed to match new frame rate
+- Custom video quality settings (CRF or auto bitrate)
+- CPU usage control for background conversions
+- Cross-platform: Windows and macOS
 
 ## First Run
 > Your OS may warn or block the first launch because the app is not signed/notarized. <br/>
@@ -80,6 +88,9 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
 - Tauri 2 \(Rust\)
 - Vue 3, TypeScript, Naive UI, Vite
 - GitHub Actions for builds and releases
+
+## Tags
+`video-converter` `fps-converter` `frame-rate` `ffmpeg` `video-processing` `fps-changer` `video-editor` `frame-rate-converter` `video-tool` `open-source`
 
 ## For developers
 ### Build from source
