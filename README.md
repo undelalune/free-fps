@@ -1,5 +1,7 @@
 # Free FPS. Video FPS Converter [![GitHub release][release-img]][release-url]  [![license][license-url]](app/src-tauri/licenses/LICENSE.txt)
 
+**[Visit the Website](https://undelalune.github.io/free-fps/)**
+
 <img src="app/src/md/logo.png" alt="Free‑FPS logo" align="left" width="128" style="border-radius: 24px;">
 
 Open‑source desktop app and scripts to change a video file frame rate \(FPS\) <ins>**using FFmpeg**</ins>.\

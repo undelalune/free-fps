@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Free-FPS: Free open-source video FPS converter and video compressor. Change video frame rate without interpolation or effects. Convert 30fps to 60fps, 24fps to 30fps, or compress videos to reduce file size. FFmpeg-powered desktop app for Windows and macOS.">
+    <meta name="keywords" content="video fps converter, change video fps, frame rate converter, convert fps, video speed converter, ffmpeg fps, change frame rate, 30fps to 60fps, 24fps to 30fps, video framerate changer, fps conversion tool, batch video fps converter, no interpolation, free video converter, open source fps converter, windows fps converter, macos fps converter, video processing, mp4 fps converter, mkv fps converter, video compressor, reduce video file size, compress video, video compression tool, ffmpeg compressor">
+    <meta name="author" content="undelalune">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://undelalune.github.io/free-fps/">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://undelalune.github.io/free-fps/">
+    <meta property="og:title" content="Free-FPS - Video FPS Converter | Change Frame Rate Without Interpolation">
+    <meta property="og:description" content="Free open-source tool to change video frame rates using FFmpeg. No interpolation, no effects. Also works as a video compressor to reduce file sizes. Perfect for converting 30fps to 60fps, adjusting playback speed, or batch processing videos.">
+    <meta property="og:image" content="https://undelalune.github.io/free-fps/assets/logo.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free FPS - Video FPS Converter">
+    <meta name="twitter:description" content="Free open-source video FPS converter using FFmpeg. Change frame rates without interpolation or effects.">
+
+    <title>Free-FPS - Video FPS Converter & Compressor | Change Frame Rate | FFmpeg Tool</title>
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Free-FPS",
+        "description": "Free open-source video FPS converter and video compressor. Change video frame rates without interpolation using FFmpeg. Reduce video file sizes with quality controls. Desktop application for Windows and macOS.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": ["Windows 10", "Windows 11", "macOS 10.15+"],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "undelalune",
+            "url": "https://github.com/undelalune"
+        },
+        "softwareVersion": "1.1.2",
+        "downloadUrl": "https://github.com/undelalune/free-fps/releases/latest",
+        "screenshot": "https://undelalune.github.io/free-fps/assets/previews/home.png",
+        "featureList": [
+            "Convert video frame rates (FPS)",
+            "Compress videos to reduce file size",
+            "Batch processing multiple videos",
+            "Audio speed adjustment",
+            "Video quality control with CRF and bitrate",
+            "CPU usage management",
+            "Multi-language support"
+        ],
+        "license": "https://www.gnu.org/licenses/gpl-3.0.html"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What's the difference between FPS conversion and frame interpolation?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "FPS conversion changes the playback speed by adjusting timing between existing frames. Frame interpolation uses AI to generate new frames. Free-FPS doesn't create artificial frames - it simply makes your video play faster or slower."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I convert 30fps to 60fps without changing speed?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No, pure FPS conversion always affects playback speed. Converting 30fps to 60fps will make your video play at 2x speed. For keeping the same playback speed, you would need frame interpolation software."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What video formats are supported?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Free-FPS supports all major video formats that FFmpeg can handle, including MP4, MKV, AVI, MOV, WebM, FLV, WMV, and many more."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Free-FPS really free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, Free-FPS is completely free and open-source (GPL-3.0 license). There are no file size limits, no watermarks, no trial periods, and no premium features."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="hero">
+        <nav class="nav">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <img src="./assets/logo.png" alt="Free-FPS Logo" class="logo">
+                    <span class="brand-name">Free FPS</span>
+                </div>
+                <div class="nav-links">
+                    <a href="https://github.com/undelalune/free-fps" target="_blank" rel="noopener">GitHub</a>
+                    <a href="#features">Features</a>
+                    <a href="#download">Download</a>
+                    <a href="#guides">Guides</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Video FPS Converter</h1>
+                <p class="hero-subtitle">Free open-source tool to change video frame rates without interpolation</p>
+                <p class="hero-description">
+                    Convert video frame rates (FPS) precisely using <a href="https://www.ffmpeg.org/" target="_blank" >FFmpeg</a>. Perfect for changing 30fps to 60fps,
+                    24fps to 30fps, or any custom frame rate. Adjust playback speed, re-encode audio, and control
+                    video quality. <strong>No AI interpolation, no frame blending, no effects</strong> - just pure
+                    speed adjustment by changing how fast your video plays. Also works as a powerful video compressor
+                    to reduce file sizes without changing FPS. Your original files are never modified.
+                </p>
+                <div class="hero-buttons">
+                    <a href="https://github.com/undelalune/free-fps/releases/latest" class="btn btn-primary" target="_blank" rel="noopener">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                        Download Latest
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/XPDDSLRMNXD2CS?hl=en-US&gl=US&ocid=pdpshare" class="btn btn-secondary" target="_blank" rel="noopener">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+                        </svg>
+                        Microsoft Store
+                    </a>
+                </div>
+                <p class="platform-info">
+                    <span class="platform-badge">Windows 10/11</span>
+                    <span class="platform-badge">macOS 10.15+</span>
+                </p>
+            </div>
+            <div class="hero-image">
+                <img src="./assets/previews/home.png" alt="Free-FPS video converter interface showing FPS conversion settings, batch processing queue, and video quality controls for Windows and macOS" class="screenshot">
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <div class="container">
+            <h2 class="section-title">Why Use Free-FPS?</h2>
+
+            <div class="use-cases">
+                <div class="use-case-content">
+                    <h3>What is FPS Conversion Without Interpolation?</h3>
+                    <p>
+                        FPS (frames per second) conversion is the process of changing how fast a video plays back.
+                        Unlike AI-powered frame interpolation tools that generate new frames, Free-FPS simply adjusts
+                        the playback speed of your existing frames. This means:
+                    </p>
+                    <ul>
+                        <li><strong>Converting 30fps to 60fps</strong> makes your video play twice as fast (2x speed)</li>
+                        <li><strong>Converting 60fps to 30fps</strong> makes your video play at half speed (0.5x speed)</li>
+                        <li><strong>Converting 24fps to 30fps</strong> slightly speeds up your video (1.25x)</li>
+                        <li><strong>No artificial frames</strong> are created - only the playback timing changes</li>
+                    </ul>
+                </div>
+
+                <div class="use-case-content">
+                    <h3>Video Compression Without Changing FPS</h3>
+                    <p>
+                        Free-FPS isn't just for changing frame rates - it's also an excellent video compressor! You can keep
+                        your original FPS and use the quality controls to significantly reduce file size:
+                    </p>
+                    <ul>
+                        <li><strong>CRF (Constant Rate Factor):</strong> Adjust compression level from 0 (lossless) to 51 (maximum compression)</li>
+                        <li><strong>Automatic bitrate calculation:</strong> Let the app choose optimal settings based on resolution</li>
+                        <li><strong>Maintain playback speed:</strong> Your video plays at the same speed, just with a smaller file size</li>
+                        <li><strong>Perfect for archiving:</strong> Reduce storage space while keeping acceptable quality</li>
+                        <li><strong>Web optimization:</strong> Create smaller files for faster uploads and streaming</li>
+                        <li><strong>Batch compression:</strong> Process multiple large videos at once to save disk space</li>
+                    </ul>
+                    <p style="margin-top: var(--spacing-md); color: var(--text-tertiary); font-size: 0.95rem;">
+                        <strong>Note:</strong> File size reduction comes from compression settings (CRF/bitrate), not from changing FPS.
+                        The app gives you full control over quality vs. size trade-offs.
+                    </p>
+                </div>
+
+                <div class="use-case-content">
+                    <h3>Common Use Cases</h3>
+                    <ul>
+                        <li><strong>Speed up slow-motion footage:</strong> Convert high FPS recordings (120fps, 240fps) to normal playback speeds</li>
+                        <li><strong>Match framerates for editing:</strong> Convert all clips to the same FPS (e.g., 30fps or 24fps) for smooth timeline editing</li>
+                        <li><strong>Create time-lapse effects:</strong> Increase FPS to make videos play faster without re-recording</li>
+                        <li><strong>Fix playback speed issues:</strong> Correct videos recorded at wrong frame rates</li>
+                        <li><strong>Compress videos:</strong> Keep the same FPS and use quality settings (CRF or bitrate) to reduce file size for archiving or web delivery</li>
+                        <li><strong>Platform requirements:</strong> Convert videos to specific FPS required by streaming platforms or video editors</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="features-title">Key Features</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎬</div>
+                    <h3>Precise FPS Control</h3>
+                    <p>Convert video frame rates with mathematical precision. Supports all common formats including MP4, MKV, AVI, MOV, WebM, and more. Set any target FPS from 1 to 240+ fps.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Batch Processing</h3>
+                    <p>Convert multiple videos simultaneously. Queue dozens of files and process them in parallel. Perfect for converting entire folders of footage at once.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔊</div>
+                    <h3>Smart Audio Handling</h3>
+                    <p>Choose to preserve original audio speed or adjust it to match the new frame rate. Keep audio quality intact or re-encode for smaller file sizes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Video Quality Control</h3>
+                    <p>Customize output quality with CRF (Constant Rate Factor) or automatic bitrate calculation. Also works as a video compressor to reduce file sizes without changing FPS.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>CPU Usage Management</h3>
+                    <p>Control how much CPU power the converter uses. Run conversions in the background while working on other tasks, or use maximum power for fastest results.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Multi-language Interface</h3>
+                    <p>Available in 10 languages: English, Deutsch, Español, Français, Italiano, Polski, Português, Русский, Українська, Беларуская. Easy to use worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Gallery -->
+    <section class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">Screenshots</h2>
+            <div class="gallery">
+                <img src="./assets/previews/home.png" alt="Free-FPS home screen with video selection and FPS conversion settings" class="gallery-img">
+                <img src="./assets/previews/home2.png" alt="FPS converter advanced settings showing quality controls and output options" class="gallery-img">
+                <img src="./assets/previews/processing3.png" alt="Batch video processing showing multiple files being converted simultaneously" class="gallery-img">
+                <img src="./assets/previews/processing1.png" alt="Video FPS conversion progress with real-time processing statistics" class="gallery-img">
+                <img src="./assets/previews/processing2.png" alt="Detailed conversion progress view with frame rate and bitrate information" class="gallery-img">
+                <img src="./assets/previews/help.png" alt="Free-FPS help section with usage instructions and tips" class="gallery-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="section">
+        <div class="container">
+            <h2 class="section-title">Download Free-FPS Video Converter</h2>
+            <p style="text-align: center; max-width: 800px; margin: 0 auto var(--spacing-xl); color: var(--text-secondary); font-size: 1.1rem;">
+                Download the free FPS converter for Windows or macOS. No registration required, no trial limitations.
+                Start converting video frame rates instantly with our FFmpeg-powered desktop application.
+            </p>
+            <div class="download-cards">
+                <div class="download-card">
+                    <div class="download-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+                        </svg>
+                    </div>
+                    <h3>Windows</h3>
+                    <p>Windows 10 1809+ and Windows 11</p>
+                    <p class="download-note">Requires Microsoft Edge WebView2 runtime</p>
+                    <div class="download-buttons">
+                        <a href="https://github.com/undelalune/free-fps/releases/latest" class="btn btn-primary" target="_blank" rel="noopener">GitHub Release</a>
+                        <a href="https://apps.microsoft.com/detail/XPDDSLRMNXD2CS?hl=en-US&gl=US&ocid=pdpshare" class="btn btn-secondary" target="_blank" rel="noopener">Microsoft Store</a>
+                    </div>
+                    <p class="first-run-note">
+                        <strong>First run:</strong> Windows may warn about the app.
+                        <a href="https://github.com/undelalune/free-fps/blob/main/app/docs/first_run_win.MD" target="_blank">See instructions</a>
+                    </p>
+                </div>
+                <div class="download-card">
+                    <div class="download-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
+                        </svg>
+                    </div>
+                    <h3>macOS</h3>
+                    <p>macOS 10.15+ (Catalina or newer)</p>
+                    <p class="download-note">Intel and Apple Silicon supported</p>
+                    <div class="download-buttons">
+                        <a href="https://github.com/undelalune/free-fps/releases/latest" class="btn btn-primary" target="_blank" rel="noopener">GitHub Release</a>
+                    </div>
+                    <p class="first-run-note">
+                        <strong>First run:</strong> macOS may block unsigned apps.
+                        <a href="https://github.com/undelalune/free-fps/blob/main/app/docs/first_run_mac.MD" target="_blank">See instructions</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guides Section -->
+    <section id="guides" class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">User Guides</h2>
+            <div class="guides-content">
+                <div class="guides-intro">
+                    <h3>App User Guides (Multiple Languages)</h3>
+                    <p>Detailed instructions for using the Free-FPS desktop application in your language:</p>
+                </div>
+                <div class="guides-links">
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/en.MD" target="_blank">🇬🇧 English</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/de.MD" target="_blank">🇩🇪 Deutsch</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/es.MD" target="_blank">🇪🇸 Español</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/fr.MD" target="_blank">🇫🇷 Français</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/it.MD" target="_blank">🇮🇹 Italiano</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/pl.MD" target="_blank">🇵🇱 Polski</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/pt.MD" target="_blank">🇵🇹 Português</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/ru.MD" target="_blank">🇷🇺 Русский</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/ua.MD" target="_blank">🇺🇦 Українська</a>
+                    <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/by.MD" target="_blank">🇧🇾 Беларуская</a>
+                </div>
+                <div class="guides-scripts">
+                    <h3>Command-Line Scripts</h3>
+                    <p>Prefer the command line? Use our PowerShell and Bash scripts directly:</p>
+                    <div class="script-links">
+                        <a href="https://github.com/undelalune/free-fps/blob/main/scripts/win/README.md" target="_blank" class="script-link">
+                            <strong>Windows Scripts</strong>
+                            <span>PowerShell scripts for Windows</span>
+                        </a>
+                        <a href="https://github.com/undelalune/free-fps/blob/main/scripts/unix/README.md" target="_blank" class="script-link">
+                            <strong>Unix Scripts</strong>
+                            <span>Bash scripts for macOS and Linux</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-content">
+                <div class="faq-item">
+                    <h3>What's the difference between FPS conversion and frame interpolation?</h3>
+                    <p>
+                        FPS conversion (what Free-FPS does) changes the playback speed by adjusting timing between existing frames.
+                        Frame interpolation uses AI to generate new frames between existing ones. Free-FPS doesn't create artificial
+                        frames - it simply makes your video play faster or slower, which is useful for time-lapse effects, correcting
+                        recording speeds, or matching frame rates for editing.
+                    </p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I convert 30fps to 60fps without changing speed?</h3>
+                    <p>
+                        No, pure FPS conversion always affects playback speed. Converting 30fps to 60fps will make your video play
+                        at 2x speed. If you want to keep the same playback speed, you would need frame interpolation software (which
+                        generates artificial frames). Free-FPS is designed for speed-based conversion, perfect for slow-motion footage,
+                        time-lapse, or matching framerates for editing.
+                    </p>
+                </div>
+                <div class="faq-item">
+                    <h3>What video formats are supported?</h3>
+                    <p>
+                        Free-FPS supports all major video formats that FFmpeg can handle, including MP4, MKV, AVI, MOV, WebM, FLV,
+                        WMV, and many more. Input and output formats can be different - for example, you can convert an AVI file to
+                        MP4 while changing the frame rate.
+                    </p>
+                </div>
+                <div class="faq-item">
+                    <h3>Does it work with 4K and high-resolution videos?</h3>
+                    <p>
+                        Yes! Free-FPS can handle any resolution from SD to 8K and beyond. The processing speed depends on your
+                        computer's CPU power, but resolution doesn't affect the quality of FPS conversion. You can also adjust
+                        CPU usage to balance performance with system responsiveness.
+                    </p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is Free-FPS really free? Are there any limitations?</h3>
+                    <p>
+                        Yes, Free-FPS is completely free and open-source (GPL-3.0 license). There are no file size limits,
+                        no watermarks, no trial periods, and no premium features. You can convert as many videos as you want.
+                        The project relies on community support and donations to continue development.
+                    </p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do I need FFmpeg installed separately?</h3>
+                    <p>
+                        No! FFmpeg comes bundled with the application on both Windows and macOS. You don't need to install anything
+                        separately - just download Free-FPS and it's ready to use immediately. The app includes all necessary
+                        FFmpeg binaries, so you can start converting videos right away.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Support the Project</h2>
+            <div class="support-content">
+                <p>Free-FPS is open-source and completely free. If you find it useful, consider supporting the development:</p>
+                <div class="support-buttons">
+                    <a href="https://buymeacoffee.com/undelalune" target="_blank" rel="noopener" class="support-link">
+                        <img src="./assets/bmc-logo.svg" alt="Buy Me a Coffee" class="support-logo">
+                    </a>
+                    <a href="https://suppi.pl/undelalune" target="_blank" rel="noopener" class="support-link">
+                        <img src="./assets/suppi-logo.svg" alt="Suppi" class="support-logo">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <img src="./assets/logo.png" alt="Free-FPS Logo" class="footer-logo">
+                    <p>Open-source video FPS converter</p>
+                    <p class="tech-stack">Built with Tauri, Vue 3, and FFmpeg</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Project</h4>
+                        <a href="https://github.com/undelalune/free-fps" target="_blank" rel="noopener">GitHub Repository</a>
+                        <a href="https://github.com/undelalune/free-fps/releases" target="_blank" rel="noopener">Releases</a>
+                        <a href="https://github.com/undelalune/free-fps/issues" target="_blank" rel="noopener">Issues</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="https://github.com/undelalune/free-fps/blob/main/README.md" target="_blank" rel="noopener">Documentation</a>
+                        <a href="https://github.com/undelalune/free-fps/blob/main/app/src/md/en.MD" target="_blank" rel="noopener">User Guide</a>
+                        <a href="https://github.com/undelalune/free-fps/blob/main/LICENSE" target="_blank" rel="noopener">License (GPL-3.0)</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Free-FPS. Licensed under GPL-3.0. Made with ❤️ by <a href="https://github.com/undelalune" target="_blank" rel="noopener">undelalune</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

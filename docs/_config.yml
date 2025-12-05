@@ -1,0 +1,12 @@
+# GitHub Pages Configuration
+title: Free-FPS - Video FPS Converter
+description: Open-source desktop app to change video frame rates using FFmpeg
+baseurl: "/free-fps"
+url: "https://undelalune.github.io"
+
+# Theme
+theme: null
+
+# Build settings
+markdown: kramdown
+
