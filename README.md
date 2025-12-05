@@ -86,7 +86,7 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
 </a>
 
 ## Tech stack
-[![tauri-img]][tauri-url] [![vue-img]][vue-url] [![vite-img]][vite-url]
+[![tauri-img]][tauri-url] [![vue-img]][vue-url] [![vite-img]][vite-url] [![rust-img]][rust-url]
 - Tauri 2 \(Rust\)
 - Vue 3, TypeScript, Naive UI, Vite
 - GitHub Actions for builds and releases
@@ -120,3 +120,5 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
 [vue-url]:         https://vuejs.org/
 [vite-img]:        https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E
 [vite-url]:        https://vite.dev/
+[rust-img]:        https://img.shields.io/badge/Rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white
+[rust-url]:        https://rust-lang.org/
