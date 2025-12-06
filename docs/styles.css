@@ -499,6 +499,26 @@ img {
     text-align: center;
     transition: all var(--transition-normal);
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+.guides-links a .flag-icon {
+    display: inline-block;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+
+.guides-links a .by-icon {
+    font-size: 18px;
+    width: 24px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
 }
 
 .guides-links a:hover {
