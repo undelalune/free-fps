@@ -95,20 +95,14 @@ jobs:
           # Clean output to ensure no unnecessary files
           Get-ChildItem -Path $BinOut -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse
 
-          $Files = @(
-            "avcodec-62.dll",
-            "avdevice-62.dll",
-            "avfilter-11.dll",
-            "avformat-62.dll",
-            "avutil-60.dll",
-            "ffmpeg.exe",
-            "ffprobe.exe",
-            "swresample-6.dll",
-            "swscale-9.dll"
-          )
-          foreach ($f in $Files) {
-            Copy-Item -Force (Join-Path $InnerBin $f) $BinOut
-          }
+          # Copy ffmpeg.exe, ffprobe.exe and all required DLLs dynamically
+          Copy-Item -Force (Join-Path $InnerBin "ffmpeg.exe") $BinOut
+          Copy-Item -Force (Join-Path $InnerBin "ffprobe.exe") $BinOut
+          
+          # Copy all av*, sw* DLLs (handles version number changes)
+          Get-ChildItem -Path $InnerBin -Filter "av*.dll" | Copy-Item -Destination $BinOut -Force
+          Get-ChildItem -Path $InnerBin -Filter "sw*.dll" | Copy-Item -Destination $BinOut -Force
+          
           Get-ChildItem $BinOut | ForEach-Object { Write-Host "Prepared $($_.Name)" }
 
       # Cache FFmpeg archives for macOS
@@ -170,8 +164,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: app
-          tagName: v__VERSION__
-          releaseName: Free FPS v__VERSION__
+          tagName: ${{ github.ref_name }}
+          releaseName: Free FPS ${{ github.ref_name }}
           releaseBody: |
             Downloads:
             - Windows portable: `free-fps_portable.zip`
