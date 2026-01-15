@@ -122,7 +122,7 @@ onBeforeUnmount(() => {
         </span>
       </span>
 
-      <span> © 2025 <a href="https://github.com/undelalune/free-fps" target="_blank">undelalune</a></span>
+      <span> © {{new Date().getFullYear()}} <a href="https://github.com/undelalune/free-fps" target="_blank">undelalune</a></span>
     </div>
   </footer>
 </template>

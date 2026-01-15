@@ -44,7 +44,9 @@ const pickMdForLocale = (loc: string) => {
 
 const renderedHtml = computed(() => {
   const raw = pickMdForLocale(locale.value);
-  const html = md.render(raw);
+  const currentYear = new Date().getFullYear().toString();
+  const processedRaw = raw.replace(/\{\{YEAR}}/g, currentYear);
+  const html = md.render(processedRaw);
   return DOMPurify.sanitize(html);
 });
 

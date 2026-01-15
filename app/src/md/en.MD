@@ -44,7 +44,7 @@ If you want to support the author, you can do it here:
 - **Custom FPS** - set your own FPS value if the desired one is not in the list.
 - **Keep Audio** - keeps the audio from the source file. The sound may be **slowed down or sped up**, so the option is disabled by default.
 - **Audio Bitrate** - set the bitrate if you keep audio.
-- **Custom Video Quality** - output video quality (CRF). By default, the app tries to preserve the source quality - this is recommended.
+- **Custom Video Quality** - output video quality (CRF). By default, the app uses Auto mode, which estimates bitrate based on source video properties.<br/>**IMPORTANT:** Auto mode may produce visible artifacts (blockiness, banding, blur) in complex scenes with fast motion, rapid camera movement, or fine details. It may also underperform with already compressed sources or screen recordings. For important or visually complex videos, prefer **High** or **Maximum** quality.<br/>
   Caution: too low a value results in poor quality; too high - huge files. More: [FFmpeg Encode H.264](https://trac.ffmpeg.org/wiki/Encode/H.264)
 - **CPU Limit** - limit CPU usage. May slightly reduce load, but not guaranteed.
 
@@ -93,4 +93,4 @@ https://github.com/undelalune/free-fps
 
 ---
 
-<p style="text-align:center;">Copyright © 2025 undelalune</p>
+<p style="text-align:center;">Copyright © {{YEAR}} undelalune</p>

@@ -1,5 +1,5 @@
 Free FPS - Video Frame Rate Converter
-Copyright © 2025 undelalune
+Copyright © 2026 undelalune
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

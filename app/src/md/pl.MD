@@ -44,7 +44,7 @@ Jeśli chcesz wesprzeć autora, możesz to zrobić tutaj:
 - **Własny FPS** - ustaw własną wartość FPS, jeśli żądanej nie ma na liście.
 - **Zachowaj dźwięk** - zachowuje dźwięk z pliku źródłowego. Dźwięk może być **spowolniony lub przyspieszony**, dlatego domyślnie opcja jest wyłączona.
 - **Bitrate audio** - ustaw bitrate, jeśli zachowujesz audio.
-- **Własna jakość wideo** - jakość wyjściowego wideo (CRF). Domyślnie aplikacja stara się zachować jakość źródłową - to zalecane.
+- **Własna jakość wideo** - jakość wyjściowego wideo (CRF). Domyślnie aplikacja używa trybu Auto, który szacuje bitrate na podstawie właściwości wideo źródłowego.<br/>**WAŻNE:** Tryb Auto może powodować widoczne artefakty (bloki, paski, rozmycie) w złożonych scenach z szybkim ruchem, szybkim ruchem kamery lub drobnymi szczegółami. Może też działać gorzej z już skompresowanymi źródłami lub nagraniami ekranu. Dla ważnych lub wizualnie złożonych filmów wybierz jakość **Wysoką** lub **Maksymalną**.<br/>
   Uwaga: zbyt niska wartość da słabą jakość; zbyt wysoka - ogromne pliki. Więcej: [FFmpeg Encode H.264](https://trac.ffmpeg.org/wiki/Encode/H.264)
 - **Limit CPU** - ogranicz użycie procesora. Może nieznacznie zmniejszyć obciążenie, ale nie jest gwarantowane.
 
@@ -94,4 +94,4 @@ Pełny kod źródłowy jest dostępny pod adresem: https://github.com/undelalune
 
 ---
 
-<p style="text-align:center;">Copyright © 2025 undelalune</p>
+<p style="text-align:center;">Copyright © {{YEAR}} undelalune</p>

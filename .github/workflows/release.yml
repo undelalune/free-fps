@@ -246,32 +246,33 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  upload-msi-to-azure:
-    name: Upload MSI to Azure
-    needs: build-and-release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download MSI artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: msi-windows
-          path: ./msi
+  # NOTE: Azure upload disabled - not currently in use
+  # upload-msi-to-azure:
+  #   name: Upload MSI to Azure
+  #   needs: build-and-release
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download MSI artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: msi-windows
+  #         path: ./msi
 
-      - name: Upload MSI to Azure Blob Storage (overwrite)
-        uses: azure/cli@v2
-        env:
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-          AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
-        with:
-          inlineScript: |
-            MSI_FILE=$(ls ./msi/*.msi | head -n 1)
-            NAME=$(basename "$MSI_FILE")
-            echo "Uploading $MSI_FILE to container '$AZURE_CONTAINER_NAME' as '$NAME'"
-            az storage blob upload \
-              --overwrite true \
-              --account-name "$AZURE_STORAGE_ACCOUNT" \
-              --account-key "$AZURE_STORAGE_KEY" \
-              --container-name "$AZURE_CONTAINER_NAME" \
-              --file "$MSI_FILE" \
-              --name "$NAME"
+  #     - name: Upload MSI to Azure Blob Storage (overwrite)
+  #       uses: azure/cli@v2
+  #       env:
+  #         AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+  #         AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+  #         AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
+  #       with:
+  #         inlineScript: |
+  #           MSI_FILE=$(ls ./msi/*.msi | head -n 1)
+  #           NAME=$(basename "$MSI_FILE")
+  #           echo "Uploading $MSI_FILE to container '$AZURE_CONTAINER_NAME' as '$NAME'"
+  #           az storage blob upload \
+  #             --overwrite true \
+  #             --account-name "$AZURE_STORAGE_ACCOUNT" \
+  #             --account-key "$AZURE_STORAGE_KEY" \
+  #             --container-name "$AZURE_CONTAINER_NAME" \
+  #             --file "$MSI_FILE" \
+  #             --name "$NAME"
