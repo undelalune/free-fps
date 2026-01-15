@@ -169,9 +169,9 @@ jobs:
           releaseBody: |
             Downloads:
             - Windows portable: `free-fps_portable.zip`
-            - Windows installer (NSIS): `Free.FPS_x64-setup_windows.exe`
-            - Windows installer (MSI): `Free.FPS_x64_en-US_windows.msi`
-            - macOS Intel: `Free.FPS_x64_darwin.dmg`
+            - Windows installer (NSIS): `Free.FPS_*_x64-setup.exe`
+            - Windows installer (MSI): `Free.FPS_*_x64_en-US.msi`
+            - macOS Intel: `Free.FPS_*_x64.dmg`
           releaseDraft: false
           prerelease: false
           args: --bundles ${{ matrix.bundles }} ${{ matrix.extra_args }}
