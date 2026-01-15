@@ -37,6 +37,10 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Add x86_64 target (macOS)
+        if: matrix.os == 'macos-14'
+        run: rustup target add x86_64-apple-darwin
+
       - name: Install Node deps (app)
         working-directory: app
         shell: bash
