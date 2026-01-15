@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 /app/src-tauri/binaries/
+
+# sign files
+/sign/*
