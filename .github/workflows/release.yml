@@ -18,7 +18,7 @@ jobs:
           - os: windows-latest
             bundles: nsis,msi
             extra_args: ""
-          - os: macos-13
+          - os: macos-14
             bundles: dmg,app
             extra_args: --target x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
@@ -113,7 +113,7 @@ jobs:
 
       # Cache FFmpeg archives for macOS
       - name: Cache FFmpeg downloads (macOS)
-        if: matrix.os == 'macos-13'
+        if: matrix.os == 'macos-14'
         uses: actions/cache@v4
         with:
           path: app/src-tauri/.cache/ffmpeg/macos
@@ -123,7 +123,7 @@ jobs:
 
       # Download, extract, chmod +x, and de-quarantine FFmpeg for macOS
       - name: Prepare FFmpeg sidecars (macOS)
-        if: matrix.os == 'macos-13'
+        if: matrix.os == 'macos-14'
         shell: bash
         run: |
           set -euo pipefail
