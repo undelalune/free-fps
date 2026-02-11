@@ -66,6 +66,7 @@ export default {
             worstQuality: "Menor qualidade ({value})",
             setVideoQualityInfo: "Valor menor = maior qualidade (e arquivo maior). 0 = sem perdas, 51 = qualidade mais baixa.",
             customVideoQualityInfo: "Se desativado, a qualidade será definida automaticamente com base na qualidade do vídeo de entrada. Ajustes manuais podem resultar em arquivos maiores.",
+            customVideoQualityGpuDisabled: "A qualidade personalizada não está disponível com aceleração GPU. O modo GPU preserva automaticamente a qualidade do vídeo original.",
             cpuLimit: "Limite de CPU:",
             cpuLimitInfo: "Limita núcleos da CPU usados para manter o sistema responsivo.",
             ffmpegNotSet: "Defina o caminho para ffmpeg nas configurações primeiro.",

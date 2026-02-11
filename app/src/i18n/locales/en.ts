@@ -66,6 +66,7 @@ export default {
             worstQuality: "Lowest quality ({value})",
             setVideoQualityInfo: "Lower value = higher quality (and larger file size). 0 means lossless, 51 means the lowest quality.",
             customVideoQualityInfo: "If disabled, the video quality will be set automatically based on the input video's quality. Manual adjustments may result in larger files.",
+            customVideoQualityGpuDisabled: "Custom quality is not available with GPU acceleration. GPU mode automatically preserves the original video quality.",
             cpuLimit: "CPU Limit:",
             cpuLimitInfo: "Limit the number of CPU cores used during conversion. This can help keep your system responsive during the process.",
             ffmpegNotSet: "Please set a valid path to the ffmpeg executable in the settings first.",

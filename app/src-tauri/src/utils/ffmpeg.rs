@@ -288,25 +288,6 @@ async fn compute_timings(probe: &VideoProbe, target_fps: f32) -> Result<Timings,
     })
 }
 
-/// Map CPU preset to NVIDIA NVENC preset (p1-p7)
-fn map_preset_nvidia(_preset: &str) -> &'static str {
-    // For now, use p4 (medium) as default for balanced speed/quality
-    // NVENC presets: p1 (fastest) to p7 (slowest/best quality)
-    "p4"
-}
-
-/// Map CPU preset to AMD AMF quality setting
-fn map_preset_amd(_preset: &str) -> &'static str {
-    // AMF quality settings: speed, balanced, quality
-    "balanced"
-}
-
-/// Map CPU preset to Intel QSV preset
-fn map_preset_intel(_preset: &str) -> &'static str {
-    // QSV presets similar to x264: veryfast, faster, fast, medium, slow, slower, veryslow
-    "medium"
-}
-
 /// Build video encoding arguments with GPU support
 async fn build_video_args(
     input: &str,
@@ -316,103 +297,74 @@ async fn build_video_args(
     use_gpu: bool,
     gpu_type: Option<&str>,
 ) -> Result<Vec<String>, AppError> {
-    // Validate CRF if custom quality is used
+    // Validate CRF if custom quality is used (CPU only)
     if use_custom_quality && crf > 51 {
         let _ = log_error("VideoQualityOutOfRange", &format!("crf={}", crf)).await;
         return Err(AppError::code_only(AppErrorCode::VideoQualityOutOfRange));
     }
 
-    // If GPU encoding is requested
+    // GPU encoding - always use auto-bitrate mode to preserve quality
+    // Custom CRF is only available for CPU encoding
     if use_gpu {
         if let Some(gpu) = gpu_type {
+            let target_kbps = calculate_target_bitrate(input, new_duration).await?;
+            // Use slightly higher bitrate for GPU to ensure quality preservation
+            let quality_kbps = (target_kbps as f64 * 1.1) as u64; // 10% higher for safety margin
+
             match gpu.to_lowercase().as_str() {
                 "nvidia" => {
-                    let mut args = vec![
+                    return Ok(vec![
                         "-c:v".into(),
                         "h264_nvenc".into(),
-                    ];
-
-                    if use_custom_quality {
-                        // NVENC uses -cq for constant quality mode (similar to CRF)
-                        args.extend([
-                            "-cq".into(),
-                            crf.to_string(),
-                            "-preset".into(),
-                            map_preset_nvidia("slow").into(),
-                        ]);
-                    } else {
-                        // Auto bitrate mode - calculate target bitrate
-                        let target_kbps = calculate_target_bitrate(input, new_duration).await?;
-                        args.extend([
-                            "-b:v".into(),
-                            format!("{}k", target_kbps),
-                            "-preset".into(),
-                            map_preset_nvidia("slow").into(),
-                        ]);
-                    }
-
-                    args.extend(["-pix_fmt".into(), "yuv420p".into()]);
-                    return Ok(args);
+                        "-rc".into(),
+                        "vbr".into(),
+                        "-b:v".into(),
+                        format!("{}k", quality_kbps),
+                        "-maxrate".into(),
+                        format!("{}k", (quality_kbps as f64 * 1.5) as u64),
+                        "-bufsize".into(),
+                        format!("{}k", quality_kbps * 2),
+                        "-preset".into(),
+                        "p5".into(),
+                        "-pix_fmt".into(),
+                        "yuv420p".into(),
+                    ]);
                 }
 
                 "amd" => {
-                    let mut args = vec![
+                    return Ok(vec![
                         "-c:v".into(),
                         "h264_amf".into(),
-                    ];
-
-                    if use_custom_quality {
-                        // AMF uses -qp_i, -qp_p, -qp_b for quality control
-                        args.extend([
-                            "-qp_i".into(),
-                            crf.to_string(),
-                            "-qp_p".into(),
-                            crf.to_string(),
-                            "-qp_b".into(),
-                            crf.to_string(),
-                            "-quality".into(),
-                            map_preset_amd("slow").into(),
-                        ]);
-                    } else {
-                        let target_kbps = calculate_target_bitrate(input, new_duration).await?;
-                        args.extend([
-                            "-b:v".into(),
-                            format!("{}k", target_kbps),
-                            "-quality".into(),
-                            map_preset_amd("slow").into(),
-                        ]);
-                    }
-
-                    args.extend(["-pix_fmt".into(), "yuv420p".into()]);
-                    return Ok(args);
+                        "-rc".into(),
+                        "vbr_peak".into(),
+                        "-b:v".into(),
+                        format!("{}k", quality_kbps),
+                        "-maxrate".into(),
+                        format!("{}k", (quality_kbps as f64 * 1.5) as u64),
+                        "-bufsize".into(),
+                        format!("{}k", quality_kbps * 2),
+                        "-quality".into(),
+                        "quality".into(), // Use "quality" instead of "balanced" for better output
+                        "-pix_fmt".into(),
+                        "yuv420p".into(),
+                    ]);
                 }
 
                 "intel" => {
-                    let mut args = vec![
+                    return Ok(vec![
                         "-c:v".into(),
                         "h264_qsv".into(),
-                    ];
-
-                    if use_custom_quality {
-                        // QSV uses -global_quality for quality control
-                        args.extend([
-                            "-global_quality".into(),
-                            crf.to_string(),
-                            "-preset".into(),
-                            map_preset_intel("slow").into(),
-                        ]);
-                    } else {
-                        let target_kbps = calculate_target_bitrate(input, new_duration).await?;
-                        args.extend([
-                            "-b:v".into(),
-                            format!("{}k", target_kbps),
-                            "-preset".into(),
-                            map_preset_intel("slow").into(),
-                        ]);
-                    }
-
-                    args.extend(["-pix_fmt".into(), "yuv420p".into()]);
-                    return Ok(args);
+                        "-b:v".into(),
+                        format!("{}k", quality_kbps),
+                        "-maxrate".into(),
+                        format!("{}k", (quality_kbps as f64 * 1.5) as u64),
+                        "-bufsize".into(),
+                        format!("{}k", quality_kbps * 2),
+                        "-preset".into(),
+                        "slower".into(), // Use "slower" for better quality
+                        "-pix_fmt".into(),
+                        "yuv420p".into(),
+                    ]);
                 }
 
                 _ => {
@@ -422,7 +374,7 @@ async fn build_video_args(
         }
     }
 
-    // CPU encoding (default/fallback)
+    // CPU encoding with custom CRF quality
     if use_custom_quality {
         return Ok(vec![
             "-c:v".into(),
@@ -436,7 +388,7 @@ async fn build_video_args(
         ]);
     }
 
-    // Derive approximate target bitrate to preserve size
+    // CPU auto-bitrate mode (fallback if GPU not available)
     let target_kbps = calculate_target_bitrate(input, new_duration).await?;
 
     Ok(vec![
@@ -452,6 +404,7 @@ async fn build_video_args(
 }
 
 /// Calculate target bitrate based on input file size and expected duration
+/// Returns video bitrate in kbps with a reasonable minimum floor
 async fn calculate_target_bitrate(input: &str, new_duration: f64) -> Result<u64, AppError> {
     let meta = fs::metadata(input)
         .await
@@ -476,7 +429,18 @@ async fn calculate_target_bitrate(input: &str, new_duration: f64) -> Result<u64,
         return Err(AppError::code_only(AppErrorCode::InvalidNewDuration));
     }
 
-    Ok(((size_bytes * 8.0) / new_duration / 1000.0).round().max(1.0) as u64)
+    // Calculate total bitrate from file size
+    let total_kbps = ((size_bytes * 8.0) / new_duration / 1000.0).round();
+
+    // Estimate ~192kbps for audio overhead (conservative estimate)
+    // and ensure we don't go below a reasonable minimum for video
+    let audio_overhead_kbps = 192.0;
+    let video_kbps = (total_kbps - audio_overhead_kbps).max(500.0); // Minimum 500kbps for video
+
+    // Also apply an upper sanity check - don't exceed original total bitrate
+    let final_kbps = video_kbps.min(total_kbps).max(500.0) as u64;
+
+    Ok(final_kbps)
 }
 
 async fn build_audio_args(

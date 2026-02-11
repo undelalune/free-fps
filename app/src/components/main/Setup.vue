@@ -218,9 +218,10 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
     <!-- Video quality and CPU limit row -->
     <div class="horizontal-flex-group bottom-settings-row">
       <n-flex vertical>
-        <!-- Video quality (grouped) -->
+        <!-- Video quality (grouped) - only available for CPU encoding -->
         <div class="non-form-el">
           <n-checkbox v-model:checked="store.useCustomVideoQuality" style="max-width: 180px;"
+                      :disabled="store.useGpu"
                       :label="t('mainView.setup.customVideoQuality')"/>
           <n-tooltip placement="top" style="max-width:200px" :delay="500">
             <template #trigger>
@@ -228,10 +229,10 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
                 <InfoCircle/>
               </n-icon>
             </template>
-            {{ t('mainView.setup.customVideoQualityInfo') }}
+            {{ store.useGpu ? t('mainView.setup.customVideoQualityGpuDisabled') : t('mainView.setup.customVideoQualityInfo') }}
           </n-tooltip>
         </div>
-        <n-form-item v-if="store.useCustomVideoQuality" :label="t('mainView.setup.setVideoQuality')"
+        <n-form-item v-if="store.useCustomVideoQuality && !store.useGpu" :label="t('mainView.setup.setVideoQuality')"
                      :show-feedback="false">
           <template #label>
             <span class="label-with-help">
