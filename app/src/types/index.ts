@@ -10,6 +10,16 @@ export interface VideoFile {
     thumbnail?: string; //base64 data url
 }
 
+// GPU types for hardware-accelerated encoding
+export type GpuType = 'Nvidia' | 'Amd' | 'Intel' | 'None';
+
+export interface GpuInfo {
+    gpu_type: GpuType;
+    has_h264: boolean;
+    has_h265: boolean;
+    model_name: string;
+}
+
 export interface VideoConversionParams {
     input_folder: string; //input folder path
     output_folder: string; //output folder path (if empty, use input folder to create output folder inside with the name "converted_videos_${target_fps}fps")
@@ -20,6 +30,8 @@ export interface VideoConversionParams {
     use_custom_video_quality: boolean; // if true use custom video quality - video_quality (crf, 0-51, lower is better quality). If false:
     video_quality: number; // output video quality (crf, 0-51, lower is better quality) (if use_custom_video_quality = true)
     files: string[]; //array of file paths to convert
+    use_gpu: boolean; // if true use GPU acceleration
+    gpu_type?: string; // GPU type: 'Nvidia', 'Amd', 'Intel' or undefined for auto-detect
 }
 
 export enum LicenseType {

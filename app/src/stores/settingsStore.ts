@@ -18,6 +18,7 @@ export function useSettingsStore() {
         useCustomVideoQuality,
         videoQuality,
         cpuLimit,
+        useGpu,
     } = useSettingsPersistence({
         useDarkTheme: true,
         userLocale: 'en' as Locale,
@@ -32,6 +33,7 @@ export function useSettingsStore() {
         useCustomVideoQuality: false,
         videoQuality: 16,
         cpuLimit: 75,
+        useGpu: false,
     });
 
     const setLocale = (loc: Locale) => {
@@ -52,6 +54,7 @@ export function useSettingsStore() {
         useCustomVideoQuality.value = false;
         videoQuality.value = 16;
         cpuLimit.value = 75;
+        useGpu.value = false;
 
         userLocale.value = 'en';
         setLocale(userLocale.value);
@@ -74,6 +77,7 @@ export function useSettingsStore() {
         useCustomVideoQuality,
         videoQuality,
         cpuLimit,
+        useGpu,
 
         // actions
         loadAllSettings,

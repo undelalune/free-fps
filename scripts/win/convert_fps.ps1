@@ -7,8 +7,71 @@ param (
     [string]$FfprobePath = "C:\ffmpeg\bin\ffprobe.exe",
     [string]$OutputFolder = "",
     [int]$AudioBitrate = 192,
-    [bool]$AutoVideoBr = $true
+    [bool]$AutoVideoBr = $true,
+    [bool]$UseGpu = $true,
+    [string]$GpuType = "auto"
 )
+
+# ========== GPU DETECTION ==========
+function Get-AvailableGpuEncoder {
+    param (
+        [string]$FfmpegPath
+    )
+
+    $encoders = & $FfmpegPath -hide_banner -encoders 2>&1 | Out-String
+
+    # Check NVIDIA first (highest priority)
+    if ($encoders -match "h264_nvenc") {
+        # Test if NVENC actually works
+        $testResult = & $FfmpegPath -f lavfi -i "color=black:s=320x240:d=1" -c:v h264_nvenc -f null - 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            return @{
+                Type = "nvidia"
+                Encoder = "h264_nvenc"
+                QualityParam = "-cq"
+                PresetParam = "-preset"
+                Preset = "p4"
+            }
+        }
+    }
+
+    # Check AMD
+    if ($encoders -match "h264_amf") {
+        $testResult = & $FfmpegPath -f lavfi -i "color=black:s=320x240:d=1" -c:v h264_amf -f null - 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            return @{
+                Type = "amd"
+                Encoder = "h264_amf"
+                QualityParam = "-qp_i"
+                PresetParam = "-quality"
+                Preset = "balanced"
+            }
+        }
+    }
+
+    # Check Intel QuickSync
+    if ($encoders -match "h264_qsv") {
+        $testResult = & $FfmpegPath -f lavfi -i "color=black:s=320x240:d=1" -c:v h264_qsv -f null - 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            return @{
+                Type = "intel"
+                Encoder = "h264_qsv"
+                QualityParam = "-global_quality"
+                PresetParam = "-preset"
+                Preset = "medium"
+            }
+        }
+    }
+
+    # Fallback to CPU
+    return @{
+        Type = "cpu"
+        Encoder = "libx264"
+        QualityParam = "-crf"
+        PresetParam = "-preset"
+        Preset = "slow"
+    }
+}
 
 # ========== CHECK FFMPEG ==========
 if (!(Test-Path $FfmpegPath)) {
@@ -41,6 +104,35 @@ Write-Host "Target FPS: $Fps"
 Write-Host "Remove audio: $( !($KeepAudio) )"
 Write-Host "CRF: $Crf"
 Write-Host "Use bitrate mode: $AutoVideoBr"
+
+# ========== GPU DETECTION ==========
+$GpuInfo = $null
+if ($UseGpu) {
+    if ($GpuType -eq "auto") {
+        Write-Host "Detecting GPU..."
+        $GpuInfo = Get-AvailableGpuEncoder -FfmpegPath $FfmpegPath
+    } else {
+        # Manual GPU type specified
+        switch ($GpuType.ToLower()) {
+            "nvidia" {
+                $GpuInfo = @{ Type = "nvidia"; Encoder = "h264_nvenc"; QualityParam = "-cq"; PresetParam = "-preset"; Preset = "p4" }
+            }
+            "amd" {
+                $GpuInfo = @{ Type = "amd"; Encoder = "h264_amf"; QualityParam = "-qp_i"; PresetParam = "-quality"; Preset = "balanced" }
+            }
+            "intel" {
+                $GpuInfo = @{ Type = "intel"; Encoder = "h264_qsv"; QualityParam = "-global_quality"; PresetParam = "-preset"; Preset = "medium" }
+            }
+            default {
+                $GpuInfo = @{ Type = "cpu"; Encoder = "libx264"; QualityParam = "-crf"; PresetParam = "-preset"; Preset = "slow" }
+            }
+        }
+    }
+    Write-Host "GPU Encoder: $($GpuInfo.Type) ($($GpuInfo.Encoder))"
+} else {
+    $GpuInfo = @{ Type = "cpu"; Encoder = "libx264"; QualityParam = "-crf"; PresetParam = "-preset"; Preset = "slow" }
+    Write-Host "GPU Encoder: Disabled (using CPU)"
+}
 Write-Host ""
 
 # ========== SUPPORTED EXTENSIONS ==========
@@ -111,6 +203,9 @@ foreach ($ext in $extensions) {
 
         # compute target bitrate if requested
         $videoArgs = ""
+        $encoderType = $GpuInfo.Type
+        $encoder = $GpuInfo.Encoder
+
         if ($AutoVideoBr) {
             $original_size = $_.Length  # bytes
             if ($original_duration -le 0) {
@@ -130,9 +225,16 @@ foreach ($ext in $extensions) {
             if ($target_bitrate_kbps -lt 1) { $target_bitrate_kbps = 1 }
 
             Write-Host "  Computed target bitrate: ${target_bitrate_kbps}k (new duration: $new_duration s)"
-            $videoArgs = "-b:v ${target_bitrate_kbps}k -c:v libx264 -preset slow"
+            $videoArgs = "-b:v ${target_bitrate_kbps}k -c:v $encoder $($GpuInfo.PresetParam) $($GpuInfo.Preset)"
         } else {
-            $videoArgs = "-c:v libx264 -crf $Crf -preset slow"
+            # Quality-based encoding
+            if ($encoderType -eq "amd") {
+                # AMD uses -qp_i, -qp_p, -qp_b
+                $videoArgs = "-c:v $encoder -qp_i $Crf -qp_p $Crf -qp_b $Crf $($GpuInfo.PresetParam) $($GpuInfo.Preset)"
+            } else {
+                # NVIDIA, Intel, CPU all use similar quality param
+                $videoArgs = "-c:v $encoder $($GpuInfo.QualityParam) $Crf $($GpuInfo.PresetParam) $($GpuInfo.Preset)"
+            }
         }
 
         # audio args (preserve/build atempo chain or remove audio)

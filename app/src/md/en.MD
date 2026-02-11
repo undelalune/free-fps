@@ -46,6 +46,7 @@ If you want to support the author, you can do it here:
 - **Audio Bitrate** - set the bitrate if you keep audio.
 - **Custom Video Quality** - output video quality (CRF). By default, the app uses Auto mode, which estimates bitrate based on source video properties.<br/>**IMPORTANT:** Auto mode may produce visible artifacts (blockiness, banding, blur) in complex scenes with fast motion, rapid camera movement, or fine details. It may also underperform with already compressed sources or screen recordings. For important or visually complex videos, prefer **High** or **Maximum** quality.<br/>
   Caution: too low a value results in poor quality; too high - huge files. More: [FFmpeg Encode H.264](https://trac.ffmpeg.org/wiki/Encode/H.264)
+- **GPU Acceleration** - uses your graphics card for faster video encoding. Supports NVIDIA (NVENC), AMD (AMF), and Intel (QuickSync). Can be 3-5x faster than CPU encoding. If no compatible GPU is detected, the option will be disabled.
 - **CPU Limit** - limit CPU usage. May slightly reduce load, but not guaranteed.
 
 ---

@@ -25,6 +25,7 @@ const {
   rescanFolder,
   performConversion,
   cancelConversion,
+  detectGpu,
   setupProgressListener,
   cleanup,
 } = useVideoConversion();
@@ -36,7 +37,10 @@ const onNext = () => {
 
 watch(() => store.inputFolder, scanFolder);
 
-onMounted(setupProgressListener);
+onMounted(() => {
+  setupProgressListener();
+  detectGpu();
+});
 onUnmounted(cleanup);
 </script>
 

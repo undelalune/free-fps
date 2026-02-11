@@ -10,6 +10,7 @@ It works on Unix-like systems (Linux, macOS) and supports multiple formats and f
 
 - Works from any folder (no system-wide installation of `ffmpeg` required if you pass a custom binary path).
 - Supports `.mp4`, `.mov`, `.avi`, `.mkv`, `.webm`.
+- **GPU-accelerated encoding** (NVIDIA NVENC, AMD AMF, Intel QuickSync) with automatic detection.
 - Removes audio by default (use `-k` to keep audio).
 - CRF defines video quality:
   - `0 = lossless`
@@ -50,6 +51,8 @@ The script rounds to whole kbps and clamps to at least `1k`. If any detection st
 | `-o OUTPUT_FOLDER` | Name of the output folder inside the input dir                             | `-o converted_out`          | `converted_fps_<FPS>`              |
 | `-b AUDIO_BITRATE` | Audio bitrate in kbps (when keeping audio)                                 | `-b 192`                    | `192`                              |
 | `-u`               | Use bitrate mode (compute target bitrate and use `-b:v` instead of `-crf`) | `-u`                        | enabled                            |
+| `-g`               | Disable GPU acceleration                                                   | `-g`                        | GPU enabled by default             |
+| `-G GPU_TYPE`      | Force GPU type: `nvidia`, `amd`, `intel`, `cpu`                            | `-G nvidia`                 | `auto` (auto-detect)               |
 
 ---
 

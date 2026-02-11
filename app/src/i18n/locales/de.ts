@@ -68,7 +68,11 @@ export default {
             customVideoQualityInfo: "Wenn deaktiviert, wird die Qualität automatisch eingestellt. Manuelle Anpassung kann größere Dateien erzeugen.",
             cpuLimit: "CPU-Limit:",
             cpuLimitInfo: "Anzahl der verwendeten CPU-Kerne begrenzen, um Systemreaktion zu erhalten.",
-            ffmpegNotSet: "Bitte gültigen ffmpeg-Pfad zuerst in den Einstellungen angeben."
+            ffmpegNotSet: "Bitte gültigen ffmpeg-Pfad zuerst in den Einstellungen angeben.",
+            useGpu: "GPU-Beschleunigung",
+            gpuInfo: "Verwenden Sie Ihre Grafikkarte für schnellere Videocodierung. Unterstützt NVIDIA (NVENC), AMD (AMF) und Intel (QuickSync). Kann 3-5x schneller als CPU-Codierung sein.",
+            detectingGpu: "GPU wird erkannt...",
+            noGpuDetected: "Keine kompatible GPU erkannt"
         },
         processing: {
             rescanFolder: "Ordner neu scannen",

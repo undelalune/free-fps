@@ -288,17 +288,142 @@ async fn compute_timings(probe: &VideoProbe, target_fps: f32) -> Result<Timings,
     })
 }
 
+/// Map CPU preset to NVIDIA NVENC preset (p1-p7)
+fn map_preset_nvidia(_preset: &str) -> &'static str {
+    // For now, use p4 (medium) as default for balanced speed/quality
+    // NVENC presets: p1 (fastest) to p7 (slowest/best quality)
+    "p4"
+}
+
+/// Map CPU preset to AMD AMF quality setting
+fn map_preset_amd(_preset: &str) -> &'static str {
+    // AMF quality settings: speed, balanced, quality
+    "balanced"
+}
+
+/// Map CPU preset to Intel QSV preset
+fn map_preset_intel(_preset: &str) -> &'static str {
+    // QSV presets similar to x264: veryfast, faster, fast, medium, slow, slower, veryslow
+    "medium"
+}
+
+/// Build video encoding arguments with GPU support
 async fn build_video_args(
     input: &str,
     use_custom_quality: bool,
     crf: u8,
     new_duration: f64,
+    use_gpu: bool,
+    gpu_type: Option<&str>,
 ) -> Result<Vec<String>, AppError> {
-    if use_custom_quality {
-        if crf > 51 {
-            let _ = log_error("VideoQualityOutOfRange", &format!("crf={}", crf)).await;
-            return Err(AppError::code_only(AppErrorCode::VideoQualityOutOfRange));
+    // Validate CRF if custom quality is used
+    if use_custom_quality && crf > 51 {
+        let _ = log_error("VideoQualityOutOfRange", &format!("crf={}", crf)).await;
+        return Err(AppError::code_only(AppErrorCode::VideoQualityOutOfRange));
+    }
+
+    // If GPU encoding is requested
+    if use_gpu {
+        if let Some(gpu) = gpu_type {
+            match gpu.to_lowercase().as_str() {
+                "nvidia" => {
+                    let mut args = vec![
+                        "-c:v".into(),
+                        "h264_nvenc".into(),
+                    ];
+
+                    if use_custom_quality {
+                        // NVENC uses -cq for constant quality mode (similar to CRF)
+                        args.extend([
+                            "-cq".into(),
+                            crf.to_string(),
+                            "-preset".into(),
+                            map_preset_nvidia("slow").into(),
+                        ]);
+                    } else {
+                        // Auto bitrate mode - calculate target bitrate
+                        let target_kbps = calculate_target_bitrate(input, new_duration).await?;
+                        args.extend([
+                            "-b:v".into(),
+                            format!("{}k", target_kbps),
+                            "-preset".into(),
+                            map_preset_nvidia("slow").into(),
+                        ]);
+                    }
+
+                    args.extend(["-pix_fmt".into(), "yuv420p".into()]);
+                    return Ok(args);
+                }
+
+                "amd" => {
+                    let mut args = vec![
+                        "-c:v".into(),
+                        "h264_amf".into(),
+                    ];
+
+                    if use_custom_quality {
+                        // AMF uses -qp_i, -qp_p, -qp_b for quality control
+                        args.extend([
+                            "-qp_i".into(),
+                            crf.to_string(),
+                            "-qp_p".into(),
+                            crf.to_string(),
+                            "-qp_b".into(),
+                            crf.to_string(),
+                            "-quality".into(),
+                            map_preset_amd("slow").into(),
+                        ]);
+                    } else {
+                        let target_kbps = calculate_target_bitrate(input, new_duration).await?;
+                        args.extend([
+                            "-b:v".into(),
+                            format!("{}k", target_kbps),
+                            "-quality".into(),
+                            map_preset_amd("slow").into(),
+                        ]);
+                    }
+
+                    args.extend(["-pix_fmt".into(), "yuv420p".into()]);
+                    return Ok(args);
+                }
+
+                "intel" => {
+                    let mut args = vec![
+                        "-c:v".into(),
+                        "h264_qsv".into(),
+                    ];
+
+                    if use_custom_quality {
+                        // QSV uses -global_quality for quality control
+                        args.extend([
+                            "-global_quality".into(),
+                            crf.to_string(),
+                            "-preset".into(),
+                            map_preset_intel("slow").into(),
+                        ]);
+                    } else {
+                        let target_kbps = calculate_target_bitrate(input, new_duration).await?;
+                        args.extend([
+                            "-b:v".into(),
+                            format!("{}k", target_kbps),
+                            "-preset".into(),
+                            map_preset_intel("slow").into(),
+                        ]);
+                    }
+
+                    args.extend(["-pix_fmt".into(), "yuv420p".into()]);
+                    return Ok(args);
+                }
+
+                _ => {
+                    // Unknown GPU type, fall through to CPU encoding
+                }
+            }
         }
+    }
+
+    // CPU encoding (default/fallback)
+    if use_custom_quality {
         return Ok(vec![
             "-c:v".into(),
             "libx264".into(),
@@ -312,30 +437,7 @@ async fn build_video_args(
     }
 
     // Derive approximate target bitrate to preserve size
-    let meta = fs::metadata(input)
-        .await
-        .map_err(|e| AppError::new(AppErrorCode::ReadMetadataFailed, e.to_string()))?;
-    let size_bytes = meta.len() as f64;
-    if size_bytes <= 0.0 {
-        let _ = log_error(
-            "EmptyInputFile",
-            &format!("input={} size={}", input, size_bytes),
-        )
-            .await;
-        return Err(AppError::code_only(AppErrorCode::EmptyInputFile));
-    }
-    if new_duration <= 0.0 {
-        let _ = log_error(
-            "InvalidNewDuration",
-            &format!("input={} new_duration={}", input, new_duration),
-        )
-            .await;
-        return Err(AppError::code_only(AppErrorCode::InvalidNewDuration));
-    }
-
-    let target_kbps = ((size_bytes * 8.0) / new_duration / 1000.0)
-        .round()
-        .max(1.0) as u64;
+    let target_kbps = calculate_target_bitrate(input, new_duration).await?;
 
     Ok(vec![
         "-b:v".into(),
@@ -347,6 +449,34 @@ async fn build_video_args(
         "-pix_fmt".into(),
         "yuv420p".into(),
     ])
+}
+
+/// Calculate target bitrate based on input file size and expected duration
+async fn calculate_target_bitrate(input: &str, new_duration: f64) -> Result<u64, AppError> {
+    let meta = fs::metadata(input)
+        .await
+        .map_err(|e| AppError::new(AppErrorCode::ReadMetadataFailed, e.to_string()))?;
+    let size_bytes = meta.len() as f64;
+
+    if size_bytes <= 0.0 {
+        let _ = log_error(
+            "EmptyInputFile",
+            &format!("input={} size={}", input, size_bytes),
+        )
+        .await;
+        return Err(AppError::code_only(AppErrorCode::EmptyInputFile));
+    }
+
+    if new_duration <= 0.0 {
+        let _ = log_error(
+            "InvalidNewDuration",
+            &format!("input={} new_duration={}", input, new_duration),
+        )
+        .await;
+        return Err(AppError::code_only(AppErrorCode::InvalidNewDuration));
+    }
+
+    Ok(((size_bytes * 8.0) / new_duration / 1000.0).round().max(1.0) as u64)
 }
 
 async fn build_audio_args(
@@ -536,6 +666,8 @@ pub struct ConvertOptions<'a> {
     pub use_custom_video_quality: bool,
     pub video_quality: u8, // CRF 0..51
     pub cpu_limit: Option<u8>,
+    pub use_gpu: bool,
+    pub gpu_type: Option<String>,
 }
 
 // Internal implementation with coded errors.
@@ -573,6 +705,8 @@ where
         opts.use_custom_video_quality,
         opts.video_quality,
         timings.new_duration,
+        opts.use_gpu,
+        opts.gpu_type.as_deref(),
     )
         .await?;
 

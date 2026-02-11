@@ -18,6 +18,24 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
 - Writes results to a separate output folder by default.
 - Also doubles as a fast video compressor: keep the original FPS and raise compression (e.g., higher CRF or lower bitrate) to reduce file size.
 
+## GPU Acceleration
+
+Free-FPS supports hardware-accelerated video encoding using your graphics card, which can be **3-5x faster** than CPU encoding:
+
+| GPU Vendor | Technology | Supported Cards |
+|------------|------------|-----------------|
+| **NVIDIA** | NVENC | GeForce GTX 600+ series, RTX series |
+| **AMD** | AMF | Radeon HD 7000+ series, RX series |
+| **Intel** | QuickSync | 2nd gen Core processors and newer |
+
+### How it works:
+- The app automatically detects your GPU on startup
+- GPU acceleration is enabled by default if compatible hardware is found
+- If GPU encoding fails, the app automatically falls back to CPU encoding
+- Scripts also support GPU acceleration with automatic detection
+
+> **Note:** GPU encoding may produce slightly larger files (5-10%) at the same quality setting compared to CPU encoding. The speed improvement usually outweighs this small difference.
+
 <p align="center">
   <a href="app/docs/previews/home.png?raw=1">
     <img src="app/docs/previews/home.png" alt="home" width="260" style="max-width: 260px; width: auto;" loading="lazy">
@@ -41,6 +59,7 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
 
 **Key Features:**
 - Convert video frame rates (FPS) with precision
+- **GPU-accelerated encoding** (NVIDIA NVENC, AMD AMF, Intel QuickSync)
 - Support for MP4, MKV, AVI, MOV, WebM and other formats
 - Batch processing - convert multiple videos at once
 - Preserve or adjust audio speed to match new frame rate

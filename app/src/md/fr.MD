@@ -46,6 +46,7 @@ Si vous souhaitez soutenir l'auteur, vous pouvez le faire ici :
 - **Débit audio** - définissez le débit si vous conservez l'audio.
 - **Qualité vidéo personnalisée** - qualité vidéo de sortie (CRF). Par défaut, l'application utilise le mode Auto, qui estime le débit en fonction des propriétés de la vidéo source.<br/>**IMPORTANT :** Le mode Auto peut produire des artefacts visibles (blocs, bandes, flou) dans les scènes complexes avec des mouvements rapides, des mouvements de caméra ou des détails fins. Il peut aussi sous-performer avec des sources déjà compressées ou des enregistrements d'écran. Pour les vidéos importantes ou visuellement complexes, préférez la qualité **Haute** ou **Maximale**.<br/>
   Attention : une valeur trop basse donnera une mauvaise qualité ; une valeur trop élevée produira des fichiers très volumineux. Plus d'infos : [FFmpeg Encode H.264](https://trac.ffmpeg.org/wiki/Encode/H.264)
+- **Accélération GPU** - utilise votre carte graphique pour un encodage vidéo plus rapide. Prend en charge NVIDIA (NVENC), AMD (AMF) et Intel (QuickSync). Peut être 3 à 5 fois plus rapide que l'encodage CPU. Si aucun GPU compatible n'est détecté, l'option sera désactivée.
 - **Limite CPU** - limite l'utilisation du processeur. Peut réduire légèrement la charge, mais ce n'est pas garanti.
 
 ---

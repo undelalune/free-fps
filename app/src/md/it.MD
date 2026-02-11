@@ -46,6 +46,7 @@ Se vuoi sostenere l'autore, puoi farlo qui:
 - **Bitrate audio** - imposta il bitrate se mantieni l'audio.
 - **Qualità video personalizzata** - qualità del video in uscita (CRF). Per impostazione predefinita, l'app usa la modalità Auto, che stima il bitrate in base alle proprietà del video di origine.<br/>**IMPORTANTE:** La modalità Auto può produrre artefatti visibili (blocchi, banding, sfocatura) in scene complesse con movimenti rapidi, movimenti della fotocamera o dettagli fini. Può anche avere prestazioni inferiori con sorgenti già compresse o registrazioni dello schermo. Per video importanti o visivamente complessi, preferire la qualità **Alta** o **Massima**.<br/>
   Attenzione: un valore troppo basso produce scarsa qualità; troppo alto - file enormi. Maggiori info: [FFmpeg Encode H.264](https://trac.ffmpeg.org/wiki/Encode/H.264)
+- **Accelerazione GPU** - usa la scheda grafica per una codifica video più veloce. Supporta NVIDIA (NVENC), AMD (AMF) e Intel (QuickSync). Può essere 3-5 volte più veloce della codifica CPU. Se non viene rilevata una GPU compatibile, l'opzione sarà disabilitata.
 - **Limite CPU** - limita l'uso della CPU. Può ridurre leggermente il carico, ma non è garantito.
 
 ---

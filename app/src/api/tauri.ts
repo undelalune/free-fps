@@ -1,6 +1,6 @@
 import {invoke} from '@tauri-apps/api/core';
 import {listen} from '@tauri-apps/api/event';
-import {ConversionProgress, LicenseType, VideoConversionParams, VideoFile} from '@/types';
+import {ConversionProgress, GpuInfo, LicenseType, VideoConversionParams, VideoFile} from '@/types';
 
 export const tauriAPI = {
     async getVideoFiles(folderPath: string): Promise<VideoFile[]> {
@@ -21,6 +21,10 @@ export const tauriAPI = {
 
     async openLicense(license: LicenseType): Promise<void> {
         await invoke('open_bundled_license', {license});
+    },
+
+    async getGpuInfo(): Promise<GpuInfo> {
+        return await invoke<GpuInfo>('get_gpu_info');
     },
 
     onConversionProgress(callback: (progress: ConversionProgress) => void) {

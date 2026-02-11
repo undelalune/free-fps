@@ -14,10 +14,12 @@ FFPROBE_PATH="/Volumes/Work/dev/ffprobe"
 OUTPUT_FOLDER=""
 AUDIO_BITRATE=192
 USE_BITRATE=true
+USE_GPU=true
+GPU_TYPE="auto"
 
 print_usage() {
   cat <<'USAGE'
-Usage: convert_fps.sh [-d dir] [-f fps] [-k] [-c crf] [-p ffmpeg_path] [-P ffprobe_path] [-o output_folder] [-b audio_bitrate] [-u]
+Usage: convert_fps.sh [-d dir] [-f fps] [-k] [-c crf] [-p ffmpeg_path] [-P ffprobe_path] [-o output_folder] [-b audio_bitrate] [-u] [-g] [-G gpu_type]
 
   -d DIR            Input directory (default: .)
   -f FPS            Target FPS (default: 25)
@@ -28,11 +30,13 @@ Usage: convert_fps.sh [-d dir] [-f fps] [-k] [-c crf] [-p ffmpeg_path] [-P ffpro
   -o OUTPUT_FOLDER  Output folder name inside input dir (default: converted_fps_<FPS>)
   -b AUDIO_BITRATE  Audio bitrate in kbps (default: 192)
   -u                Use bitrate mode (compute target bitrate and use -b:v instead of -crf)
+  -g                Disable GPU acceleration (default: enabled)
+  -G GPU_TYPE       Force GPU type: nvidia, amd, intel, cpu (default: auto-detect)
 USAGE
 }
 
 # parse options
-while getopts ":d:f:kc:p:P:o:b:uh" opt; do
+while getopts ":d:f:kc:p:P:o:b:ugG:h" opt; do
   case ${opt} in
     d) DIR="${OPTARG}" ;;
     f) FPS="${OPTARG}" ;;
@@ -43,6 +47,8 @@ while getopts ":d:f:kc:p:P:o:b:uh" opt; do
     o) OUTPUT_FOLDER="${OPTARG}" ;;
     b) AUDIO_BITRATE="${OPTARG}" ;;
     u) USE_BITRATE=true ;;
+    g) USE_GPU=false ;;
+    G) GPU_TYPE="${OPTARG}" ;;
     h) print_usage; exit 0 ;;
     \?) echo "Invalid option: -${OPTARG}" >&2; print_usage; exit 1 ;;
     :) echo "Option -${OPTARG} requires an argument." >&2; exit 1 ;;
@@ -60,6 +66,40 @@ if ! command -v "${FFPROBE_PATH}" >/dev/null 2>&1 && [ ! -x "${FFPROBE_PATH}" ];
   echo "ffprobe not found at: ${FFPROBE_PATH}" >&2
   exit 1
 fi
+
+# ========== GPU DETECTION ==========
+# Returns: TYPE:ENCODER:QUALITY_PARAM:PRESET_PARAM:PRESET
+detect_gpu_encoder() {
+  local encoders
+  encoders="$("${FFMPEG_PATH}" -hide_banner -encoders 2>&1)"
+
+  # Check NVIDIA first (highest priority)
+  if echo "${encoders}" | grep -q "h264_nvenc"; then
+    if "${FFMPEG_PATH}" -f lavfi -i "color=black:s=320x240:d=1" -c:v h264_nvenc -f null - >/dev/null 2>&1; then
+      echo "nvidia:h264_nvenc:-cq:-preset:p4"
+      return
+    fi
+  fi
+
+  # Check AMD
+  if echo "${encoders}" | grep -q "h264_amf"; then
+    if "${FFMPEG_PATH}" -f lavfi -i "color=black:s=320x240:d=1" -c:v h264_amf -f null - >/dev/null 2>&1; then
+      echo "amd:h264_amf:-qp_i:-quality:balanced"
+      return
+    fi
+  fi
+
+  # Check Intel QuickSync
+  if echo "${encoders}" | grep -q "h264_qsv"; then
+    if "${FFMPEG_PATH}" -f lavfi -i "color=black:s=320x240:d=1" -c:v h264_qsv -f null - >/dev/null 2>&1; then
+      echo "intel:h264_qsv:-global_quality:-preset:medium"
+      return
+    fi
+  fi
+
+  # Fallback to CPU
+  echo "cpu:libx264:-crf:-preset:slow"
+}
 
 # portable filesize
 filesize() {
@@ -87,6 +127,28 @@ echo "Target FPS: ${FPS}"
 echo "Keep audio: ${KEEP_AUDIO}"
 echo "CRF: ${CRF}"
 echo "Use bitrate: ${USE_BITRATE}"
+
+# ========== GPU DETECTION ==========
+GPU_INFO=""
+if [ "${USE_GPU}" = true ]; then
+  if [ "${GPU_TYPE}" = "auto" ]; then
+    echo "Detecting GPU..."
+    GPU_INFO="$(detect_gpu_encoder)"
+  else
+    case "${GPU_TYPE}" in
+      nvidia) GPU_INFO="nvidia:h264_nvenc:-cq:-preset:p4" ;;
+      amd)    GPU_INFO="amd:h264_amf:-qp_i:-quality:balanced" ;;
+      intel)  GPU_INFO="intel:h264_qsv:-global_quality:-preset:medium" ;;
+      *)      GPU_INFO="cpu:libx264:-crf:-preset:slow" ;;
+    esac
+  fi
+else
+  GPU_INFO="cpu:libx264:-crf:-preset:slow"
+fi
+
+# Parse GPU info
+IFS=':' read -r GPU_ENCODER_TYPE GPU_ENCODER GPU_QUALITY_PARAM GPU_PRESET_PARAM GPU_PRESET <<< "${GPU_INFO}"
+echo "GPU Encoder: ${GPU_ENCODER_TYPE} (${GPU_ENCODER})"
 echo ""
 
 exts=(mp4 MP4 mov MOV mkv MKV avi AVI webm WEBM)
@@ -153,7 +215,7 @@ for ext in "${exts[@]}"; do
               target_bitrate_kbps="$(awk -v sz="${original_size}" -v nd="${new_duration}" 'BEGIN{ if (nd>0) printf "%.0f", ((sz*8)/nd)/1000; else print 1 }')"
               [ -z "${target_bitrate_kbps}" ] && target_bitrate_kbps=1
               echo "  Computed target bitrate: ${target_bitrate_kbps}k (new duration: ${new_duration} s)"
-              videoArgs="-b:v ${target_bitrate_kbps}k -c:v libx264 -preset slow -pix_fmt yuv420p"
+              videoArgs="-b:v ${target_bitrate_kbps}k -c:v ${GPU_ENCODER} ${GPU_PRESET_PARAM} ${GPU_PRESET} -pix_fmt yuv420p"
             fi
           else
             USE_BITRATE=false
@@ -167,7 +229,12 @@ for ext in "${exts[@]}"; do
     fi
 
     if [ -z "${videoArgs}" ]; then
-      videoArgs="-c:v libx264 -crf ${CRF} -preset slow -pix_fmt yuv420p"
+      if [ "${GPU_ENCODER_TYPE}" = "amd" ]; then
+        # AMD uses -qp_i, -qp_p, -qp_b
+        videoArgs="-c:v ${GPU_ENCODER} -qp_i ${CRF} -qp_p ${CRF} -qp_b ${CRF} ${GPU_PRESET_PARAM} ${GPU_PRESET} -pix_fmt yuv420p"
+      else
+        videoArgs="-c:v ${GPU_ENCODER} ${GPU_QUALITY_PARAM} ${CRF} ${GPU_PRESET_PARAM} ${GPU_PRESET} -pix_fmt yuv420p"
+      fi
     fi
 
     if [ "${KEEP_AUDIO}" = true ]; then

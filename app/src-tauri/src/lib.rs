@@ -22,6 +22,7 @@ use commands::license::open_bundled_license;
 use commands::video::{
     cancel_conversion, convert_videos, get_video_files, get_video_thumbnail, ConversionController,
 };
+use utils::gpu::get_gpu_info;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -44,6 +45,7 @@ pub fn run() {
             convert_videos,
             cancel_conversion,
             open_bundled_license,
+            get_gpu_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

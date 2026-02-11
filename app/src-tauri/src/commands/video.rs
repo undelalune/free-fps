@@ -119,6 +119,10 @@ pub struct VideoConversionParams {
     pub use_custom_video_quality: bool,
     pub video_quality: u8,
     pub files: Vec<String>,
+    #[serde(default)]
+    pub use_gpu: bool,
+    #[serde(default)]
+    pub gpu_type: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -477,6 +481,8 @@ pub async fn convert_videos(
                 use_custom_video_quality: params.use_custom_video_quality,
                 video_quality: params.video_quality,
                 cpu_limit: Some(params.cpu_limit),
+                use_gpu: params.use_gpu,
+                gpu_type: params.gpu_type.clone(),
             },
             move |p| {
                 if cancel_clone.is_cancelled() {

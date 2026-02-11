@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free-FPS: Free open-source video FPS converter and video compressor. Change video frame rate without interpolation or effects. Convert 30fps to 60fps, 24fps to 30fps, or compress videos to reduce file size. FFmpeg-powered desktop app for Windows and macOS.">
-    <meta name="keywords" content="video fps converter, change video fps, frame rate converter, convert fps, video speed converter, ffmpeg fps, change frame rate, 30fps to 60fps, 24fps to 30fps, video framerate changer, fps conversion tool, batch video fps converter, no interpolation, free video converter, open source fps converter, windows fps converter, macos fps converter, video processing, mp4 fps converter, mkv fps converter, video compressor, reduce video file size, compress video, video compression tool, ffmpeg compressor">
+    <meta name="description" content="Free-FPS: Free open-source video FPS converter and video compressor with GPU acceleration. Change video frame rate without interpolation or effects. Convert 30fps to 60fps, 24fps to 30fps, or compress videos to reduce file size. Supports NVIDIA NVENC, AMD AMF, Intel QuickSync. FFmpeg-powered desktop app for Windows and macOS.">
+    <meta name="keywords" content="video fps converter, change video fps, frame rate converter, convert fps, video speed converter, ffmpeg fps, change frame rate, 30fps to 60fps, 24fps to 30fps, video framerate changer, fps conversion tool, batch video fps converter, no interpolation, free video converter, open source fps converter, windows fps converter, macos fps converter, video processing, mp4 fps converter, mkv fps converter, video compressor, reduce video file size, compress video, video compression tool, ffmpeg compressor, gpu acceleration, nvenc, amd amf, intel quicksync, hardware encoding">
     <meta name="author" content="undelalune">
 
     <!-- Canonical URL -->
@@ -50,6 +50,7 @@
         "screenshot": "https://undelalune.github.io/free-fps/assets/previews/home.png",
         "featureList": [
             "Convert video frame rates (FPS)",
+            "GPU-accelerated encoding (NVIDIA NVENC, AMD AMF, Intel QuickSync)",
             "Compress videos to reduce file size",
             "Batch processing multiple videos",
             "Audio speed adjustment",
@@ -127,7 +128,8 @@
                 <p class="hero-description">
                     Convert video frame rates (FPS) precisely using <a href="https://www.ffmpeg.org/" target="_blank" >FFmpeg</a>. Perfect for changing 30fps to 60fps,
                     24fps to 30fps, or any custom frame rate. Adjust playback speed, re-encode audio, and control
-                    video quality. <strong>No AI interpolation, no frame blending, no effects</strong> - just pure
+                    video quality. <strong>GPU-accelerated encoding</strong> with NVIDIA NVENC, AMD AMF, and Intel QuickSync
+                    for up to 5x faster processing. <strong>No AI interpolation, no frame blending, no effects</strong> - just pure
                     speed adjustment by changing how fast your video plays. Also works as a powerful video compressor
                     to reduce file sizes without changing FPS. Your original files are never modified.
                 </p>
@@ -216,6 +218,11 @@
                     <div class="feature-icon">🎬</div>
                     <h3>Precise FPS Control</h3>
                     <p>Convert video frame rates with mathematical precision. Supports all common formats including MP4, MKV, AVI, MOV, WebM, and more. Set any target FPS from 1 to 240+ fps.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>GPU Acceleration</h3>
+                    <p>Hardware-accelerated encoding with NVIDIA NVENC, AMD AMF, and Intel QuickSync. Up to 5x faster than CPU encoding. Auto-detects your GPU and falls back to CPU if needed.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
@@ -385,6 +392,15 @@
                         Yes! Free-FPS can handle any resolution from SD to 8K and beyond. The processing speed depends on your
                         computer's CPU power, but resolution doesn't affect the quality of FPS conversion. You can also adjust
                         CPU usage to balance performance with system responsiveness.
+                    </p>
+                </div>
+                <div class="faq-item">
+                    <h3>How does GPU acceleration work?</h3>
+                    <p>
+                        Free-FPS automatically detects compatible GPUs (NVIDIA GeForce GTX 600+, AMD Radeon HD 7000+, or Intel 2nd gen+)
+                        and uses hardware encoding for up to 5x faster video processing. If no compatible GPU is found, the app
+                        automatically uses CPU encoding. GPU encoding produces nearly identical quality with significantly faster
+                        processing times.
                     </p>
                 </div>
                 <div class="faq-item">

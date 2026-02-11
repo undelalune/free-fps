@@ -46,6 +46,7 @@ Jeśli chcesz wesprzeć autora, możesz to zrobić tutaj:
 - **Bitrate audio** - ustaw bitrate, jeśli zachowujesz audio.
 - **Własna jakość wideo** - jakość wyjściowego wideo (CRF). Domyślnie aplikacja używa trybu Auto, który szacuje bitrate na podstawie właściwości wideo źródłowego.<br/>**WAŻNE:** Tryb Auto może powodować widoczne artefakty (bloki, paski, rozmycie) w złożonych scenach z szybkim ruchem, szybkim ruchem kamery lub drobnymi szczegółami. Może też działać gorzej z już skompresowanymi źródłami lub nagraniami ekranu. Dla ważnych lub wizualnie złożonych filmów wybierz jakość **Wysoką** lub **Maksymalną**.<br/>
   Uwaga: zbyt niska wartość da słabą jakość; zbyt wysoka - ogromne pliki. Więcej: [FFmpeg Encode H.264](https://trac.ffmpeg.org/wiki/Encode/H.264)
+- **Akceleracja GPU** - używa karty graficznej do szybszego kodowania wideo. Obsługuje NVIDIA (NVENC), AMD (AMF) i Intel (QuickSync). Może być 3-5x szybsza niż kodowanie CPU. Jeśli nie zostanie wykryta kompatybilna karta graficzna, opcja będzie wyłączona.
 - **Limit CPU** - ogranicz użycie procesora. Może nieznacznie zmniejszyć obciążenie, ale nie jest gwarantowane.
 
 ---

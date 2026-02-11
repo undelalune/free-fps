@@ -3,7 +3,7 @@ import { i18n, Locale } from '@/i18n';
 import { darkThemeOverrides, lightThemeOverrides } from '@/themes';
 import { computed, ref } from 'vue';
 import { useSettingsStore } from './settingsStore';
-import type { VideoFile } from '@/types';
+import type { VideoFile, GpuInfo } from '@/types';
 
 export const useStore = defineStore('index', () => {
     const settings = useSettingsStore();
@@ -21,6 +21,7 @@ export const useStore = defineStore('index', () => {
         useCustomVideoQuality,
         videoQuality,
         cpuLimit,
+        useGpu,
         resetDefaults,
         setLocale,
     } = settings;
@@ -34,6 +35,10 @@ export const useStore = defineStore('index', () => {
     const statusMessage = ref('');
     const showHelp = ref(false);
     const heartIsBeating = ref(false);
+
+    // GPU detection state (not persisted)
+    const gpuInfo = ref<GpuInfo | null>(null);
+    const gpuDetecting = ref(false);
 
     const theme = computed(() => (useDarkTheme.value ? darkThemeOverrides : lightThemeOverrides));
     const locale = computed(() => i18n.locale.value as Locale);
@@ -72,6 +77,9 @@ export const useStore = defineStore('index', () => {
         useCustomVideoQuality,
         videoQuality,
         cpuLimit,
+        useGpu,
+        gpuInfo,
+        gpuDetecting,
         videoFiles,
         folderScanning,
         processing,

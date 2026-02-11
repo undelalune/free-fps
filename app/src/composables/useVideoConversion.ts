@@ -87,6 +87,8 @@ export function useVideoConversion() {
                 files: selectedFiles.value
                     .filter(f => f.status !== ConversionStatus.Success)
                     .map(f => f.path),
+                use_gpu: store.useGpu,
+                gpu_type: store.gpuInfo?.gpu_type !== 'None' ? store.gpuInfo?.gpu_type : undefined,
             });
 
             const hasErrors = selectedFiles.value.some(f =>
@@ -104,6 +106,34 @@ export function useVideoConversion() {
         } finally {
             store.processing = false;
             store.processingPos = 0;
+        }
+    };
+
+    const detectGpu = async () => {
+        if (store.gpuDetecting) return;
+
+        store.gpuDetecting = true;
+        try {
+            const gpuInfo = await tauriAPI.getGpuInfo();
+            store.gpuInfo = gpuInfo;
+
+            // Auto-enable GPU if available and not explicitly disabled
+            if (gpuInfo.gpu_type !== 'None' && gpuInfo.has_h264) {
+                // Only auto-enable if user hasn't explicitly set it before
+                if (store.useGpu === false && !store.gpuInfo) {
+                    store.useGpu = true;
+                }
+            }
+        } catch (error) {
+            console.error('GPU detection failed:', error);
+            store.gpuInfo = {
+                gpu_type: 'None',
+                has_h264: false,
+                has_h265: false,
+                model_name: 'None',
+            };
+        } finally {
+            store.gpuDetecting = false;
         }
     };
 
@@ -133,6 +163,7 @@ export function useVideoConversion() {
         rescanFolder: () => scanFolder(store.inputFolder),
         performConversion,
         cancelConversion,
+        detectGpu,
         setupProgressListener,
         cleanup,
     };

@@ -68,7 +68,11 @@ export default {
             customVideoQualityInfo: "Якщо вимкнено, якість відео буде встановлено автоматично на основі вихідного. Ручні налаштування можуть призвести до збільшення розміру файлу.",
             cpuLimit: "Ліміт CPU:",
             cpuLimitInfo: "Обмежує кількість ядер.",
-            ffmpegNotSet: "Спочатку вкажіть шлях до ffmpeg у налаштуваннях."
+            ffmpegNotSet: "Спочатку вкажіть шлях до ffmpeg у налаштуваннях.",
+            useGpu: "GPU прискорення",
+            gpuInfo: "Використовуйте відеокарту для швидшого кодування. Підтримує NVIDIA (NVENC), AMD (AMF) та Intel (QuickSync). Може бути в 3-5 разів швидше, ніж кодування на CPU.",
+            detectingGpu: "Виявлення GPU...",
+            noGpuDetected: "Сумісну GPU не виявлено"
         },
         processing: {
             rescanFolder: "Пересканувати",

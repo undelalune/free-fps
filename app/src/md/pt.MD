@@ -46,6 +46,7 @@ Se quiser apoiar o autor, pode fazê-lo aqui:
 - **Bitrate de áudio** - defina o bitrate se mantiver o áudio.
 - **Qualidade de vídeo personalizada** - qualidade do vídeo de saída (CRF). Por defeito, a aplicação usa o modo Auto, que estima o bitrate com base nas propriedades do vídeo de origem.<br/>**IMPORTANTE:** O modo Auto pode produzir artefactos visíveis (blocos, bandas, desfoque) em cenas complexas com movimento rápido, movimento de câmara ou detalhes finos. Também pode ter desempenho inferior com fontes já comprimidas ou gravações de ecrã. Para vídeos importantes ou visualmente complexos, prefira a qualidade **Alta** ou **Máxima**.<br/>
   Atenção: um valor demasiado baixo resulta em má qualidade; demasiado alto - ficheiros enormes. Mais: [FFmpeg Encode H.264](https://trac.ffmpeg.org/wiki/Encode/H.264)
+- **Aceleração por GPU** - usa a placa gráfica para codificação de vídeo mais rápida. Suporta NVIDIA (NVENC), AMD (AMF) e Intel (QuickSync). Pode ser 3-5x mais rápida que a codificação por CPU. Se nenhuma GPU compatível for detetada, a opção será desativada.
 - **Limite de CPU** - limite o uso da CPU. Pode reduzir ligeiramente a carga, mas não é garantido.
 
 ---

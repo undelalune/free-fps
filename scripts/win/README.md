@@ -19,6 +19,7 @@ Notes:
 
 - Works from any folder (no system-wide installation of `ffmpeg` and `ffprobe` required).
 - Supports `.mp4`, `.mov`, `.avi`, `.mkv`, `.webm`.
+- **GPU-accelerated encoding** (NVIDIA NVENC, AMD AMF, Intel QuickSync) with automatic detection.
 - Removes audio by default (use `-KeepAudio $true` to keep).
 - CRF defines video quality:
      - `0 = lossless`
@@ -57,6 +58,8 @@ If detection fails, the script warns and uses CRF mode instead.
 | `-OutputFolder` | Name of the output folder                                          | `-OutputFolder "converted_25_fps"`       | `converted_25_fps`            |
 | `-AudioBitrate` | Output bitrate of the audio if needed                              | `-AudioBitrate 128`                      | `192` (kbps)                  |
 | `-AutoVideoBr`  | Recalculates bitrate automatically (uses `-b:v` instead of `-crf`) | `-AutoVideoBr $false`                    | `$true` (enabled)             |
+| `-UseGpu`       | Enable/disable GPU acceleration                                    | `-UseGpu $false`                         | `$true` (enabled)             |
+| `-GpuType`      | Force GPU type: `auto`, `nvidia`, `amd`, `intel`, `cpu`            | `-GpuType "nvidia"`                      | `"auto"` (auto-detect)        |
 
 ---
 

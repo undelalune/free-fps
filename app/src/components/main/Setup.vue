@@ -182,6 +182,42 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
         </n-form-item>
       </n-flex>
       <n-flex vertical>
+        <!-- GPU Acceleration -->
+        <div class="non-form-el">
+          <n-checkbox
+            v-model:checked="store.useGpu"
+            :disabled="!store.gpuInfo || store.gpuInfo.gpu_type === 'None'"
+            :label="t('mainView.setup.useGpu')"
+          />
+          <n-tooltip placement="top" style="max-width:240px" :delay="500">
+            <template #trigger>
+              <n-icon size="16"><InfoCircle/></n-icon>
+            </template>
+            {{ t('mainView.setup.gpuInfo') }}
+          </n-tooltip>
+        </div>
+        <div v-if="store.gpuDetecting" class="gpu-status">
+          <n-spin size="small" />
+          <n-text depth="3" style="font-size: 12px; margin-left: 8px;">
+            {{ t('mainView.setup.detectingGpu') }}
+          </n-text>
+        </div>
+        <div v-else-if="store.gpuInfo && store.gpuInfo.gpu_type !== 'None'" class="gpu-status">
+          <n-text depth="3" class="gpu-model-name">
+            {{ store.gpuInfo.model_name }}
+          </n-text>
+        </div>
+        <div v-else-if="store.gpuInfo" class="gpu-status">
+          <n-text depth="3" style="font-size: 12px;">
+            {{ t('mainView.setup.noGpuDetected') }}
+          </n-text>
+        </div>
+      </n-flex>
+    </div>
+
+    <!-- Video quality and CPU limit row -->
+    <div class="horizontal-flex-group bottom-settings-row">
+      <n-flex vertical>
         <!-- Video quality (grouped) -->
         <div class="non-form-el">
           <n-checkbox v-model:checked="store.useCustomVideoQuality" style="max-width: 180px;"
@@ -212,29 +248,30 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
                     :format-tooltip="formatVideoTooltip"/>
         </n-form-item>
       </n-flex>
+      <n-flex vertical>
+        <!-- CPU limit -->
+        <n-form-item :show-feedback="false">
+          <template #label>
+            <span class="label-with-help">
+              {{ t('mainView.setup.cpuLimit') }}
+              <n-tooltip placement="top" style="max-width:240px" :delay="500">
+                <template #trigger>
+                  <n-icon size="16"><InfoCircle/></n-icon>
+                </template>
+                {{ t('mainView.setup.cpuLimitInfo') }}
+              </n-tooltip>
+            </span>
+          </template>
+          <n-slider class="cpu-slider"
+                    v-model:value="store.cpuLimit"
+                    :min="5"
+                    :max="100"
+                    :step="1"
+                    :format-tooltip="formatCPUTooltip"
+          />
+        </n-form-item>
+      </n-flex>
     </div>
-
-    <!-- CPU limit -->
-    <n-form-item class="cpu-limit-form-item">
-      <template #label>
-        <span class="label-with-help">
-          {{ t('mainView.setup.cpuLimit') }}
-          <n-tooltip placement="top" style="max-width:240px" :delay="500">
-            <template #trigger>
-              <n-icon size="16"><InfoCircle/></n-icon>
-            </template>
-            {{ t('mainView.setup.cpuLimitInfo') }}
-          </n-tooltip>
-        </span>
-      </template>
-      <n-slider class="cpu-slider"
-                v-model:value="store.cpuLimit"
-                :min="5"
-                :max="100"
-                :step="1"
-                :format-tooltip="formatCPUTooltip"
-      />
-    </n-form-item>
 
     <!-- Next -->
     <n-button class="next-btn" type="primary" :disabled="!store.inputFolder || store.folderScanning"
@@ -272,13 +309,31 @@ const formatCPUTooltip = (value: number): string => `${value}%`;
 .horizontal-flex-group {
   display: flex;
   align-items: flex-start;
+  gap: 24px;
 }
 
 .horizontal-flex-group > *:first-child {
   width: 180px;
 }
 
-.cpu-limit-form-item {
+.gpu-status {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.gpu-model-name {
+  font-size: 12px;
+  max-width: 180px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.bottom-settings-row {
   margin-top: 20px;
 }
 

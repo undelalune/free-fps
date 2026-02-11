@@ -68,7 +68,11 @@ export default {
             customVideoQualityInfo: "Калі адключана, якасць відэа будзе ўсталявана аўтаматычна паводле якасці крыніцы. Ручныя налады могуць павялічыць памер файла.",
             cpuLimit: "Абмежаванне CPU:",
             cpuLimitInfo: "Абмяжоўвае нагрузку на працэсар.",
-            ffmpegNotSet: "Укажыце шлях да ffmpeg у наладах."
+            ffmpegNotSet: "Укажыце шлях да ffmpeg у наладах.",
+            useGpu: "GPU паскарэнне",
+            gpuInfo: "Выкарыстоўвайце відэакарту для хутчэйшага кадзіравання. Падтрымлівае NVIDIA (NVENC), AMD (AMF) і Intel (QuickSync). Можа быць у 3-5 разоў хутчэй, чым кадзіраванне на CPU.",
+            detectingGpu: "Вызначэнне GPU...",
+            noGpuDetected: "Сумяшчальная GPU не выяўлена"
         },
         processing: {
             rescanFolder: "Перасканаваць",

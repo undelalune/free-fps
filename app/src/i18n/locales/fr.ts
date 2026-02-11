@@ -68,7 +68,11 @@ export default {
             customVideoQualityInfo: "Si désactivé, la qualité sera définie automatiquement selon la qualité d'entrée. Un réglage manuel peut créer des fichiers plus gros.",
             cpuLimit: "Limite CPU:",
             cpuLimitInfo: "Limite le nombre de cœurs utilisés pendant la conversion. Aide à garder le système réactif.",
-            ffmpegNotSet: "Définissez d'abord un chemin valide vers l'exécutable ffmpeg dans les paramètres."
+            ffmpegNotSet: "Définissez d'abord un chemin valide vers l'exécutable ffmpeg dans les paramètres.",
+            useGpu: "Accélération GPU",
+            gpuInfo: "Utilisez votre carte graphique pour un encodage vidéo plus rapide. Prend en charge NVIDIA (NVENC), AMD (AMF) et Intel (QuickSync). Peut être 3 à 5 fois plus rapide que l'encodage CPU.",
+            detectingGpu: "Détection du GPU...",
+            noGpuDetected: "Aucun GPU compatible détecté"
         },
         processing: {
             rescanFolder: "Rescanner le dossier",
