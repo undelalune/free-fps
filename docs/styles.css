@@ -287,6 +287,55 @@ img {
     gap: var(--spacing-xl);
 }
 
+/* Two-column layout for specific use case row with a video */
+.use-case-row {
+    display: grid;
+    /* Make the text column wider than the video column (text : video = 2 : 1) */
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-lg);
+    /* Stretch children so both columns match height */
+    align-items: stretch;
+}
+
+.use-case-video {
+    background: var(--bg-tertiary);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    /* Make the video column a flex column so the video wrapper can grow to match sibling height */
+    display: flex;
+    flex-direction: column;
+}
+
+.use-case-video h3 {
+    margin-top: 0;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.video-wrapper {
+    /* Allow the wrapper to grow to fill the column height when grid items are stretched */
+    height: 100%;
+    overflow: hidden;
+    border-radius: calc(var(--radius-md) - 2px);
+    /* Let the wrapper take available vertical space when inside a flex column */
+    flex: 1 1 auto;
+    /* Center the iframe and preserve its aspect ratio without distortion */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-wrapper iframe {
+    /* Preserve aspect ratio, don't stretch -- fit inside the wrapper */
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    border: 0;
+    display: block;
+}
+
 .use-case-content {
     background: var(--bg-tertiary);
     padding: var(--spacing-xl);
@@ -762,6 +811,11 @@ img {
     .footer-content {
         grid-template-columns: 1fr;
     }
+
+    /* Collapse the two-column use-case row to a single column on smaller screens */
+    .use-case-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 640px) {
@@ -825,4 +879,3 @@ img {
 .download-card {
     animation: fadeInUp 0.6s ease-out;
 }
-
