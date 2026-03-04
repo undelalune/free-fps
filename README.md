@@ -18,6 +18,12 @@ The app for Windows is also available in the [Microsoft Store](https://apps.micr
 - Writes results to a separate output folder by default.
 - Also doubles as a fast video compressor: keep the original FPS and raise compression (e.g., higher CRF or lower bitrate) to reduce file size.
 
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=rfp1D_BANz4" target="_blank" rel="noopener">
+    <img src="https://img.youtube.com/vi/rfp1D_BANz4/hqdefault.jpg" alt="Free-FPS overview video" width="640" style="max-width:100%; height:auto; border-radius:8px;" />
+  </a>
+</p>
+
 ## GPU Acceleration
 
 Free-FPS supports hardware-accelerated video encoding using your graphics card, which can be **3-5x faster** than CPU encoding:
