@@ -333,6 +333,7 @@ img {
     width: auto;
     height: auto;
     border: 0;
+    border-radius: 0.5rem;
     display: block;
 }
 
