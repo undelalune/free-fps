@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref, watch} from 'vue';
+import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useStore} from '@/stores';
 import {useI18n} from 'vue-i18n';
 import {useVideoConversion} from '@/composables/useVideoConversion';
@@ -17,9 +17,7 @@ const store = useStore();
 const {t} = useI18n();
 const setupState = ref(true);
 
-const getTitle = () => {
-  return `${t('common.conversion')} • ${store.useCustomFps ? store.customFps : store.targetFps} fps`;
-};
+const title = computed(() => `${t('common.conversion')} • ${store.useCustomFps ? store.customFps : store.targetFps} fps`);
 const {
   scanFolder,
   rescanFolder,
@@ -47,7 +45,7 @@ onUnmounted(cleanup);
 <template>
   <div class="main-view">
     <LogoHeader v-if="setupState"/>
-    <TitledHeader v-else :title="getTitle()">
+    <TitledHeader v-else :title="title">
       <RotateClockwise2/>
     </TitledHeader>
 

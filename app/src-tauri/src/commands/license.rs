@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::errors::{AppError, AppErrorCode, AppResult};
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::Manager;
 
@@ -27,11 +27,11 @@ pub enum LicenseType {
 }
 
 #[tauri::command]
-pub fn open_bundled_license(license: LicenseType, app_handle: tauri::AppHandle) -> Result<(), String> {
+pub async fn open_bundled_license(license: LicenseType, app_handle: tauri::AppHandle) -> AppResult<()> {
     let resource_dir = app_handle
         .path()
         .resource_dir()
-        .map_err(|e| format!("license resource dir error: {}", e))?;
+        .map_err(|e| AppError::new(AppErrorCode::LicenseNotFound, format!("license resource dir error: {}", e)))?;
 
     let src = match license {
         LicenseType::FFmpegNotice => resource_dir.join("licenses").join("FFMPEG_NOTICE.txt"),
@@ -39,8 +39,8 @@ pub fn open_bundled_license(license: LicenseType, app_handle: tauri::AppHandle) 
         LicenseType::FreeFPSLicense => resource_dir.join("licenses").join("LICENSE.txt"),
     };
 
-    if !src.exists() {
-        return Err(format!("file not found: {}", src.display()));
+    if !tokio::fs::try_exists(&src).await.unwrap_or(false) {
+        return Err(AppError::new(AppErrorCode::LicenseNotFound, format!("file not found: {}", src.display())));
     }
 
     let mut dst = std::env::temp_dir();
@@ -55,7 +55,9 @@ pub fn open_bundled_license(license: LicenseType, app_handle: tauri::AppHandle) 
         LicenseType::FreeFPSLicense => format!("LICENSE_{}.txt", ts),
     });
 
-    fs::copy(&src, &dst).map_err(|e| e.to_string())?;
-    open::that(&dst).map_err(|e| e.to_string())?;
+    tokio::fs::copy(&src, &dst)
+        .await
+        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+    open::that(&dst).map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
     Ok(())
 }

@@ -129,9 +129,9 @@ async fn extract_thumbnail_system(
     use base64::{engine::general_purpose, Engine as _};
     use std::fs;
     use std::path::PathBuf;
-    use std::process::{Command as StdCommand, Stdio};
-    use std::time::{Duration, Instant};
+    use std::process::Stdio;
     use tokio::io::AsyncReadExt;
+    use tokio::process::Command as TokioCommand;
 
     if cancel.is_cancelled() {
         return Ok(None);
@@ -149,7 +149,7 @@ async fn extract_thumbnail_system(
     );
     out_png.set_extension("png");
 
-    let mut cmd = StdCommand::new("/usr/bin/qlmanage");
+    let mut cmd = TokioCommand::new("/usr/bin/qlmanage");
     cmd.arg("-t")
         .arg("-s")
         .arg(size.to_string())
@@ -163,7 +163,6 @@ async fn extract_thumbnail_system(
     // Make a new process group so we can kill children too.
     #[cfg(unix)]
     unsafe {
-        use std::os::unix::process::CommandExt;
         cmd.pre_exec(|| {
             libc::setpgid(0, 0);
             Ok(())
@@ -175,34 +174,20 @@ async fn extract_thumbnail_system(
         .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
 
     let pid = child.id();
-    let cancel2 = cancel.clone();
 
-    // Hard wall‑clock timeout: 1s
-    let finished_ok = tokio::task::spawn_blocking(move || {
-        let start = Instant::now();
-        loop {
-            if cancel2.is_cancelled() || start.elapsed() > Duration::from_secs(1) {
-                #[cfg(unix)]
-                unsafe {
-                    // Kill the whole process group: -pid
-                    libc::kill(-(pid as i32), libc::SIGKILL);
-                }
-                let _ = child.wait();
-                return false;
-            }
-            match child.try_wait() {
-                Ok(Some(status)) => return status.success(),
-                Ok(None) => {
-                    std::thread::sleep(Duration::from_millis(25));
-                }
-                Err(_) => return false,
-            }
-        }
-    })
-        .await
-        .map_err(|e| AppError::new(AppErrorCode::Io, e.to_string()))?;
+    // Hard wall‑clock timeout: 1s, also respects cancellation token.
+    let finished_ok = tokio::select! {
+        result = child.wait() => result.map(|s| s.success()).unwrap_or(false),
+        _ = tokio::time::sleep(std::time::Duration::from_secs(1)) => false,
+        _ = cancel.cancelled() => false,
+    };
 
     if !finished_ok {
+        #[cfg(unix)]
+        if let Some(p) = pid {
+            unsafe { libc::kill(-(p as i32), libc::SIGKILL); }
+        }
+        let _ = child.wait().await;
         return Ok(None);
     }
 

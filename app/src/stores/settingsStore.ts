@@ -2,6 +2,22 @@ import {nextTick} from 'vue';
 import {i18n, Locale} from '@/i18n';
 import {useSettingsPersistence} from '@/composables/useSettingsPersistence';
 
+const DEFAULTS = {
+    useDarkTheme: true,
+    userLocale: 'en' as Locale,
+    inputFolder: '',
+    outputFolder: '',
+    targetFps: 30,
+    useCustomFps: false,
+    customFps: 30,
+    keepAudio: false,
+    audioBitrate: 192,
+    useCustomVideoQuality: false,
+    videoQuality: 16,
+    cpuLimit: 75,
+    useGpu: false,
+};
+
 export function useSettingsStore() {
     const {
         useDarkTheme,
@@ -19,22 +35,7 @@ export function useSettingsStore() {
         videoQuality,
         cpuLimit,
         useGpu,
-    } = useSettingsPersistence({
-        useDarkTheme: true,
-        userLocale: 'en' as Locale,
-
-        inputFolder: '',
-        outputFolder: '',
-        targetFps: 30,
-        useCustomFps: false,
-        customFps: 30,
-        keepAudio: false,
-        audioBitrate: 192,
-        useCustomVideoQuality: false,
-        videoQuality: 16,
-        cpuLimit: 75,
-        useGpu: false,
-    });
+    } = useSettingsPersistence(DEFAULTS);
 
     const setLocale = (loc: Locale) => {
         userLocale.value = loc;
@@ -42,21 +43,20 @@ export function useSettingsStore() {
     };
 
     const resetDefaults = async (onDone?: () => void) => {
-        useDarkTheme.value = true;
+        useDarkTheme.value = DEFAULTS.useDarkTheme;
+        inputFolder.value = DEFAULTS.inputFolder;
+        outputFolder.value = DEFAULTS.outputFolder;
+        targetFps.value = DEFAULTS.targetFps;
+        useCustomFps.value = DEFAULTS.useCustomFps;
+        customFps.value = DEFAULTS.customFps;
+        keepAudio.value = DEFAULTS.keepAudio;
+        audioBitrate.value = DEFAULTS.audioBitrate;
+        useCustomVideoQuality.value = DEFAULTS.useCustomVideoQuality;
+        videoQuality.value = DEFAULTS.videoQuality;
+        cpuLimit.value = DEFAULTS.cpuLimit;
+        useGpu.value = DEFAULTS.useGpu;
 
-        inputFolder.value = '';
-        outputFolder.value = '';
-        targetFps.value = 30;
-        useCustomFps.value = false;
-        customFps.value = 30;
-        keepAudio.value = false;
-        audioBitrate.value = 192;
-        useCustomVideoQuality.value = false;
-        videoQuality.value = 16;
-        cpuLimit.value = 75;
-        useGpu.value = false;
-
-        userLocale.value = 'en';
+        userLocale.value = DEFAULTS.userLocale;
         setLocale(userLocale.value);
 
         await nextTick();

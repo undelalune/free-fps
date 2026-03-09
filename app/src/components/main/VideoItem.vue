@@ -39,6 +39,7 @@ const showSuccess = computed(() => {
 
 const thumbnail = ref('');
 const thumbnailError = ref(false);
+const formattedSize = computed(() => formatSize(props.videoItem.size));
 const showPreview = ref(false);
 const getThumbnail = () => {
   showPreview.value = true;
@@ -85,7 +86,7 @@ const getThumbnail = () => {
             <n-icon size="16" ><Eye/></n-icon>
           </template>
         </n-button>
-        <span style="margin-left: 4px;">{{ formatSize(videoItem.size) }}</span>
+        <span style="margin-left: 4px;">{{ formattedSize }}</span>
       </div>
     </div>
 
