@@ -16,6 +16,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::process::Command;
+use std::time::Duration;
 use tauri::AppHandle;
 
 use crate::utils::bundled_ffmpeg::get_ffmpeg_path;
@@ -70,14 +71,15 @@ fn apply_no_window(cmd: &mut Command) {
 #[cfg(not(windows))]
 fn apply_no_window(_cmd: &mut Command) {}
 
-/// Test if a specific GPU encoder actually works (not just compiled into FFmpeg)
+/// Test if a specific GPU encoder actually works (not just compiled into FFmpeg).
 /// This is important because FFmpeg may have encoder support compiled in,
 /// but the actual hardware/drivers may not be available.
+/// Uses a timeout to avoid long waits when an encoder is compiled in but non-functional.
 fn test_gpu_encoding(ffmpeg_bin: &str, encoder: &str) -> bool {
     let mut cmd = Command::new(ffmpeg_bin);
     apply_no_window(&mut cmd);
 
-    let output = cmd
+    let child = cmd
         .args([
             "-f", "lavfi",
             "-i", "color=black:s=320x240:d=1",
@@ -85,16 +87,37 @@ fn test_gpu_encoding(ffmpeg_bin: &str, encoder: &str) -> bool {
             "-f", "null",
             "-",
         ])
-        .output();
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn();
 
-    match output {
-        Ok(result) => result.status.success(),
+    match child {
+        Ok(mut child) => {
+            // Wait up to 5 seconds — a working encoder finishes in under 2s
+            let timeout = Duration::from_secs(5);
+            let start = std::time::Instant::now();
+            loop {
+                match child.try_wait() {
+                    Ok(Some(status)) => return status.success(),
+                    Ok(None) => {
+                        if start.elapsed() >= timeout {
+                            let _ = child.kill();
+                            let _ = child.wait();
+                            return false;
+                        }
+                        std::thread::sleep(Duration::from_millis(100));
+                    }
+                    Err(_) => return false,
+                }
+            }
+        }
         Err(_) => false,
     }
 }
 
 /// Detect available GPU encoders by checking FFmpeg AND testing actual encoding.
-/// Priority order: NVIDIA > AMD > Intel
+/// On macOS, VideoToolbox is checked first (native framework, fastest path).
+/// On other platforms: NVIDIA > AMD > Intel.
 pub fn detect_gpu(ffmpeg_bin: &str) -> GpuInfo {
     let mut info = GpuInfo::default();
 
@@ -109,7 +132,21 @@ pub fn detect_gpu(ffmpeg_bin: &str) -> GpuInfo {
         Err(_) => return info,
     };
 
-    // Check NVIDIA (highest priority) - NVENC
+    // On macOS, check Apple VideoToolbox first — it's the native framework and
+    // avoids slow failed tests for NVENC/AMF/QSV which are compiled in but non-functional.
+    #[cfg(target_os = "macos")]
+    if stdout.contains("h264_videotoolbox")
+        && test_gpu_encoding(ffmpeg_bin, "h264_videotoolbox")
+    {
+        info.gpu_type = GpuType::Apple;
+        info.has_h264 = true;
+        info.has_h265 = stdout.contains("hevc_videotoolbox")
+            && test_gpu_encoding(ffmpeg_bin, "hevc_videotoolbox");
+        info.model_name = get_gpu_model(&["Apple", "M1", "M2", "M3", "M4"]);
+        return info;
+    }
+
+    // Check NVIDIA (highest priority on non-macOS) - NVENC
     if stdout.contains("h264_nvenc") && test_gpu_encoding(ffmpeg_bin, "h264_nvenc") {
         info.gpu_type = GpuType::Nvidia;
         info.has_h264 = true;
@@ -137,7 +174,8 @@ pub fn detect_gpu(ffmpeg_bin: &str) -> GpuInfo {
         return info;
     }
 
-    // Check Apple VideoToolbox (macOS native framework — works on Apple Silicon and Intel Macs)
+    // Check Apple VideoToolbox as fallback on non-macOS (unlikely but safe)
+    #[cfg(not(target_os = "macos"))]
     if stdout.contains("h264_videotoolbox")
         && test_gpu_encoding(ffmpeg_bin, "h264_videotoolbox")
     {
@@ -145,7 +183,7 @@ pub fn detect_gpu(ffmpeg_bin: &str) -> GpuInfo {
         info.has_h264 = true;
         info.has_h265 = stdout.contains("hevc_videotoolbox")
             && test_gpu_encoding(ffmpeg_bin, "hevc_videotoolbox");
-        info.model_name = get_gpu_model(&["Apple", "M1", "M2", "M3", "M4"]);
+        info.model_name = String::from("Apple VideoToolbox");
         return info;
     }
 
