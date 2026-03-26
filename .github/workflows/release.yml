@@ -45,7 +45,10 @@ jobs:
 
       - name: Install create-dmg (macOS)
         if: matrix.os == 'macos-14'
-        run: brew install create-dmg
+        run: |
+          brew install create-dmg
+          echo "create-dmg version: $(create-dmg --version 2>&1 || echo 'unknown')"
+          echo "hdiutil version: $(hdiutil info 2>&1 | head -5 || echo 'unknown')"
 
       - name: Install Node deps (app)
         working-directory: app
@@ -158,6 +161,8 @@ jobs:
 
       - name: Build with Tauri (no release)
         if: github.event_name == 'workflow_dispatch'
+        id: tauri_build
+        continue-on-error: true
         uses: tauri-apps/tauri-action@v0
         with:
           projectPath: app
@@ -165,6 +170,8 @@ jobs:
 
       - name: Build and release with Tauri
         if: startsWith(github.ref, 'refs/tags/v')
+        id: tauri_release
+        continue-on-error: true
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -181,6 +188,26 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: --bundles ${{ matrix.bundles }} ${{ matrix.extra_args }}
+
+      - name: Debug DMG failure (macOS)
+        if: matrix.os == 'macos-14' && (steps.tauri_build.outcome == 'failure' || steps.tauri_release.outcome == 'failure')
+        shell: bash
+        run: |
+          echo "=== bundle_dmg.sh content ==="
+          find app/src-tauri/target -name "bundle_dmg.sh" -exec cat {} \; 2>/dev/null || echo "bundle_dmg.sh not found"
+          echo ""
+          echo "=== Retrying bundle_dmg.sh with verbose output ==="
+          find app/src-tauri/target -name "bundle_dmg.sh" -exec bash -x {} \; 2>&1 || true
+          echo ""
+          echo "=== DMG bundle directory listing ==="
+          find app/src-tauri/target -path "*/bundle/dmg*" -ls 2>/dev/null || echo "No DMG bundle dir found"
+          echo ""
+          echo "=== macOS bundle directory listing ==="
+          find app/src-tauri/target -path "*/bundle/macos*" -ls 2>/dev/null || echo "No macOS bundle dir found"
+
+      - name: Fail if Tauri build failed
+        if: steps.tauri_build.outcome == 'failure' || steps.tauri_release.outcome == 'failure'
+        run: exit 1
 
       - name: Create portable.zip (Windows)
         if: matrix.os == 'windows-latest'
