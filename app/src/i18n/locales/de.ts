@@ -71,7 +71,7 @@ export default {
             cpuLimitInfo: "Anzahl der verwendeten CPU-Kerne begrenzen, um Systemreaktion zu erhalten.",
             ffmpegNotSet: "Bitte gültigen ffmpeg-Pfad zuerst in den Einstellungen angeben.",
             useGpu: "GPU-Beschleunigung",
-            gpuInfo: "Verwenden Sie Ihre Grafikkarte für schnellere Videocodierung. Unterstützt NVIDIA (NVENC), AMD (AMF) und Intel (QuickSync). Kann 3-5x schneller als CPU-Codierung sein.",
+            gpuInfo: "Verwenden Sie Ihre Grafikkarte für schnellere Videocodierung. Unterstützt NVIDIA (NVENC), AMD (AMF), Intel (QuickSync) und Apple (VideoToolbox). Kann 3-5x schneller als CPU-Codierung sein.",
             detectingGpu: "GPU wird erkannt...",
             noGpuDetected: "Keine kompatible GPU erkannt"
         },

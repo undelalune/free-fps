@@ -71,7 +71,7 @@ export default {
             cpuLimitInfo: "Limita i core CPU per mantenere il sistema reattivo.",
             ffmpegNotSet: "Imposta prima un percorso valido per ffmpeg.",
             useGpu: "Accelerazione GPU",
-            gpuInfo: "Usa la scheda grafica per una codifica video più veloce. Supporta NVIDIA (NVENC), AMD (AMF) e Intel (QuickSync). Può essere 3-5 volte più veloce della codifica CPU.",
+            gpuInfo: "Usa la scheda grafica per una codifica video più veloce. Supporta NVIDIA (NVENC), AMD (AMF), Intel (QuickSync) e Apple (VideoToolbox). Può essere 3-5 volte più veloce della codifica CPU.",
             detectingGpu: "Rilevamento GPU...",
             noGpuDetected: "Nessuna GPU compatibile rilevata"
         },

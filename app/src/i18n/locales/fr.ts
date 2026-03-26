@@ -71,7 +71,7 @@ export default {
             cpuLimitInfo: "Limite le nombre de cœurs utilisés pendant la conversion. Aide à garder le système réactif.",
             ffmpegNotSet: "Définissez d'abord un chemin valide vers l'exécutable ffmpeg dans les paramètres.",
             useGpu: "Accélération GPU",
-            gpuInfo: "Utilisez votre carte graphique pour un encodage vidéo plus rapide. Prend en charge NVIDIA (NVENC), AMD (AMF) et Intel (QuickSync). Peut être 3 à 5 fois plus rapide que l'encodage CPU.",
+            gpuInfo: "Utilisez votre carte graphique pour un encodage vidéo plus rapide. Prend en charge NVIDIA (NVENC), AMD (AMF), Intel (QuickSync) et Apple (VideoToolbox). Peut être 3 à 5 fois plus rapide que l'encodage CPU.",
             detectingGpu: "Détection du GPU...",
             noGpuDetected: "Aucun GPU compatible détecté"
         },

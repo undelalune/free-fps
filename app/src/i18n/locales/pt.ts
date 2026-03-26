@@ -71,7 +71,7 @@ export default {
             cpuLimitInfo: "Limita núcleos da CPU usados para manter o sistema responsivo.",
             ffmpegNotSet: "Defina o caminho para ffmpeg nas configurações primeiro.",
             useGpu: "Aceleração por GPU",
-            gpuInfo: "Usa a placa gráfica para codificação de vídeo mais rápida. Suporta NVIDIA (NVENC), AMD (AMF) e Intel (QuickSync). Pode ser 3-5x mais rápida que a codificação por CPU.",
+            gpuInfo: "Usa a placa gráfica para codificação de vídeo mais rápida. Suporta NVIDIA (NVENC), AMD (AMF), Intel (QuickSync) e Apple (VideoToolbox). Pode ser 3-5x mais rápida que a codificação por CPU.",
             detectingGpu: "Detectando GPU...",
             noGpuDetected: "Nenhuma GPU compatível detectada"
         },

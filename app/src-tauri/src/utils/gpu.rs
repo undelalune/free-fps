@@ -31,6 +31,7 @@ pub enum GpuType {
     Nvidia,
     Amd,
     Intel,
+    Apple,
     None,
 }
 
@@ -136,6 +137,18 @@ pub fn detect_gpu(ffmpeg_bin: &str) -> GpuInfo {
         return info;
     }
 
+    // Check Apple VideoToolbox (macOS native framework — works on Apple Silicon and Intel Macs)
+    if stdout.contains("h264_videotoolbox")
+        && test_gpu_encoding(ffmpeg_bin, "h264_videotoolbox")
+    {
+        info.gpu_type = GpuType::Apple;
+        info.has_h264 = true;
+        info.has_h265 = stdout.contains("hevc_videotoolbox")
+            && test_gpu_encoding(ffmpeg_bin, "hevc_videotoolbox");
+        info.model_name = get_gpu_model(&["Apple", "M1", "M2", "M3", "M4"]);
+        return info;
+    }
+
     info
 }
 
@@ -183,17 +196,29 @@ fn get_gpu_model(vendor_keywords: &[&str]) -> String {
 
     if let Ok(output) = output {
         let stdout = String::from_utf8_lossy(&output.stdout);
+
+        // First pass: find a line matching any vendor keyword
         for line in stdout.lines() {
             let line_upper = line.to_uppercase();
             if vendor_keywords
                 .iter()
                 .any(|kw| line_upper.contains(&kw.to_uppercase()))
             {
-                // Extract chipset name from lines like "Chipset Model: AMD Radeon Pro 5500M"
+                // Extract chipset name from lines like "Chipset Model: Apple M1 Max"
                 if let Some(pos) = line.find(':') {
                     return line[pos + 1..].trim().to_string();
                 }
                 return line.trim().to_string();
+            }
+        }
+
+        // Second pass: extract first "Chipset Model:" value as generic fallback
+        // (e.g. "Intel UHD Graphics 630" on an Intel Mac detected via VideoToolbox)
+        for line in stdout.lines() {
+            if line.contains("Chipset Model:") {
+                if let Some(pos) = line.find(':') {
+                    return line[pos + 1..].trim().to_string();
+                }
             }
         }
     }

@@ -11,7 +11,7 @@ export interface VideoFile {
 }
 
 // GPU types for hardware-accelerated encoding
-export type GpuType = 'Nvidia' | 'Amd' | 'Intel' | 'None';
+export type GpuType = 'Nvidia' | 'Amd' | 'Intel' | 'Apple' | 'None';
 
 export interface GpuInfo {
     gpu_type: GpuType;

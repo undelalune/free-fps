@@ -71,7 +71,7 @@ export default {
             cpuLimitInfo: "Ogranicz liczbę rdzeni, by system pozostał responsywny.",
             ffmpegNotSet: "Najpierw ustaw poprawną ścieżkę do ffmpeg w ustawieniach.",
             useGpu: "Akceleracja GPU",
-            gpuInfo: "Użyj karty graficznej do szybszego kodowania. Obsługuje NVIDIA (NVENC), AMD (AMF) i Intel (QuickSync). Może być 3-5x szybsze niż kodowanie CPU.",
+            gpuInfo: "Użyj karty graficznej do szybszego kodowania. Obsługuje NVIDIA (NVENC), AMD (AMF), Intel (QuickSync) i Apple (VideoToolbox). Może być 3-5x szybsze niż kodowanie CPU.",
             detectingGpu: "Wykrywanie GPU...",
             noGpuDetected: "Nie wykryto kompatybilnej karty GPU"
         },

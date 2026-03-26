@@ -71,7 +71,7 @@ export default {
             cpuLimitInfo: "Абмяжоўвае нагрузку на працэсар.",
             ffmpegNotSet: "Укажыце шлях да ffmpeg у наладах.",
             useGpu: "GPU паскарэнне",
-            gpuInfo: "Выкарыстоўвайце відэакарту для хутчэйшага кадзіравання. Падтрымлівае NVIDIA (NVENC), AMD (AMF) і Intel (QuickSync). Можа быць у 3-5 разоў хутчэй, чым кадзіраванне на CPU.",
+            gpuInfo: "Выкарыстоўвайце відэакарту для хутчэйшага кадзіравання. Падтрымлівае NVIDIA (NVENC), AMD (AMF), Intel (QuickSync) і Apple (VideoToolbox). Можа быць у 3-5 разоў хутчэй, чым кадзіраванне на CPU.",
             detectingGpu: "Вызначэнне GPU...",
             noGpuDetected: "Сумяшчальная GPU не выяўлена"
         },

@@ -71,7 +71,7 @@ export default {
             cpuLimitInfo: "Обмежує кількість ядер.",
             ffmpegNotSet: "Спочатку вкажіть шлях до ffmpeg у налаштуваннях.",
             useGpu: "GPU прискорення",
-            gpuInfo: "Використовуйте відеокарту для швидшого кодування. Підтримує NVIDIA (NVENC), AMD (AMF) та Intel (QuickSync). Може бути в 3-5 разів швидше, ніж кодування на CPU.",
+            gpuInfo: "Використовуйте відеокарту для швидшого кодування. Підтримує NVIDIA (NVENC), AMD (AMF), Intel (QuickSync) та Apple (VideoToolbox). Може бути в 3-5 разів швидше, ніж кодування на CPU.",
             detectingGpu: "Виявлення GPU...",
             noGpuDetected: "Сумісну GPU не виявлено"
         },

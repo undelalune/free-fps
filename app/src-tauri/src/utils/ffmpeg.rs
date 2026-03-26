@@ -367,6 +367,23 @@ async fn build_video_args(
                     ]);
                 }
 
+                "apple" => {
+                    return Ok(vec![
+                        "-c:v".into(),
+                        "h264_videotoolbox".into(),
+                        "-b:v".into(),
+                        format!("{}k", quality_kbps),
+                        "-maxrate".into(),
+                        format!("{}k", (quality_kbps as f64 * 1.5) as u64),
+                        "-bufsize".into(),
+                        format!("{}k", quality_kbps * 2),
+                        "-profile:v".into(),
+                        "high".into(),
+                        "-pix_fmt".into(),
+                        "yuv420p".into(),
+                    ]);
+                }
+
                 _ => {
                     // Unknown GPU type, fall through to CPU encoding
                 }
