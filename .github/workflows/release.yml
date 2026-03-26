@@ -9,6 +9,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-and-release:
     strategy:
@@ -22,8 +25,6 @@ jobs:
             bundles: dmg,app
             extra_args: --target x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
