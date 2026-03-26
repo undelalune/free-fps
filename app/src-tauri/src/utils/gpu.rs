@@ -140,7 +140,7 @@ pub fn detect_gpu(ffmpeg_bin: &str) -> GpuInfo {
         info.gpu_type = GpuType::Apple;
         info.has_h264 = true;
         info.has_h265 = stdout.contains("hevc_videotoolbox");
-        info.model_name = get_gpu_model(&["Apple", "M1", "M2", "M3", "M4"]);
+        info.model_name = get_mac_chip_name();
         return info;
     }
 
@@ -223,7 +223,25 @@ fn get_gpu_model(vendor_keywords: &[&str]) -> String {
         .unwrap_or_else(|| "Unknown GPU".to_string())
 }
 
-/// Get GPU model name on macOS using system_profiler
+/// Get Mac chip name instantly via sysctl (e.g. "Apple M1 Max", "Apple M4 Pro").
+/// Falls back to "Apple GPU" if sysctl doesn't return a brand string.
+#[cfg(target_os = "macos")]
+fn get_mac_chip_name() -> String {
+    // sysctl is instant, unlike system_profiler which takes 3-8 seconds
+    if let Ok(output) = Command::new("sysctl")
+        .args(["-n", "machdep.cpu.brand_string"])
+        .output()
+    {
+        let name = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if !name.is_empty() {
+            return name;
+        }
+    }
+    String::from("Apple GPU")
+}
+
+/// Get GPU model name on macOS using system_profiler (slow — used only as fallback
+/// for non-VideoToolbox GPU detection on Intel Macs with discrete GPUs).
 #[cfg(target_os = "macos")]
 fn get_gpu_model(vendor_keywords: &[&str]) -> String {
     let output = Command::new("system_profiler")
@@ -240,7 +258,6 @@ fn get_gpu_model(vendor_keywords: &[&str]) -> String {
                 .iter()
                 .any(|kw| line_upper.contains(&kw.to_uppercase()))
             {
-                // Extract chipset name from lines like "Chipset Model: Apple M1 Max"
                 if let Some(pos) = line.find(':') {
                     return line[pos + 1..].trim().to_string();
                 }
@@ -249,7 +266,6 @@ fn get_gpu_model(vendor_keywords: &[&str]) -> String {
         }
 
         // Second pass: extract first "Chipset Model:" value as generic fallback
-        // (e.g. "Intel UHD Graphics 630" on an Intel Mac detected via VideoToolbox)
         for line in stdout.lines() {
             if line.contains("Chipset Model:") {
                 if let Some(pos) = line.find(':') {
