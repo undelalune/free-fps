@@ -132,16 +132,14 @@ pub fn detect_gpu(ffmpeg_bin: &str) -> GpuInfo {
         Err(_) => return info,
     };
 
-    // On macOS, check Apple VideoToolbox first — it's the native framework and
-    // avoids slow failed tests for NVENC/AMF/QSV which are compiled in but non-functional.
+    // On macOS, check Apple VideoToolbox first — it's a native OS framework,
+    // so if FFmpeg lists it, it will work. No need for a slow test encode.
+    // This also avoids testing NVENC/AMF/QSV which are compiled in but non-functional on Mac.
     #[cfg(target_os = "macos")]
-    if stdout.contains("h264_videotoolbox")
-        && test_gpu_encoding(ffmpeg_bin, "h264_videotoolbox")
-    {
+    if stdout.contains("h264_videotoolbox") {
         info.gpu_type = GpuType::Apple;
         info.has_h264 = true;
-        info.has_h265 = stdout.contains("hevc_videotoolbox")
-            && test_gpu_encoding(ffmpeg_bin, "hevc_videotoolbox");
+        info.has_h265 = stdout.contains("hevc_videotoolbox");
         info.model_name = get_gpu_model(&["Apple", "M1", "M2", "M3", "M4"]);
         return info;
     }
