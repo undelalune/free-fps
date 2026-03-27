@@ -256,9 +256,45 @@ async fn list_video_files(
         }
     }
 
-    video_files.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    video_files.sort_by(|a, b| natural_cmp_ignore_case(&a.name, &b.name));
 
     Ok(video_files)
+}
+
+/// Case-insensitive natural sort: numeric segments are compared numerically,
+/// so "video_2" sorts before "video_10". Handles macOS NFD filenames correctly
+/// because numeric segments are extracted before byte comparison.
+fn natural_cmp_ignore_case(a: &str, b: &str) -> std::cmp::Ordering {
+    let a = a.to_lowercase();
+    let b = b.to_lowercase();
+    let mut ai = a.chars().peekable();
+    let mut bi = b.chars().peekable();
+
+    loop {
+        match (ai.peek().copied(), bi.peek().copied()) {
+            (None, None) => return std::cmp::Ordering::Equal,
+            (None, _) => return std::cmp::Ordering::Less,
+            (_, None) => return std::cmp::Ordering::Greater,
+            (Some(ac), Some(bc)) if ac.is_ascii_digit() && bc.is_ascii_digit() => {
+                let a_num: u64 = std::iter::from_fn(|| ai.next_if(|c| c.is_ascii_digit()))
+                    .fold(0u64, |n, c| n * 10 + (c as u64 - '0' as u64));
+                let b_num: u64 = std::iter::from_fn(|| bi.next_if(|c| c.is_ascii_digit()))
+                    .fold(0u64, |n, c| n * 10 + (c as u64 - '0' as u64));
+                match a_num.cmp(&b_num) {
+                    std::cmp::Ordering::Equal => continue,
+                    other => return other,
+                }
+            }
+            (Some(ac), Some(bc)) => {
+                ai.next();
+                bi.next();
+                match ac.cmp(&bc) {
+                    std::cmp::Ordering::Equal => continue,
+                    other => return other,
+                }
+            }
+        }
+    }
 }
 
 fn derive_output_folder(params: &VideoConversionParams) -> PathBuf {
