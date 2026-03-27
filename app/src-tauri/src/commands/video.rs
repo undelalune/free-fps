@@ -256,6 +256,8 @@ async fn list_video_files(
         }
     }
 
+    video_files.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+
     Ok(video_files)
 }
 

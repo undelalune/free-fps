@@ -224,20 +224,19 @@ fn get_gpu_model(vendor_keywords: &[&str]) -> String {
 }
 
 /// Get Mac chip name instantly via sysctl (e.g. "Apple M1 Max", "Apple M4 Pro").
-/// Falls back to "Apple GPU" if sysctl doesn't return a brand string.
+/// On Intel Macs, sysctl returns the CPU name (not GPU), so we show a generic label instead.
 #[cfg(target_os = "macos")]
 fn get_mac_chip_name() -> String {
-    // sysctl is instant, unlike system_profiler which takes 3-8 seconds
     if let Ok(output) = Command::new("sysctl")
         .args(["-n", "machdep.cpu.brand_string"])
         .output()
     {
         let name = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if !name.is_empty() {
+        if !name.is_empty() && name.starts_with("Apple") {
             return name;
         }
     }
-    String::from("Apple GPU")
+    String::from("Apple VideoToolbox")
 }
 
 /// Get GPU model name on macOS using system_profiler (slow — used only as fallback
