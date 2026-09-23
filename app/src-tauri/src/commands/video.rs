@@ -187,9 +187,9 @@ impl Default for ConversionController {
 #[tauri::command]
 pub async fn get_video_thumbnail(
     path: String,
-    state: tauri::State<'_, ConversionController>,
 ) -> AppResult<Option<String>> {
-    let cancel = state.new_token().await;
+    // Own token: previews must not cancel a folder scan or each other
+    let cancel = CancellationToken::new();
     get_video_thumbnail_data_url(&path, &cancel).await
 }
 
@@ -374,6 +374,18 @@ fn set_creation_time_windows(path: &Path, t: std::time::SystemTime) -> Result<()
         return Err("SetFileTime failed".to_string());
     }
     Ok(())
+}
+
+/// Best-effort removal of an incomplete output file. Retries briefly because on
+/// Windows a just-killed ffmpeg may still hold the file handle.
+async fn remove_partial_output(path: &Path) {
+    for _ in 0..5 {
+        match fs::remove_file(path).await {
+            Ok(()) => return,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return,
+            Err(_) => tokio::time::sleep(std::time::Duration::from_millis(200)).await,
+        }
+    }
 }
 
 #[tauri::command]
@@ -571,6 +583,7 @@ pub async fn convert_videos(
                 let _ = app.emit("conversion-progress", &done);
             }
             Err(e) => {
+                remove_partial_output(&output_path).await;
                 if e == "Cancelled" {
                     let _ = app.emit(
                         "conversion-progress",

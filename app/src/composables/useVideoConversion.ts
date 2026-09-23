@@ -114,16 +114,7 @@ export function useVideoConversion() {
 
         store.gpuDetecting = true;
         try {
-            const gpuInfo = await tauriAPI.getGpuInfo();
-            store.gpuInfo = gpuInfo;
-
-            // Auto-enable GPU if available and not explicitly disabled
-            if (gpuInfo.gpu_type !== 'None' && gpuInfo.has_h264) {
-                // Only auto-enable if user hasn't explicitly set it before
-                if (store.useGpu === false && !store.gpuInfo) {
-                    store.useGpu = true;
-                }
-            }
+            store.gpuInfo = await tauriAPI.getGpuInfo();
         } catch (error) {
             console.error('GPU detection failed:', error);
             store.gpuInfo = {

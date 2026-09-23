@@ -288,9 +288,131 @@ async fn compute_timings(probe: &VideoProbe, target_fps: f32) -> Result<Timings,
     })
 }
 
+/// Output container family; WebM only accepts VP8/VP9/AV1 video and Vorbis/Opus audio.
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum Container {
+    WebM,
+    Other,
+}
+
+fn container_for_output(output: &str) -> Container {
+    let is_webm = std::path::Path::new(output)
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.eq_ignore_ascii_case("webm"))
+        .unwrap_or(false);
+    if is_webm {
+        Container::WebM
+    } else {
+        Container::Other
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum VideoEncoder {
+    /// Lowercased GPU vendor: nvidia / amd / intel / apple
+    Gpu(String),
+    X264,
+    Vp9,
+}
+
+enum RateControl {
+    Crf(u8),
+    Bitrate(u64),
+}
+
+fn select_encoder(container: Container, use_gpu: bool, gpu_type: Option<&str>) -> VideoEncoder {
+    // GPU encoders are H.264 only, which WebM can't hold
+    if container == Container::WebM {
+        return VideoEncoder::Vp9;
+    }
+    if use_gpu {
+        if let Some(gpu) = gpu_type {
+            let vendor = gpu.to_lowercase();
+            if matches!(vendor.as_str(), "nvidia" | "amd" | "intel" | "apple") {
+                return VideoEncoder::Gpu(vendor);
+            }
+        }
+    }
+    VideoEncoder::X264
+}
+
+fn video_codec_args(encoder: &VideoEncoder, rate: RateControl) -> Vec<String> {
+    match (encoder, rate) {
+        (VideoEncoder::Gpu(vendor), rate) => {
+            let target_kbps = match rate {
+                RateControl::Bitrate(k) => k,
+                // GPU encoding always uses auto-bitrate mode; CRF never reaches here
+                RateControl::Crf(_) => 0,
+            };
+            // Use slightly higher bitrate for GPU to ensure quality preservation
+            let quality_kbps = (target_kbps as f64 * 1.1) as u64; // 10% higher for safety margin
+            let bitrate_args = [
+                "-b:v".to_string(),
+                format!("{}k", quality_kbps),
+                "-maxrate".into(),
+                format!("{}k", (quality_kbps as f64 * 1.5) as u64),
+                "-bufsize".into(),
+                format!("{}k", quality_kbps * 2),
+            ];
+            let (codec, head, tail): (&str, Vec<&str>, Vec<&str>) = match vendor.as_str() {
+                "nvidia" => ("h264_nvenc", vec!["-rc", "vbr"], vec!["-preset", "p5"]),
+                // Use "quality" instead of "balanced" for better output
+                "amd" => ("h264_amf", vec!["-rc", "vbr_peak"], vec!["-quality", "quality"]),
+                // Use "slower" for better quality
+                "intel" => ("h264_qsv", vec![], vec!["-preset", "slower"]),
+                _ => ("h264_videotoolbox", vec![], vec!["-profile:v", "high"]),
+            };
+            let mut args: Vec<String> = vec!["-c:v".into(), codec.into()];
+            args.extend(head.into_iter().map(String::from));
+            args.extend(bitrate_args);
+            args.extend(tail.into_iter().map(String::from));
+            args.extend(["-pix_fmt".to_string(), "yuv420p".into()]);
+            args
+        }
+        (VideoEncoder::X264, RateControl::Crf(crf)) => vec![
+            "-c:v".into(),
+            "libx264".into(),
+            "-crf".into(),
+            crf.to_string(),
+            "-preset".into(),
+            "slow".into(),
+            "-pix_fmt".into(),
+            "yuv420p".into(),
+        ],
+        (VideoEncoder::X264, RateControl::Bitrate(kbps)) => vec![
+            "-b:v".into(),
+            format!("{}k", kbps),
+            "-c:v".into(),
+            "libx264".into(),
+            "-preset".into(),
+            "slow".into(),
+            "-pix_fmt".into(),
+            "yuv420p".into(),
+        ],
+        (VideoEncoder::Vp9, rate) => {
+            let mut args: Vec<String> = vec!["-c:v".into(), "libvpx-vp9".into()];
+            match rate {
+                // -b:v 0 switches libvpx to constant quality mode
+                RateControl::Crf(crf) => {
+                    args.extend(["-crf".into(), crf.to_string(), "-b:v".into(), "0".into()])
+                }
+                RateControl::Bitrate(kbps) => args.extend(["-b:v".into(), format!("{}k", kbps)]),
+            }
+            args.extend(
+                ["-deadline", "good", "-cpu-used", "2", "-row-mt", "1", "-pix_fmt", "yuv420p"]
+                    .into_iter()
+                    .map(String::from),
+            );
+            args
+        }
+    }
+}
+
 /// Build video encoding arguments with GPU support
 async fn build_video_args(
     input: &str,
+    container: Container,
     use_custom_quality: bool,
     crf: u8,
     new_duration: f64,
@@ -303,121 +425,16 @@ async fn build_video_args(
         return Err(AppError::code_only(AppErrorCode::VideoQualityOutOfRange));
     }
 
-    // GPU encoding - always use auto-bitrate mode to preserve quality
+    let encoder = select_encoder(container, use_gpu, gpu_type);
+
     // Custom CRF is only available for CPU encoding
-    if use_gpu {
-        if let Some(gpu) = gpu_type {
-            let target_kbps = calculate_target_bitrate(input, new_duration).await?;
-            // Use slightly higher bitrate for GPU to ensure quality preservation
-            let quality_kbps = (target_kbps as f64 * 1.1) as u64; // 10% higher for safety margin
+    let rate = if use_custom_quality && !matches!(encoder, VideoEncoder::Gpu(_)) {
+        RateControl::Crf(crf)
+    } else {
+        RateControl::Bitrate(calculate_target_bitrate(input, new_duration).await?)
+    };
 
-            match gpu.to_lowercase().as_str() {
-                "nvidia" => {
-                    return Ok(vec![
-                        "-c:v".into(),
-                        "h264_nvenc".into(),
-                        "-rc".into(),
-                        "vbr".into(),
-                        "-b:v".into(),
-                        format!("{}k", quality_kbps),
-                        "-maxrate".into(),
-                        format!("{}k", (quality_kbps as f64 * 1.5) as u64),
-                        "-bufsize".into(),
-                        format!("{}k", quality_kbps * 2),
-                        "-preset".into(),
-                        "p5".into(),
-                        "-pix_fmt".into(),
-                        "yuv420p".into(),
-                    ]);
-                }
-
-                "amd" => {
-                    return Ok(vec![
-                        "-c:v".into(),
-                        "h264_amf".into(),
-                        "-rc".into(),
-                        "vbr_peak".into(),
-                        "-b:v".into(),
-                        format!("{}k", quality_kbps),
-                        "-maxrate".into(),
-                        format!("{}k", (quality_kbps as f64 * 1.5) as u64),
-                        "-bufsize".into(),
-                        format!("{}k", quality_kbps * 2),
-                        "-quality".into(),
-                        "quality".into(), // Use "quality" instead of "balanced" for better output
-                        "-pix_fmt".into(),
-                        "yuv420p".into(),
-                    ]);
-                }
-
-                "intel" => {
-                    return Ok(vec![
-                        "-c:v".into(),
-                        "h264_qsv".into(),
-                        "-b:v".into(),
-                        format!("{}k", quality_kbps),
-                        "-maxrate".into(),
-                        format!("{}k", (quality_kbps as f64 * 1.5) as u64),
-                        "-bufsize".into(),
-                        format!("{}k", quality_kbps * 2),
-                        "-preset".into(),
-                        "slower".into(), // Use "slower" for better quality
-                        "-pix_fmt".into(),
-                        "yuv420p".into(),
-                    ]);
-                }
-
-                "apple" => {
-                    return Ok(vec![
-                        "-c:v".into(),
-                        "h264_videotoolbox".into(),
-                        "-b:v".into(),
-                        format!("{}k", quality_kbps),
-                        "-maxrate".into(),
-                        format!("{}k", (quality_kbps as f64 * 1.5) as u64),
-                        "-bufsize".into(),
-                        format!("{}k", quality_kbps * 2),
-                        "-profile:v".into(),
-                        "high".into(),
-                        "-pix_fmt".into(),
-                        "yuv420p".into(),
-                    ]);
-                }
-
-                _ => {
-                    // Unknown GPU type, fall through to CPU encoding
-                }
-            }
-        }
-    }
-
-    // CPU encoding with custom CRF quality
-    if use_custom_quality {
-        return Ok(vec![
-            "-c:v".into(),
-            "libx264".into(),
-            "-crf".into(),
-            crf.to_string(),
-            "-preset".into(),
-            "slow".into(),
-            "-pix_fmt".into(),
-            "yuv420p".into(),
-        ]);
-    }
-
-    // CPU auto-bitrate mode (fallback if GPU not available)
-    let target_kbps = calculate_target_bitrate(input, new_duration).await?;
-
-    Ok(vec![
-        "-b:v".into(),
-        format!("{}k", target_kbps),
-        "-c:v".into(),
-        "libx264".into(),
-        "-preset".into(),
-        "slow".into(),
-        "-pix_fmt".into(),
-        "yuv420p".into(),
-    ])
+    Ok(video_codec_args(&encoder, rate))
 }
 
 /// Calculate target bitrate based on input file size and expected duration
@@ -460,7 +477,8 @@ async fn calculate_target_bitrate(input: &str, new_duration: f64) -> Result<u64,
     Ok(final_kbps)
 }
 
-async fn build_audio_args(
+fn build_audio_args(
+    container: Container,
     keep_audio: bool,
     audio_bitrate: u32,
     atempo: f64,
@@ -469,13 +487,19 @@ async fn build_audio_args(
         return Ok(vec!["-an".into()]);
     }
     if audio_bitrate == 0 {
-        let _ = log_error("AudioBitrateInvalid", "keep_audio=true with bitrate=0").await;
-        return Err(AppError::code_only(AppErrorCode::AudioBitrateInvalid));
+        return Err(AppError::new(
+            AppErrorCode::AudioBitrateInvalid,
+            "keep_audio=true with bitrate=0",
+        ));
     }
+    let codec = match container {
+        Container::WebM => "libopus",
+        Container::Other => "aac",
+    };
     let chain = build_atempo_chain(atempo);
     Ok(vec![
         "-c:a".into(),
-        "aac".into(),
+        codec.into(),
         "-b:a".into(),
         format!("{}k", audio_bitrate),
         "-af".into(),
@@ -567,6 +591,8 @@ fn build_ffmpeg_command(
         .arg("pipe:1")
         .arg("-nostats")
         .arg(output)
+        // Dropping the future (e.g. on timeout) must not leave ffmpeg running
+        .kill_on_drop(true)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null());
@@ -681,8 +707,10 @@ where
     let timings = compute_timings(&probe, opts.target_fps).await?;
 
     // Args
+    let container = container_for_output(opts.output);
     let video_args = build_video_args(
         opts.input,
+        container,
         opts.use_custom_video_quality,
         opts.video_quality,
         timings.new_duration,
@@ -691,7 +719,13 @@ where
     )
         .await?;
 
-    let audio_args = build_audio_args(opts.keep_audio, opts.audio_bitrate, timings.atempo).await?;
+    let audio_args = match build_audio_args(container, opts.keep_audio, opts.audio_bitrate, timings.atempo) {
+        Ok(a) => a,
+        Err(e) => {
+            let _ = log_error("AudioBitrateInvalid", e.details.as_deref().unwrap_or_default()).await;
+            return Err(e);
+        }
+    };
 
     let threads_opt = if opts.cpu_limit == Some(100) {
         None
@@ -833,8 +867,87 @@ where
                 ),
             )
                 .await;
-            cancel.cancel(); // Trigger cancellation
+            // Only this file failed; the rest of the batch keeps going
             Err((AppErrorCode::FfmpegFailed as u16).to_string())
         }
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn has_pair(args: &[String], key: &str, val: &str) -> bool {
+        args.windows(2).any(|w| w[0] == key && w[1] == val)
+    }
+
+    #[test]
+    fn container_detected_from_output_extension() {
+        assert_eq!(container_for_output("C:/out/a_30fps.webm"), Container::WebM);
+        assert_eq!(container_for_output("/out/a_30fps.WEBM"), Container::WebM);
+        assert_eq!(container_for_output("/out/a_30fps.mp4"), Container::Other);
+        assert_eq!(container_for_output("/out/a_30fps.mkv"), Container::Other);
+        assert_eq!(container_for_output("/out/noext"), Container::Other);
+    }
+
+    #[test]
+    fn webm_never_uses_gpu_encoder() {
+        let enc = select_encoder(Container::WebM, true, Some("Nvidia"));
+        assert_eq!(enc, VideoEncoder::Vp9);
+    }
+
+    #[test]
+    fn gpu_selected_for_known_vendor_only() {
+        assert_eq!(
+            select_encoder(Container::Other, true, Some("Nvidia")),
+            VideoEncoder::Gpu("nvidia".into())
+        );
+        assert_eq!(select_encoder(Container::Other, true, Some("Unknown")), VideoEncoder::X264);
+        assert_eq!(select_encoder(Container::Other, true, None), VideoEncoder::X264);
+        assert_eq!(select_encoder(Container::Other, false, Some("Nvidia")), VideoEncoder::X264);
+    }
+
+    #[test]
+    fn vp9_crf_mode_uses_constant_quality() {
+        let args = video_codec_args(&VideoEncoder::Vp9, RateControl::Crf(20));
+        assert!(has_pair(&args, "-c:v", "libvpx-vp9"));
+        assert!(has_pair(&args, "-crf", "20"));
+        assert!(has_pair(&args, "-b:v", "0"));
+    }
+
+    #[test]
+    fn vp9_bitrate_mode_sets_target_bitrate() {
+        let args = video_codec_args(&VideoEncoder::Vp9, RateControl::Bitrate(4000));
+        assert!(has_pair(&args, "-c:v", "libvpx-vp9"));
+        assert!(has_pair(&args, "-b:v", "4000k"));
+        assert!(!args.iter().any(|a| a == "-crf"));
+    }
+
+    #[test]
+    fn x264_modes_unchanged() {
+        let crf = video_codec_args(&VideoEncoder::X264, RateControl::Crf(16));
+        assert!(has_pair(&crf, "-c:v", "libx264"));
+        assert!(has_pair(&crf, "-crf", "16"));
+        let br = video_codec_args(&VideoEncoder::X264, RateControl::Bitrate(3000));
+        assert!(has_pair(&br, "-c:v", "libx264"));
+        assert!(has_pair(&br, "-b:v", "3000k"));
+    }
+
+    #[test]
+    fn gpu_args_keep_safety_margin() {
+        let args = video_codec_args(&VideoEncoder::Gpu("nvidia".into()), RateControl::Bitrate(1000));
+        assert!(has_pair(&args, "-c:v", "h264_nvenc"));
+        assert!(has_pair(&args, "-b:v", "1100k"));
+    }
+
+    #[test]
+    fn audio_codec_follows_container() {
+        let webm = build_audio_args(Container::WebM, true, 128, 1.0).unwrap();
+        assert!(has_pair(&webm, "-c:a", "libopus"));
+        assert!(has_pair(&webm, "-b:a", "128k"));
+        let mp4 = build_audio_args(Container::Other, true, 128, 1.0).unwrap();
+        assert!(has_pair(&mp4, "-c:a", "aac"));
+        let none = build_audio_args(Container::WebM, false, 128, 1.0).unwrap();
+        assert_eq!(none, vec!["-an".to_string()]);
+    }
+}
+
