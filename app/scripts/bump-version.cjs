@@ -41,8 +41,12 @@ const updated = cargo.replace(/^(\s*)version\s*=\s*"[^"]+"/m, `$1version = "${ne
 if (updated === cargo) throw new Error('version not found in Cargo.toml');
 fs.writeFileSync(cargoPath, updated);
 
+// src-tauri/Cargo.lock  (sync only our own package version, other deps stay locked)
+const cargoLockPath = path.join(root, 'src-tauri', 'Cargo.lock');
+execSync('cargo update -p free-fps', { cwd: path.join(root, 'src-tauri'), stdio: 'inherit' });
+
 // Git commit + tag (same convention standard-version used)
-const files = [pkgPath, tauriConfPath, cargoPath].map(f => `"${f}"`).join(' ');
+const files = [pkgPath, tauriConfPath, cargoPath, cargoLockPath].map(f => `"${f}"`).join(' ');
 execSync(`git add ${files}`, { stdio: 'inherit' });
 execSync(`git commit -m "chore(release): ${newVersion}"`, { stdio: 'inherit' });
 execSync(`git tag v${newVersion}`, { stdio: 'inherit' });
