@@ -7,29 +7,9 @@
   ],
   "permissions": [
     "core:default",
-    "shell:allow-open",
     "dialog:default",
-    "fs:default",
-    "fs:allow-read-file",
-    "fs:allow-write-file",
-    "fs:allow-read-dir",
-    "fs:allow-create",
-    "fs:allow-exists",
-    "fs:allow-remove",
-    "os:allow-platform",
     "opener:default",
     "store:default",
-    "core:window:allow-destroy",
-    {
-      "identifier": "fs:scope",
-      "allow": [
-        "$APPDATA/**",
-        "$VIDEO/**",
-        "$DOCUMENT/**",
-        "$DESKTOP/**",
-        "$DOWNLOAD/**"
-      ]
-    },
-    "os:default"
+    "core:window:allow-destroy"
   ]
 }

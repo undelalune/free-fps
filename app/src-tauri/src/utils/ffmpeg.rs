@@ -19,16 +19,18 @@ use crate::utils::logger::{log_error, log_ffmpeg_command, rotate_log_if_needed};
 use chrono::{DateTime, Utc};
 use regex::Regex;
 use serde::Deserialize;
+use std::collections::VecDeque;
 use std::process::Stdio;
 use tokio::{
     fs,
-    io::AsyncBufReadExt,
+    io::{AsyncBufRead, AsyncBufReadExt},
     process::Command,
     time::{timeout, Duration},
 };
 use tokio_util::sync::CancellationToken;
 
 const DEFAULT_CONVERSION_TIMEOUT_SECS: u64 = 10800; // 3 hours
+const STDERR_TAIL_LINES: usize = 20;
 
 // ===== ffprobe parsing =====
 
@@ -595,9 +597,55 @@ fn build_ffmpeg_command(
         .kill_on_drop(true)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
-        .stderr(Stdio::null());
+        .stderr(Stdio::piped());
 
     cmd
+}
+
+/// Keeps the last `cap` lines of a stream (ffmpeg stderr) for error logging.
+struct TailBuffer {
+    lines: VecDeque<String>,
+    cap: usize,
+}
+
+impl TailBuffer {
+    fn new(cap: usize) -> Self {
+        Self {
+            lines: VecDeque::with_capacity(cap),
+            cap,
+        }
+    }
+
+    fn push(&mut self, line: String) {
+        if self.lines.len() == self.cap {
+            self.lines.pop_front();
+        }
+        self.lines.push_back(line);
+    }
+
+    fn joined(&self) -> String {
+        self.lines.iter().map(String::as_str).collect::<Vec<_>>().join("\n")
+    }
+}
+
+/// Drains the reader to EOF, keeping only the tail. Must keep reading even on
+/// invalid UTF-8, otherwise a full pipe would block ffmpeg.
+async fn collect_tail<R: AsyncBufRead + Unpin>(mut reader: R, cap: usize) -> TailBuffer {
+    let mut tail = TailBuffer::new(cap);
+    let mut buf = Vec::new();
+    loop {
+        buf.clear();
+        match reader.read_until(b'\n', &mut buf).await {
+            Ok(0) | Err(_) => break,
+            Ok(_) => {
+                let line = String::from_utf8_lossy(&buf).trim_end().to_string();
+                if !line.is_empty() {
+                    tail.push(line);
+                }
+            }
+        }
+    }
+    tail
 }
 
 struct ProgressTracker {
@@ -775,6 +823,10 @@ where
     };
 
     let mut stdout = tokio::io::BufReader::new(child.stdout.take().unwrap()).lines();
+    let stderr_tail = child
+        .stderr
+        .take()
+        .map(|e| tokio::spawn(collect_tail(tokio::io::BufReader::new(e), STDERR_TAIL_LINES)));
     on_progress(0.0);
 
     // Progress tracking
@@ -819,10 +871,15 @@ where
         on_progress(100.0);
         Ok(meta_creation_time)
     } else {
+        let tail = match stderr_tail {
+            Some(handle) => handle.await.map(|t| t.joined()).unwrap_or_default(),
+            None => String::new(),
+        };
         let emsg = format!(
-            "ffmpeg failed with code {:?} (cmd: {})",
+            "ffmpeg failed with code {:?} (cmd: {})\n{}",
             status.code(),
-            preview
+            preview,
+            tail
         );
         let _ = log_error("FfmpegFailed", &emsg).await;
         Err(AppError::new(
@@ -949,5 +1006,21 @@ mod tests {
         let none = build_audio_args(Container::WebM, false, 128, 1.0).unwrap();
         assert_eq!(none, vec!["-an".to_string()]);
     }
-}
 
+    #[test]
+    fn tail_buffer_keeps_last_lines() {
+        let mut t = TailBuffer::new(3);
+        for i in 0..5 {
+            t.push(format!("line{i}"));
+        }
+        assert_eq!(t.joined(), "line2\nline3\nline4");
+    }
+
+    #[tokio::test]
+    async fn collect_tail_survives_invalid_utf8() {
+        let data: &[u8] = b"first\n\xff\xfe bad\nlast error\n";
+        let tail = collect_tail(data, 2).await;
+        assert!(tail.joined().ends_with("last error"));
+        assert_eq!(tail.lines.len(), 2);
+    }
+}

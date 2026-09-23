@@ -290,7 +290,11 @@ pub async fn get_gpu_info(app: AppHandle) -> Result<GpuInfo, String> {
         )
     })?;
 
-    Ok(detect_gpu(&ffmpeg_bin.to_string_lossy()))
+    // Detection spawns processes and sleeps while waiting on them; keep it off the async runtime
+    let ffmpeg_str = ffmpeg_bin.to_string_lossy().to_string();
+    tauri::async_runtime::spawn_blocking(move || detect_gpu(&ffmpeg_str))
+        .await
+        .map_err(|e| format!("GPU detection task failed: {e}"))
 }
 
 #[cfg(test)]
