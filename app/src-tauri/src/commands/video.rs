@@ -105,7 +105,6 @@ pub struct VideoFile {
     pub path: String,
     pub name: String,
     pub size: u64,
-    pub thumbnail: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -250,7 +249,6 @@ async fn list_video_files(
                         .to_string_lossy()
                         .to_string(),
                     size: metadata.len(),
-                    thumbnail: None,
                 });
             }
         }
@@ -431,7 +429,6 @@ pub async fn convert_videos(
                 path: pb.to_string_lossy().to_string(),
                 name,
                 size,
-                thumbnail: None,
             });
         }
         video_files
