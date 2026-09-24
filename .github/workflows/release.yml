@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+env:
+  # Windows FFmpeg: BtbN release branch build (bugfix updates only, no major jumps)
+  FFMPEG_WIN_VERSION: "9.0"
+
 jobs:
   build-and-release:
     strategy:
@@ -61,9 +65,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: app/src-tauri/.cache/ffmpeg/windows
-          key: ffmpeg-win64-gpl-shared-latest
-          restore-keys: |
-            ffmpeg-win64-gpl-shared-
+          key: ffmpeg-win64-gpl-shared-${{ env.FFMPEG_WIN_VERSION }}
 
       # Download, verify, and extract only the required files for Windows
       - name: Prepare FFmpeg (Windows)
@@ -76,9 +78,11 @@ jobs:
           $BinOut = "$Base/binaries"
           New-Item -ItemType Directory -Force -Path $Cache, $BinOut | Out-Null
 
-          # Using latest stable release (not autobuild) to avoid 404 errors
-          $Url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip"
-          $Zip = Join-Path $Cache "ffmpeg-master-latest-win64-gpl-shared.zip"
+          # Pinned release branch from the "latest" release (autobuild tags get pruned -> 404)
+          $Ver = $env:FFMPEG_WIN_VERSION
+          $Name = "ffmpeg-n$Ver-latest-win64-gpl-shared-$Ver.zip"
+          $Url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$Name"
+          $Zip = Join-Path $Cache $Name
           
           if (-not (Test-Path $Zip)) {
             Invoke-WebRequest -Uri $Url -OutFile $Zip -UseBasicParsing
